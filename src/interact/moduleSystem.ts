@@ -29,8 +29,8 @@ interface Entry {
   crate: TransformNode;
   cratePos: { x: number; z: number };
   site: { x: number; z: number };
-  marker: Mesh;
   built: TransformNode | null;
+  connector: Mesh;
 }
 
 function pbr(scene: Scene, name: string, c: Color3, rough = 0.7, metal = 0): PBRMaterial {
@@ -66,10 +66,10 @@ export class ModuleSystem {
     private readonly hud: Hud,
   ) {
     const crateMat = pbr(scene, 'crate', new Color3(0.85, 0.85, 0.82));
-    const markerMat = new StandardMaterial('siteMarker', scene);
-    markerMat.emissiveColor = new Color3(1, 0.6, 0.15);
-    markerMat.disableLighting = true;
-    markerMat.alpha = 0.8;
+    const latchMat = new StandardMaterial('moduleLatch', scene);
+    latchMat.emissiveColor = new Color3(1, 0.6, 0.15);
+    latchMat.disableLighting = true;
+    latchMat.alpha = 0.8;
     for (const c of CRATES) {
       const crate = new TransformNode(`crate-${c.moduleId}`, scene);
       crate.position.set(c.x, sampleHeight(hm, c.x, c.z) + 0.45, c.z);
@@ -93,11 +93,18 @@ export class ModuleSystem {
           sky.shadows.addShadowCaster(box);
         }
       });
-      const marker = MeshBuilder.CreateTorus(`site-${c.moduleId}`, { diameter: 3, thickness: 0.12, tessellation: 40 }, scene);
-      marker.material = markerMat;
-      marker.position.set(c.site.x, sampleHeight(hm, c.site.x, c.site.z) + 0.1, c.site.z);
-      marker.isVisible = false;
-      this.entries.set(c.moduleId, { install: new ModuleInstall(c.moduleId), crate, cratePos: { x: c.x, z: c.z }, site: c.site, marker, built: null });
+      // A separate accessible service post remains outside the final module envelope.
+      const offset = c.moduleId === 'habitat' ? 2.65 : c.moduleId === 'radiator' ? 1.0 : .8;
+      const height = c.moduleId === 'antenna' ? 1.30 : 1.25;
+      const connector = MeshBuilder.CreateBox(`connector-${c.moduleId}`, { width: .32, height: .18, depth: .13 }, scene);
+      connector.position.set(c.site.x, sampleHeight(hm, c.site.x, c.site.z - offset) + height, c.site.z - offset);
+      connector.material = crateMat; connector.receiveShadows = true;
+      const post = MeshBuilder.CreateCylinder(`service-post-${c.moduleId}`, { height, diameter: .065, tessellation: 12 }, scene);
+      post.parent = connector; post.position.y = -height / 2; post.material = crateMat;
+      const latch = MeshBuilder.CreateBox(`lock-${c.moduleId}`, { width: .12, height: .07, depth: .025 }, scene);
+      latch.parent = connector; latch.position.z = -.08; latch.material = latchMat;
+      connector.setEnabled(false);
+      this.entries.set(c.moduleId, { install: new ModuleInstall(c.moduleId), crate, cratePos: { x: c.x, z: c.z }, site: c.site, built: null, connector });
     }
     const prev = pip.onCommand;
     pip.onCommand = (cmd) => {
@@ -115,7 +122,7 @@ export class ModuleSystem {
     e.crate.parent = this.pip.root;
     e.crate.position.copyFrom(this.pip.carryOffset);
     e.crate.rotation.set(0, 0, 0);
-    e.marker.isVisible = true;
+    e.connector.setEnabled(true);
     this.pip.setPose('lift');
   }
 
@@ -137,7 +144,7 @@ export class ModuleSystem {
     e.crate.position.set(e.cratePos.x, sampleHeight(this.hm, e.cratePos.x, e.cratePos.z) + 0.45, e.cratePos.z);
     e.crate.rotation.set(0, 0, 0);
     e.install.stage = 'needsLift';
-    e.marker.isVisible = false;
+    e.connector.setEnabled(false);
     this.carrying = null;
     this.pip.lowerArm();
   }
@@ -147,13 +154,23 @@ export class ModuleSystem {
     return this.carrying;
   }
 
+  /** Visual meshes stay under the crate pivot both on the ground and in Pip's arm. */
+  crateMeshes(id: ModuleId) {
+    return this.entries.get(id)!.crate.getChildMeshes(false);
+  }
+
+  /** The service post is where the player holds E to install the module. */
+  get installTarget(): Readonly<Vector3> | null {
+    return this.carrying ? this.entries.get(this.carrying)!.connector.position : null;
+  }
+
   private interactables(): Interactable[] {
     const list: Interactable[] = [];
     for (const [id, e] of this.entries) {
       const s = e.install.stage;
       if (s === 'crate') list.push({ id: `crate:${id}`, x: e.cratePos.x, z: e.cratePos.z, enabled: this.carrying === null, prompt: tr('E — open crate: {name}', { name: tr(NAMES[id]) }) });
       if (s === 'needsLift') list.push({ id: `lift:${id}`, x: e.cratePos.x, z: e.cratePos.z, enabled: this.carrying === null, prompt: tr('Q — "Pip, lift!"') });
-      if (s === 'lifted' || s === 'aligning') list.push({ id: `site:${id}`, x: e.site.x, z: e.site.z, enabled: true, prompt: tr('Hold E — align and lock') });
+      if (s === 'lifted' || s === 'aligning') list.push({ id: `site:${id}`, x: e.connector.position.x, z: e.connector.position.z, enabled: true, prompt: tr('Hold E — align and lock') });
     }
     return list;
   }
@@ -184,11 +201,11 @@ export class ModuleSystem {
         e.crate.parent = this.pip.root;
         e.crate.position.copyFrom(this.pip.carryOffset);
         e.crate.rotation.set(0, 0, 0);
-        e.marker.isVisible = true;
+        e.connector.setEnabled(true);
         this.pip.mode = 'follow';
         this.pip.gotoTarget = undefined;
         this.pip.setFace('happy');
-        this.hud.toast(tr('Pip is carrying the {name}. Lead the way to the orange ring!', { name: tr(NAMES[this.carrying]) }));
+        this.hud.toast(tr('Pip is carrying the {name}. Lead the way to the target marker!', { name: tr(NAMES[this.carrying]) }));
       }
     }
 
@@ -208,15 +225,19 @@ export class ModuleSystem {
       const pipNear = this.pipDistTo(e.site) <= PIP_AT_SITE_M;
       if (onSite && !pipNear) prompt = pipComeHint(this.pip.mode, this.pipDistTo(e.site), PIP_AT_SITE_M) ?? tr('Wait for Pip to bring the module');
       if (onSite && pipNear && keyboard.isHeld('KeyE')) {
-        e.install.holdAlign(dt);
-        prompt = tr('Aligning… {pct}%', { pct: Math.min(100, Math.round((e.install.alignProgressS / 1.5) * 100)) });
+        const id = this.carrying;
+        const target = e.connector.position.add(new Vector3(0, 0, -.09));
+        const started = player.beginInteraction({
+          kind: 'install', id: `install:${id}`, target,
+          valid: () => this.carrying === id && !e.crate.isDisposed() && this.pipDistTo(e.site) <= PIP_AT_SITE_M && (e.install.stage === 'lifted' || e.install.stage === 'aligning'),
+          onProgress: (p) => e.install.holdAlign(Math.max(0, p * 1.5 - e.install.alignProgressS)),
+          onCancel: () => e.install.releaseAlign(),
+          onCommit: () => { e.install.stage = 'installed'; this.finish(id); },
+        });
+        if (started) keyboard.consume('KeyE');
+        else prompt = tr('Move closer to the connector and stand still');
       } else {
         e.install.releaseAlign();
-      }
-      if (e.install.stage === 'installed') {
-        this.finish(this.carrying);
-        // Step clear on the camera side so the new structure occludes neither the suit nor the view.
-        player.teleport(e.site.x + 6 * Math.cos(player.camera.alpha), e.site.z + 6 * Math.sin(player.camera.alpha));
       }
     }
     // The vertical solar panel keeps turning toward the Sun as it circles the horizon.
@@ -227,7 +248,7 @@ export class ModuleSystem {
   private finish(id: ModuleId, quiet = false): void {
     const e = this.entries.get(id)!;
     e.crate.dispose();
-    e.marker.isVisible = false;
+    e.connector.setEnabled(true);
     this.carrying = null;
     this.pip.lowerArm();
     e.built = this.buildModule(id, e.site);

@@ -14,7 +14,7 @@ Night balance keeps the original total demand: split the old 15% daily shelter l
 
 The walk-in shelter is now tall enough to cover the astronaut. Protection is limited to its central 2 m radius and checks the head against the actual dome roof, so jumping above/standing on the roof does not qualify. The displayed shell and protection geometry share a 4.2 m height. The simplified lander-hull cover rule remains a teaching abstraction.
 
-Notebook/story panels fit narrow viewports and scroll; the map uses numbered markers with a separate legend. Sources are accessible from the menu and notebook. The existing fictional braking glow is retained with an explicit on-screen label. Reduced camera motion removes landing shake and automatic rover camera turns. Exploration chatter stops during farewell/liftoff/record.
+Notebook/story panels fit narrow viewports and scroll; the map uses numbered markers with a separate legend. Sources are accessible from the menu and notebook. Reduced camera motion removes landing shake and automatic rover camera turns. Exploration chatter stops during farewell/liftoff/record.
 
 Installation steps the astronaut clear on the camera side of the new module. A parked PIP gets the existing Q-to-come hint at the installation site. DONKI's optional cached event file is no longer a mandatory boot asset: live failure uses the snapshot, and failure of both sources leaves a generic explanation without a fabricated event.
 
@@ -27,6 +27,8 @@ The orbit sequence marks Tranquility Base with a white/cyan Babylon GUI locator.
 The view shows the descent stage left on the Moon, an illustrative footprint route and a stationary US flag with a support crossbar. The view is explicitly labelled reconstructed; the flag does not flutter in wind. It does not represent a surveyed current-condition reconstruction.
 
 ## Data
+
+AxEMU character reference: public Axiom suit imagery (https://www.axiomspace.com/axiom-suit) and NASA's AxEMU testing photographs (https://www.nasa.gov/image-article/axiom-space-tests-lunar-spacesuit-at-nasas-johnson-space-center/). The game uses an original illustrative reconstruction, not a confirmed Artemis IV flight suit. Model attribution and build provenance are in `public/models/SOURCES.md`.
 
 ### Layered exhaust and attitude jets
 
@@ -113,5 +115,33 @@ Successful contact also triggers one quiet, dry, 0.55-second landing-gear thud o
 
 
 
-### Approved old-B braking overlay (2026-11-13)
-A fictional cinematic plasma layer uses the approved old-B preview, not the later flicker variation. The shell is 8% narrower than the original B preview. It fades in over 1.2 gameplay seconds once braking has ignited and altitude reaches 13,000 m AGL or lower, remains through 1,100 m AGL, then fades out over 2 gameplay seconds; Pause freezes the effect. This is not a lunar atmosphere simulation. Camera, engine plume, RCS and dust are unchanged. No additional texture downloads.
+### Lunar braking effects (updated 2026-11-14)
+The former old-B cinematic plasma overlay is removed from gameplay. No red atmospheric-entry shell surrounds the spacecraft during lunar braking or descent. Existing nozzle exhaust, RCS pulses, ground dust, camera and flight motion remain unchanged.
+
+### AxEMU body and cooperative work (approved 2026-11-14)
+
+The approximately 1.91 m suited astronaut uses a 39-joint armature, one welded weighted coverall across shoulders/hips/elbows/knees, rigid helmet and PLSS, and in-place authored idle/walk/sample/install clips. Sewn identification bands and reinforced knee/elbow panels are baked into the deforming fabric. Existing terrain-aware lunar gait, movement speeds, gravity, character collision and gameplay camera remain authoritative. Capsule contact clearance is compensated continuously across footfalls and retained during flight; arm motion eases between idle and walking with a modestly wider swing. Animation targets and final hand/foot IK have bounded reach; inaccessible work asks the player to move closer rather than stretching or teleporting. A collision-controlled foot adjustment is limited to 0.45 m, followed by a short planted-foot settle. The camera is never repositioned for these actions.
+
+Sampling takes 3.6 gameplay seconds after alignment. The sampler reaches the surface, provisionally acquires at 1.6 s, transfers to the pouch and commits the existing inventory/notebook/dialogue path once at 2.8 s. Rock samples use tongs; regolith/glass/ice use the scoop. Moving/jumping cancels before commit and restores the sample; rescue, scene teardown and entering a rover clean up transient props. Ice sampling additionally requires PIP's light throughout. Completed existing sample IDs remain the only persisted state.
+
+Module work keeps PIP carrying the load. Each of four sites has a visible service connector outside the finished module. The astronaut settles/reaches for 0.6 s, holds E to align for the existing 1.5 s, commits the install once, then releases over 0.5 s. Releasing E before commit resets alignment. Pause freezes gameplay-time action state; force-install/restore/demo remain immediate. Other world actions are gated while the astronaut is working. No new save schema, runtime library or per-action asset download is introduced.
+
+
+### Assisted manual flight and first-failure recovery (2026-11-14)
+
+Manual orbital braking gives the player direct throttle control: Space increases applied thrust by 12 percentage points per real gameplay second; releasing decreases it by 10, down to zero. There is no nominal-throttle floor or automatic horizontal-speed correction in manual throttle or pitch. Guided attitude uses nominal horizontal acceleration and existing vertical stabilization/angular slew limits. Manual orbital playback reaches at most x4, while automatic retains x10; both return to x1 by 1,200 m. This is deliberate player control, with time to react rather than automatic rescue. Final descent retains tilt-compensated hover thrust, +0.18 held / -0.12 released offsets, 25% feedback capped to +/-0.10. Applied final-descent manual throttle changes by at most 0.35 per gameplay second; orbital manual ramps use the 12/10-point rates above, independent of time warp. Empty fuel always means zero thrust. A/D rotate at up to 5 degrees/s within +/-12 degrees; releasing steering gently cancels drift toward at most +/-4 degrees with 3 degrees/s recovery, easing upright below 12 m. Manual safe touchdown requires downward speed <=2 m/s, lateral speed <=1.5 m/s and tilt <=8 degrees.
+
+The braking target band is +/-18%, minimum half-width 3 m/s. Warn after 1 second outside it. After a 2-second entry grace period, an error greater than max(45% of reference speed, 15 m/s) sustained for 6 gameplay seconds fails the attempt. While actual absolute speed mismatch closes faster than 0.015 times max(reference speed, 15/0.45) per gameplay second, the accumulated failure timer decreases at 2 seconds per second; clearing the severe-error condition resets it. Terrain impact, unsafe 300 m approach (lateral speed >12 m/s or downward speed >25 m/s), hard/tilted touchdown and leaving the landing area also fail. A cinematic explosion represents a lost attempt, not a physical claim that a speed error spontaneously explodes spacecraft.
+
+One pooled burst (18 fragments, 14 smoke puffs, short warm flash) replaces the failed hull; effects end within 5 seconds. After 2 seconds, offer Choi lai / Lai tu dong from the first failure. No timed restart. Retry restores the failed phase: its captured braking-entry checkpoint with 90,000 kg fuel, or 300 m final descent with -12 m/s vertical speed, 4 m/s lateral speed and 10,000 kg fuel. Automatic selection persists through the 300 m handoff. Pause freezes effects and timers; retry clears held input, dialogue, exhaust and the prepared handoff scene. Effects are prepared during initial loading, use bounded reusable resources, and respect existing audio volume/mute. Gameplay camera framing remains unchanged. The player performs final visual/control QA; no video deliverable.
+
+
+Failure visual refinement (user request, 2026-11-15): 38 density-textured smoke/gas puffs, 8 brief hot lobes, 26 curved hull/rib fragments, bounded to 6.5 seconds. A 1.25-second damped camera impulse settles before the popup and respects reduced-motion; normal camera framing, zoom and FOV are preserved. Visual reference: SpaceX official Flight 2, https://www.spacex.com/content/starship-flight-tests/flight-2 (41:09–41:15). Expanding gas and debris inspire the visual; the visible smoke and camera impulse are cinematic failure feedback.
+
+
+Explosion smoke tuning (2026-11-15): the existing 38 puffs travel in seven uneven outward lobes with different speeds, sizes and fade delays. Puff growth settles while the centres keep separating, leaving gaps for debris visibility. Individual smoke lifetime is 5.4–7.35 s, with the pool fully clear by 7.8 s (previously 6.5 s). Existing flash, fragments, camera framing and failure camera impulse are unchanged.
+
+Manual challenge validation (2026-11-15): direct input is tested at 30/60/120 FPS and x1/x4, with no pitch/throttle response to horizontal speed error. A simulated player reading gauge position and trend every 0.8 or 1 second completes braking; a real LOLA terrain-route simulation at all three frame rates also reaches a safe handoff. Continuous hold/release fails. From settled checkpoints at 3 km/800 m, sustained wrong input leaves green in about 2.7–4.1 seconds; at 10 km the larger band takes about 8.2–10.0 seconds. Delayed recovery from +/-25% error, after two more seconds of wrong input, reaches green in about 8.3–25.4 seconds depending on height and direction. The long overspeed recovery at 3 km is intentional physics, not a speed reset. The failure monitor measures closing absolute mismatch with a common current-reference scale for both frames, so a shrinking target does not falsely erase genuine recovery. Camera/effects and full autopilot/final-descent controllers are unchanged.
+
+
+MICA player clearance (2026-11-15): on-foot astronauts remain outside the horizontal footprint of MICA, including its solar wings, even while jumping. The footprint follows towing/rotation and adds 0.5 m player clearance plus 0.05 m geometry margin. Swept movement slides along its edge; old-save/teleport overlaps are pushed to the nearest edge, including before the memory puzzle opens. The existing 3.2 m E/Q interaction reach and camera framing remain unchanged. PIP towing/hatch movement is not blocked by this player-only rule.

@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { resetLanderSite, setLanderSite } from '../src/world/landerSite';
 import { STORM, isSheltered, stormStep, type StormPhase } from '../src/challenges/solarStorm';
 import { LOPE_SPEED_MS } from '../src/player/movement';
-import { BOULDER, CRATES, MICA_POS, REPAIR_SPOT, SHELTER_POS, zone } from '../src/world/zones';
+import { BOULDER, CRATES, HLS_POS, MICA_POS, REPAIR_SPOT, SHELTER_POS, zone } from '../src/world/zones';
 
 const d = (a: { x: number; z: number }, b: { x: number; z: number }) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -64,5 +65,13 @@ describe('the shelter is walk-in', () => {
   it('standing beside the dome is not sheltered, inside it is', () => {
     expect(isSheltered({ x: SHELTER_POS.x + 2, z: SHELTER_POS.z })).toBe(true);
     expect(isSheltered({ x: SHELTER_POS.x + 6, z: SHELTER_POS.z })).toBe(false);
+  });
+});
+describe('lander shelter site', () => {
+  afterEach(() => resetLanderSite());
+  it('shelter follows the landed ship', () => {
+    setLanderSite({ x: HLS_POS.x + 25, z: HLS_POS.z });
+    expect(isSheltered({ x: HLS_POS.x + 27, z: HLS_POS.z })).toBe(true);
+    expect(isSheltered({ x: HLS_POS.x + 2, z: HLS_POS.z })).toBe(false);
   });
 });

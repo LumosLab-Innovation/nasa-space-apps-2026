@@ -1,4 +1,4 @@
-import { Color3, Mesh, MeshBuilder, PBRMaterial, Scene, StandardMaterial, TransformNode } from '@babylonjs/core';
+import { Color3, Mesh, MeshBuilder, PBRMaterial, Scene, TransformNode } from '@babylonjs/core';
 import { setFlag, unlockCard, type GameState } from '../core/gameState';
 import { sampleHeight, type Heightmap } from '../data/heightmap';
 import { loadModel } from '../models/loadModel';
@@ -25,12 +25,6 @@ export function createFlagPlant(
   scene: Scene, hm: Heightmap, sky: Sky, state: GameState, dialogue: DialogueBox, hud: Hud,
 ): { restore(): void; update(dt: number, player: Astronaut, keyboard: Keyboard): string | null } {
   const groundY = sampleHeight(hm, FLAG_SPOT.x, FLAG_SPOT.z);
-  const marker = MeshBuilder.CreateTorus('flagMarker', { diameter: 1.6, thickness: 0.06, tessellation: 32 }, scene);
-  const mm = new StandardMaterial('flagMarkerMat', scene);
-  mm.emissiveColor = new Color3(1, 0.6, 0.15);
-  mm.disableLighting = true;
-  marker.material = mm;
-  marker.position.set(FLAG_SPOT.x, groundY + 0.05, FLAG_SPOT.z);
 
   const root = new TransformNode('artemisFlag', scene);
   root.position.set(FLAG_SPOT.x, groundY - POLE_M, FLAG_SPOT.z);
@@ -62,7 +56,6 @@ export function createFlagPlant(
     /** Continue from a save: the flag stands where it was planted. */
     restore() {
       if (!state.flags.has('flag:planted')) return;
-      marker.dispose();
       root.position.y = groundY;
       root.setEnabled(true);
       void dress();
@@ -77,7 +70,6 @@ export function createFlagPlant(
       if (state.flags.has('flag:planted')) return null;
       if (Math.hypot(player.position.x - FLAG_SPOT.x, player.position.z - FLAG_SPOT.z) > REACH_M) return null;
       if (keyboard.consume('KeyE') && tryPlant(state)) {
-        marker.dispose();
         root.setEnabled(true);
         void dress();
         rising = 0;

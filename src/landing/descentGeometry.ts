@@ -10,7 +10,8 @@ export function hullClearanceLift(heightM:number,rootClearanceM:number,lengthM:n
  const extent=(lengthM*.5*Math.abs(c)+radiusM*Math.sqrt(1-c*c))*modelScale*1000;
  return heightM+extent-rootClearanceM;
 }
-export const flightWarp=(elapsed:number,heightM:number)=>1+9*smoother(elapsed/5)*smoother((heightM-1200)/1000);
+/** Manual mode gives the player time to react; automatic playback keeps its existing pace. */
+export const flightWarp=(elapsed:number,heightM:number,automatic=true)=>1+(automatic?9:3)*smoother(elapsed/5)*smoother((heightM-1200)/1000);
 
 /** Visual extension only: preserve boundary height AND slope, then meet the original orbital DEM. */
 export function continueTerrainHeight(x:number,z:number,sample:(x:number,z:number)=>number,far:(x:number,z:number)=>number,half=750){

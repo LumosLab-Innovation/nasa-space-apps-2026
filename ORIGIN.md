@@ -15,3 +15,7 @@ This repository's `main` branch starts a new organization release history on 15 
 The release incorporates subsequent guidance and QA fixes: resource-choice consequences, MICA branch dialogue, PIP heater range, rover interaction explanations, dialogue queuing, terrain collision initialization, source attribution and submission materials. Tests and the production build are checked before deployment. Asset-design changes assigned to the separate visual QA team are not represented as completed here.
 
 Anthropic Claude and OpenAI Codex assisted development. Third-party source notices, model provenance, data attribution and the Apache-2.0 project license remain in place. See [AI_CREDITS.md](AI_CREDITS.md) and `public/sources.html`.
+
+## Gameplay integration — 15 November 2026
+
+The AxEMU/gameplay update is transferred from development commit `23f6dcb` on `codex/axemu-character-rig`, using development base `8176fa6`. The integration branch is based on the organization release, retaining its source provenance, deployment configuration, submission materials and gameplay QA fixes. Dialogue queue deduplication is preserved alongside interruption for flight retries; a regression test covers replaying the same dialogue after interruption. This transfer does not merge the separate `claude/axemu-realistic-body` branch or ongoing uncommitted development edits.

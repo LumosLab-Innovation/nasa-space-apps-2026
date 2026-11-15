@@ -9,7 +9,7 @@ import type { DialogueBox } from '../ui/dialogueBox';
 import type { Hud } from '../ui/hud';
 import type { Sky } from '../world/sky';
 import { WINCH_ANCHOR } from '../world/zones';
-import { ANCHOR_REACH_M, anchorPrompt, slopeDeg, Winch, wheelSlip, winchHoldsPip, winchPromptActive } from './winch';
+import { anchorPrompt, slopeDeg, Winch, wheelSlip, winchHoldsPip, winchPromptActive } from './winch';
 import { tr } from '../i18n/i18n';
 
 const PROMPT_RANGE_M = 6;
@@ -23,8 +23,6 @@ export class WinchSystem {
   readonly winch = new Winch();
   private anchor: Mesh | null = null;
   private rope: LinesMesh | null = null;
-  /** Glowing ring where the anchor goes, shown while Pip is stuck (Plan 3 minor). */
-  private readonly anchorRing: Mesh;
   /** Where Pip dug in: held there until the winch frees it. */
   private stuckAt: { x: number; z: number } | null = null;
   /** True only on frames where the winch offered its Q (so 'pull' near MICA never starts the reel). */
@@ -40,14 +38,6 @@ export class WinchSystem {
     private readonly hud: Hud,
     private readonly sky: Sky,
   ) {
-    this.anchorRing = MeshBuilder.CreateTorus('winchAnchorRing', { diameter: ANCHOR_REACH_M * 2, thickness: 0.12, tessellation: 40 }, scene);
-    const rm = new PBRMaterial('winchAnchorRingMat', scene);
-    rm.emissiveColor = new Color3(1, 0.6, 0.15);
-    rm.albedoColor = new Color3(1, 0.6, 0.15);
-    this.anchorRing.material = rm;
-    this.anchorRing.position.set(WINCH_ANCHOR.x, sampleHeight(hm, WINCH_ANCHOR.x, WINCH_ANCHOR.z) + 0.08, WINCH_ANCHOR.z);
-    this.anchorRing.isPickable = false;
-    this.anchorRing.setEnabled(false);
     const prev = pip.onCommand;
     pip.onCommand = (c) => {
       prev(c);
@@ -97,7 +87,6 @@ export class WinchSystem {
     }
 
     const near = winchPromptActive(w.state, this.anchorDist(player.position), Math.hypot(player.position.x - this.pip.position.x, player.position.z - this.pip.position.z));
-    if (this.anchorRing) this.anchorRing.setEnabled(w.state === 'stuck');
     if (w.state === 'stuck' && this.anchorDist(player.position) <= PROMPT_RANGE_M) {
       const ap = anchorPrompt(this.anchorDist(player.position));
       if (ap.canPlant && keyboard.consume('KeyE') && w.plantAnchor(this.anchorDist(player.position))) {

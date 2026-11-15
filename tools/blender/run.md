@@ -1,5 +1,15 @@
 # Building the GLB models
 
+## AxEMU skinned astronaut (2026-11-14)
+
+Run the standalone `build_axemu.py` with Blender 5.2 in a separate background process:
+`blender --background --python tools/blender/build_axemu.py`.
+It loads the helpers from `common.py`, creates only a tagged build scene, and exports
+`public/models/astronaut.glb` relative to this checkout. It neither opens nor saves a user's blend.
+This supersedes the old rigid `build_astronaut.py` asset; do not rebuild the hero with that legacy script.
+The skeleton retains Blender-local Z along the body; the pelvis glTF rest rotation converts to Y-up.
+Runtime resets to each joint's rest transform before sampling clips and applies bounded IK afterwards.
+
 The models are built by Python scripts that run inside the user's live Blender (5.2) through Blender MCP.
 
 ## Safe mode limits

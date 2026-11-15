@@ -1,0 +1,172 @@
+[
+  {
+    "id": "hammerFeather",
+    "en": "Arm wanted to race a feather, but up here it is always a tie.",
+    "vi": "Tay muốn thi rơi với chiếc lông vũ, nhưng trên Mặt Trăng thì lúc nào cũng hòa."
+  },
+  {
+    "id": "longShadows",
+    "en": "Here even a pebble gets a shadow long enough to brag about.",
+    "vi": "Ở đây đến hòn sỏi cũng có cái bóng dài đủ để khoe với cả xóm."
+  },
+  {
+    "id": "anorthosite",
+    "en": "Genesis Rock sounds like a rock band, and Arm already wants to join.",
+    "vi": "Đá Sáng Thế nghe như tên một ban nhạc rock, Tay đòi xin vào nhóm liền."
+  },
+  {
+    "id": "noSound",
+    "en": "Out here I could sing very badly and only your radio would know.",
+    "vi": "Ngoài này mình hát dở cỡ nào thì cũng chỉ có bộ đàm của bạn biết thôi."
+  },
+  {
+    "id": "apollo17Dust",
+    "en": "Fixing a rover with maps and tape is my kind of engineering.",
+    "vi": "Sửa xe bằng bản đồ và băng dính, đúng kiểu kỹ sư mà mình mê!"
+  },
+  {
+    "id": "tracksLast",
+    "en": "Better make your bootprints neat, because the Moon keeps them for ages.",
+    "vi": "Nhớ bước cho đẹp nhé, vì Mặt Trăng giữ dấu giày lâu lắm lắm."
+  },
+  {
+    "id": "eds",
+    "en": "An electric broom with no bristles has Arm worried about its job.",
+    "vi": "Cái chổi điện không cần lông chổi làm Tay lo bị mất việc ghê."
+  },
+  {
+    "id": "lightDelay",
+    "en": "That pause is not Houston thinking; the message is still flying home.",
+    "vi": "Khoảng lặng đó không phải Houston nghĩ lâu đâu, tin nhắn còn đang bay mà!"
+  },
+  {
+    "id": "sunFacingHeat",
+    "en": "Half of me wants a fan and the other half wants a blanket.",
+    "vi": "Nửa người mình phơi nắng thì đòi quạt, nửa trong bóng thì đòi chăn."
+  },
+  {
+    "id": "micaFiction",
+    "en": "Okay, confession: MICA and I are made up, but the dusty-panel problem is real.",
+    "vi": "Thú thật nhé: MICA và mình là nhân vật tưởng tượng, nhưng chuyện bụi phủ pin là thật."
+  },
+  {
+    "id": "spiritStuck",
+    "en": "Spirit, I wish I could have lent you my winch.",
+    "vi": "Spirit ơi, ước gì hồi đó mình cho bạn mượn được cái tời."
+  },
+  {
+    "id": "boulderTracks",
+    "en": "Note to self: not every track has a driver, some just have gravity.",
+    "vi": "Tự nhắc mình: không phải vết nào cũng có người lái, có vết chỉ do đá lăn."
+  },
+  {
+    "id": "apolloFlags",
+    "en": "Spying on flags by watching their shadows is the sneakiest science ever.",
+    "vi": "Theo dõi lá cờ qua cái bóng của nó, đúng là khoa học kiểu thám tử!"
+  },
+  {
+    "id": "earthVisibility",
+    "en": "When Earth hides behind a hill, I chat with Arm until it returns.",
+    "vi": "Lúc Trái Đất trốn sau đồi, mình tán gẫu với Tay cho đỡ buồn."
+  },
+  {
+    "id": "lcrossIce",
+    "en": "Who knew crashing a rocket on purpose could be such good science?",
+    "vi": "Ai ngờ cố tình đâm tên lửa xuống hố lại là một thí nghiệm hay đến vậy?"
+  },
+  {
+    "id": "viperPanels",
+    "en": "MICA's flat panels taught me to stand up straight and face the Sun.",
+    "vi": "Nhờ tấm pin phẳng của MICA, mình học được cách đứng thẳng và nhìn về Mặt Trời."
+  },
+  {
+    "id": "lunarRadiation",
+    "en": "Invisible stuff zooming through us all day is why I love my shelter.",
+    "vi": "Thứ vô hình bay vèo vèo qua người suốt ngày, nên mình mê chỗ trú lắm."
+  },
+  {
+    "id": "regolithShield",
+    "en": "I piled this soil blanket myself, and it is my proudest pile of dirt.",
+    "vi": "Tấm chăn đất này mình tự đắp đó, đống đất đáng tự hào nhất đời mình."
+  },
+  {
+    "id": "shadowClock",
+    "en": "Forget wristwatches: at this pole every rock becomes a clock hand.",
+    "vi": "Khỏi cần đồng hồ đeo tay, ở đây hòn đá nào cũng thành kim đồng hồ."
+  },
+  {
+    "id": "peaksOfLight",
+    "en": "Hills here play hide-and-seek with the Sun, even when it has not set.",
+    "vi": "Đồi ở đây chơi trốn tìm với Mặt Trời, dù Mặt Trời chưa hề lặn."
+  },
+  {
+    "id": "lunarNight",
+    "en": "Knowing SLIM woke up makes my own nap through the dark less scary.",
+    "vi": "Nghe tin SLIM tỉnh lại, mình bớt sợ giấc ngủ đông trong bóng tối hơn nhiều."
+  },
+  {
+    "id": "earthshine",
+    "en": "Earthshine is home leaving a tiny night-light on for us.",
+    "vi": "Ánh Trái Đất giống như nhà để lại cho tụi mình một ngọn đèn ngủ bé xíu."
+  },
+  {
+    "id": "story_pragyan",
+    "en": "Little rover, big laser, sulphur found: small robots for the win!",
+    "vi": "Một rover nhỏ có tia laser tìm ra lưu huỳnh, robot nhỏ muôn năm!"
+  },
+  {
+    "id": "story_slim",
+    "en": "Moon Sniper is a great nickname; Arm suggests calling me Pip the Precise.",
+    "vi": "Biệt danh Xạ thủ Mặt Trăng ngầu ghê, Tay bảo mình nên tên là Pip Chuẩn Xác."
+  },
+  {
+    "id": "story_odysseus",
+    "en": "Tipped over and still did its job, Odysseus is my kind of hero.",
+    "vi": "Ngã lăn ra mà vẫn làm xong việc, Odysseus đúng là người hùng của mình."
+  },
+  {
+    "id": "story_eds",
+    "en": "Turns out you cleaned MICA just like a real Moon experiment, high five!",
+    "vi": "Hóa ra bạn lau pin cho MICA giống hệt thí nghiệm thật trên Mặt Trăng, đập tay nào!"
+  },
+  {
+    "id": "story_artemis",
+    "en": "Our long stay is pretend for now, but I am saving you a bunk.",
+    "vi": "Chuyện ở lâu là tưởng tượng thôi, nhưng mình vẫn giữ sẵn một giường cho bạn."
+  },
+  {
+    "id": "apollo11Site",
+    "en": "No water in these seas, just old lava, so no swimming, Arm.",
+    "vi": "Mấy cái biển này không có nước, chỉ có dung nham cũ, nên Tay đừng đòi bơi nhé."
+  },
+  {
+    "id": "alarm1202",
+    "en": "My circuits flash a 1202 too when everyone asks me questions at once.",
+    "vi": "Hễ mọi người hỏi mình cùng lúc là mạch của mình cũng nháy 1202 liền."
+  },
+  {
+    "id": "rocketEquation",
+    "en": "Throwing stuff backward to go forward still feels like magic, but it is math.",
+    "vi": "Ném đồ ra sau để lao về trước, nghe như phép thuật mà thật ra là toán học."
+  },
+  {
+    "id": "apollo12Surveyor",
+    "en": "Rule for future bases: land far away, or you sandblast your neighbors.",
+    "vi": "Luật cho căn cứ tương lai: đáp thật xa, kẻo phun bụi vào hàng xóm."
+  },
+  {
+    "id": "horizonGlow",
+    "en": "Maybe floating dust, maybe not, and even the scientists are still arguing.",
+    "vi": "Có thể là bụi lơ lửng, cũng có thể không, các nhà khoa học vẫn còn tranh luận."
+  },
+  {
+    "id": "apolloLRV",
+    "en": "Woven wire wheels, like a picnic basket that can drive, I want one!",
+    "vi": "Bánh xe đan bằng dây thép, như cái giỏ đi chợ biết chạy, mình muốn một chiếc!"
+  },
+  {
+    "id": "artemisLTV",
+    "en": "A rover that drives itself between missions might finally be my racing buddy.",
+    "vi": "Xe biết tự lái giữa các chuyến, biết đâu sẽ thành bạn đua của mình!"
+  }
+]

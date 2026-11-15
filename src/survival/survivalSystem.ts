@@ -8,7 +8,8 @@ import { shouldStepSurvival } from '../ui/inputLock';
 import type { Hud } from '../ui/hud';
 import { SunlightCache } from '../world/lighting';
 import type { Sky } from '../world/sky';
-import { HLS_POS, zone } from '../world/zones';
+import { zone } from '../world/zones';
+import { landerSite } from '../world/landerSite';
 import { applyRescue, needsRescue, panelFactor, stepResources, type Env, type Resources, type Upg } from './resources';
 
 export type RescueKind = 'o2' | 'heat' | 'pip' | 'storm';
@@ -61,8 +62,9 @@ export class SurvivalSystem {
     const sun = this.sunAzEl;
     const dark = zone('darkCrater');
     const base = zone('base');
+    const lander = landerSite();
     const atCamp =
-      Math.hypot(p.x - HLS_POS.x, p.z - HLS_POS.z) <= LANDER_AIR_M ||
+      Math.hypot(p.x - lander.x, p.z - lander.z) <= LANDER_AIR_M ||
       (this.state.modules.has('habitat') && Math.hypot(p.x - base.x, p.z - base.z) <= base.radius);
     return {
       playerInSun: this.sun.isSunlit(p.x, p.z, sun),

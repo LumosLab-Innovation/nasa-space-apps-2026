@@ -58,3 +58,23 @@ it('a missing dialogue rejects its caller but does not poison the queue', async 
   expect(api.onLine).toHaveBeenCalledOnce();
   expect(api.busy).toBe(false);
 });
+
+
+it('interrupt clears old requests without deleting a replay of the same dialogue', async () => {
+  const api = box();
+  const old = api.play('first');
+  await vi.advanceTimersByTimeAsync(1);
+  expect(api.interrupt).toBeDefined();
+  api.interrupt!();
+  expect(api.busy).toBe(false);
+  const replay = api.play('first');
+  const second = api.play('second');
+  expect(api.play('first')).toBe(replay);
+  await vi.advanceTimersByTimeAsync(100);
+  await old;
+  expect(api.busy).toBe(true);
+  await vi.runAllTimersAsync();
+  await Promise.all([replay, second]);
+  expect(api.onLine).toHaveBeenCalledTimes(3);
+  expect(api.busy).toBe(false);
+});

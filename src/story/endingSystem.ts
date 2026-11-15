@@ -11,7 +11,7 @@ import type { DialogueBox } from '../ui/dialogueBox';
 import type { Hud } from '../ui/hud';
 import type { InputLock } from '../ui/inputLock';
 import type { StoryPanel } from '../ui/storyPanel';
-import { HLS_POS } from '../world/zones';
+import { landerSite } from '../world/landerSite';
 import type { Act5Director, Act5Stage } from './act5';
 import { missionRecord, realStories } from './ending';
 import { readDigit } from '../ui/inputLock';
@@ -25,6 +25,12 @@ const HLS_REACH_M = 9;
 const LIFTOFF_S = 10;
 const LIFTOFF_ACCEL = 3;
 const PLUME_S = 3;
+
+/** True when a point is within `reach` metres of where the lander actually stands. */
+export const nearLander = (p: { x: number; z: number }, reach: number): boolean => {
+  const s = landerSite();
+  return Math.hypot(p.x - s.x, p.z - s.z) <= reach;
+};
 
 export interface EndingWorld {
   scene: Scene;
@@ -130,7 +136,7 @@ export function createEnding(w: EndingWorld, d: Act5Director, night: CampNight |
         return tr("E — send MICA's data to Houston (Earth sets in {h} h)", { h: hoursToEarthSet().toFixed(0) });
       }
       if (stage === 'farewell') {
-        if (Math.hypot(pos.x - HLS_POS.x, pos.z - HLS_POS.z) > HLS_REACH_M) return tr('Time to go home: walk to the lander');
+        if (!nearLander(pos, HLS_REACH_M)) return tr('Time to go home: walk to the lander');
         if (w.dialogue.busy) return null;
         if (keyboard.consume('KeyE')) {
           w.lock.push('liftoff');
@@ -141,7 +147,8 @@ export function createEnding(w: EndingWorld, d: Act5Director, night: CampNight |
             cam.maxZ = 8000;
             w.scene.activeCamera = cam;
             // Between the camera (alpha 45°) and the lander, so both robots are in the shot.
-            const side = { x: HLS_POS.x + 26, z: HLS_POS.z + 26 };
+            const site = landerSite();
+            const side = { x: site.x + 26, z: site.z + 26 };
             w.pip.root.position.set(side.x, sampleHeight(w.hm, side.x, side.z), side.z);
             w.pip.mode = 'wait';
             w.mica().root.position.set(side.x + 4, sampleHeight(w.hm, side.x + 4, side.z - 3), side.z - 3);
@@ -162,12 +169,12 @@ export function createEnding(w: EndingWorld, d: Act5Director, night: CampNight |
         w.hls.position.y = hls0 + 0.5 * LIFTOFF_ACCEL * liftT * liftT;
         if (w.hls.position.y - hls0 > 2) w.hlsRig?.setTargets(0, 0);
         // The camera tilts up slowly instead of chasing the ship, so it climbs out of frame.
-        if (cam) cam.target = new Vector3(HLS_POS.x, hls0 + 20 + Math.min(w.hls.position.y - hls0, 80) * 0.5, HLS_POS.z);
+        if (cam) cam.target = new Vector3(landerSite().x, hls0 + 20 + Math.min(w.hls.position.y - hls0, 80) * 0.5, landerSite().z);
         if (liftT < PLUME_S) {
           plumeAcc += dt;
           while (plumeAcc >= 0.1) {
             plumeAcc -= 0.1;
-            w.dust.plume(new Vector3(HLS_POS.x, hls0, HLS_POS.z), 25, 70);
+            w.dust.plume(new Vector3(landerSite().x, hls0, landerSite().z), 25, 70);
           }
         }
         if (Math.floor(liftT * 2) !== Math.floor((liftT - dt) * 2)) w.pip.wave();

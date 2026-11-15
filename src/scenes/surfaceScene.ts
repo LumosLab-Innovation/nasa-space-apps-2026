@@ -1,5 +1,5 @@
 import { addCasters, mergeStatic } from '../models/optimize';
-import { Color3, Engine, MeshBuilder, PBRMaterial, PhysicsAggregate, PhysicsShapeType, Scene, TransformNode, Vector3, type Texture } from '@babylonjs/core';
+import { Color3, Engine, Mesh, MeshBuilder, PBRMaterial, PhysicsAggregate, PhysicsShapeType, Scene, TransformNode, Vector3, type Texture } from '@babylonjs/core';
 import { GameClock } from '../core/clock';
 import { EventBus, type GameEvents } from '../core/events';
 import { createState, unlockCard, type GameState } from '../core/gameState';
@@ -11,6 +11,7 @@ import { Pip } from '../pip/pip';
 import { Astronaut } from '../player/astronaut';
 import { Keyboard } from '../player/keyboard';
 import { createHud, type Hud } from '../ui/hud';
+import { addTerrainReticles, createTerrainRing } from '../ui/terrainReticles';
 import { createDialogueBox, type DialogueBox } from '../ui/dialogueBox';
 import { createNotebook, type Card } from '../ui/notebook';
 import { DialogueRunner } from '../dialogue/runner';
@@ -21,7 +22,9 @@ import { MicaRepairSystem } from '../mica/repairSystem';
 import { createThermalView } from '../ui/thermalView';
 import { createSky, type Sky } from '../world/sky';
 import { createTerrain } from '../world/terrain';
-import { HLS_POS, MICA_POS, PIP_SPAWN, PLAYER_SPAWN, SHELTER_POS } from '../world/zones';
+import { createWorkAreaFill } from '../world/workAreaFill';
+import { resetLanderSite } from '../world/landerSite';
+import { FLAG_SPOT, HLS_POS, MICA_POS, PIP_SPAWN, PLAYER_SPAWN, SHELTER_POS, WINCH_ANCHOR } from '../world/zones';
 import { createFinalDescent, type FinalDescent } from '../landing/finalDescent';
 import { createCargoLanding } from '../challenges/cargoLanding';
 import { createPipMeeting } from '../story/pipMeetingSystem';
@@ -50,7 +53,7 @@ import { createEarthRelay } from '../challenges/earthRelay';
 import { createDarkCrater } from '../challenges/darkCrater';
 import { createRoverSystem } from '../rover/roverSystem';
 import { walkReason, pipBusyFor } from '../rover/rover';
-import { winchHoldsPip } from '../challenges/winch';
+import { ANCHOR_REACH_M, winchHoldsPip } from '../challenges/winch';
 import { createMapView } from '../ui/mapView';
 import { createDemoController } from '../demo/demoController';
 import { resolveQ } from '../pip/qCommand';
@@ -126,6 +129,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   sky.shadows.addShadowCaster(terrain);
 
   // Starship HLS at the landing zone: 50 m tall, elevator facing the spot where the player steps off.
+  resetLanderSite();
   const hlsRoot = new TransformNode('hls', scene);
   hlsRoot.position.set(HLS_POS.x, sampleHeight(hm, HLS_POS.x, HLS_POS.z), HLS_POS.z);
   hlsRoot.rotation.y = Math.atan2(PLAYER_SPAWN.x - HLS_POS.x, PLAYER_SPAWN.z - HLS_POS.z);
@@ -133,12 +137,20 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   hlsRig.setTargets(1, 1, true);
   const hlsGroundY = hlsRig.groundHeight((x, z) => sampleHeight(hm, x, z));
   hlsRoot.position.y = hlsGroundY;
-  const hlsHull = MeshBuilder.CreateCylinder('hlsCollider', { diameter: 9, height: 50 }, scene);
-  hlsRoot.computeWorldMatrix(true);
-  hlsHull.position.copyFrom(Vector3.TransformCoordinates(new Vector3(0, 25, 0), hlsRoot.getWorldMatrix()));
-  hlsHull.rotation.copyFrom(hlsRoot.rotation);
-  hlsHull.isVisible = false;
-  new PhysicsAggregate(hlsHull, PhysicsShapeType.CYLINDER, { mass: 0 }, scene);
+  let hlsHull: Mesh | null = null;
+  let hlsHullBody: PhysicsAggregate | null = null;
+  /** (Re)creates the static hull collider at the lander's current world transform. */
+  const placeHullCollider = () => {
+    hlsHullBody?.dispose();
+    hlsHull?.dispose();
+    hlsHull = MeshBuilder.CreateCylinder('hlsCollider', { diameter: 9, height: 50 }, scene);
+    hlsRoot.computeWorldMatrix(true);
+    hlsHull.position.copyFrom(Vector3.TransformCoordinates(new Vector3(0, 25, 0), hlsRoot.getWorldMatrix()));
+    hlsHull.rotation.copyFrom(hlsRoot.rotation);
+    hlsHull.isVisible = false;
+    hlsHullBody = new PhysicsAggregate(hlsHull, PhysicsShapeType.CYLINDER, { mass: 0 }, scene);
+  };
+  placeHullCollider();
 
   const state = createState();
   const bus = new EventBus<GameEvents>();
@@ -201,6 +213,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   const notebook = createNotebook(hud.ui, state, cardList);
   const science = new ScienceSystem(scene, hm, state, script, dialogue, pip, sky, hud);
   const micaSys = new MicaSystem(scene, hm, state, dialogue, pip, sky, hud, await Mica.create(scene, hm, MICA_POS));
+  player.setFootprintObstacle(() => micaSys.mica.footprint);
   const repairSys = new MicaRepairSystem(scene, hm, state, micaSys, dialogue, pip, hud);
   bus.on('moduleInstalled', () => void dialogue.play('moduleDone'));
   const journey = new JourneySystem(state, dialogue, pip, hud);
@@ -307,7 +320,11 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   // MICA's memory puzzle (v2 scene 4.5), opened with E on the awake MICA.
   const memory = createMemoryPuzzleView(panel, keyboard, dialogue, state, hud, pip);
   repairSys.onRestoreMemory = () => {
-    void dialogue.play('mica_memory_intro').then(() => memory.open());
+    player.enforceFootprint();
+    void dialogue.play('mica_memory_intro').then(() => {
+      player.enforceFootprint();
+      memory.open();
+    });
   };
   // Act 5 in the first real long night at camp (29 Nov – 3 Dec 2028), computed from LOLA + JPL.
   const night = findCampNight(eph, hm, zone('base'), mission.start + 7 * 24 * 3600_000);
@@ -382,7 +399,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
     onChange: (open) => {
       descent?.setPaused(open);
       // The Havok plugin steps by frame time, so a time step of 0 is ignored: switch physics off instead.
-      keyboard.reset();
+      keyboard.reset(player.interactionBusy ? ['KeyE'] : []);
       if (open) {
         physicsWasEnabled = guide.open ? guidePhysics : scene.physicsEnabled;
         scene.physicsEnabled = false;
@@ -415,6 +432,28 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
       pauseMenu.open();
     }
   });
+
+  const workAreaFill = createWorkAreaFill(scene, [
+    terrain, player.root, ...player.root.getChildMeshes(false), ...pip.meshes,
+    ...modules.crateMeshes('radiator'), ...modules.crateMeshes('solarTower'),
+  ]);
+
+  addTerrainReticles(hud.ui, scene, hm, [
+    {
+      name: 'anchorReticle',
+      emphasized: true,
+      position: () => winchSys.winch.state === 'stuck' ? WINCH_ANCHOR : null,
+      groundRing: {
+        mesh: createTerrainRing('winchApproachRing', scene, hm, WINCH_ANCHOR, ANCHOR_REACH_M),
+        distanceFromPlayer: () => Math.hypot(player.position.x - WINCH_ANCHOR.x, player.position.z - WINCH_ANCHOR.z),
+        startsAtM: 12,
+        fullAtM: ANCHOR_REACH_M,
+      },
+    },
+    { name: 'moduleReticle', position: () => modules.installTarget },
+    { name: 'flagReticle', position: () => state.flags.has('flag:planted') ? null : FLAG_SPOT },
+  ], () => !dormant && !descent?.active && !pauseMenu.isOpen && !panel.open && !notebook.open &&
+    !map.open && !guide.open && act5.stage !== 'liftoff' && act5.stage !== 'record');
 
   scene.onBeforeRenderObservable.add(() => {
     if (dormant) return;
@@ -455,20 +494,23 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
     if (descent?.active) descent.update(dt, keyboard);
     hlsRig.update(dt);
     // The rover first, so the driver's seat is where the rover is this frame.
-    const roverPrompt = rover.update(dt, keyboard, { locked: lock.locked });
+    const roverPrompt = rover.update(dt, keyboard, { locked: lock.locked || player.interactionBusy });
+    player.updateInteraction(dt, keyboard.isHeld('KeyE'), lock.locked);
     player.update(dt, sceneInputGate(lock, keyboard.moveInput()));
     // Story beats first: their keys (E at the shelter, 1–4 in panels) win over world interactions.
     demo?.update();
+    player.enforceFootprint();
     memory.update();
     horizon?.update();
     planner.update(dt);
     const storyPrompt = act5.update(dt, player, keyboard);
     const meetPrompt = meeting.update(dt, player, keyboard, { descentActive: !!descent?.active, locked: lock.locked });
     let prompt: string | null = null;
-    if (!lock.locked && !rover.driving) {
+    if (!lock.locked && !rover.driving && !player.interactionBusy) {
       const modulePrompt = modules.update(dt, player, keyboard);
-      const repairPrompt = repairSys.update(dt, player, keyboard);
-      const sciencePrompt = science.update(dt, player, keyboard);
+      const repairPrompt = player.interactionBusy ? null : repairSys.update(dt, player, keyboard);
+      player.enforceFootprint();
+      const sciencePrompt = player.interactionBusy ? null : science.update(dt, player, keyboard);
       // After modules/repair, which reset Pip's context command every frame.
       const winchPrompt = winchSys.update(dt, player, keyboard);
       const cargoPrompt = cargo?.update(dt, player, keyboard) ?? null;
@@ -476,7 +518,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
       const brushPrompt = cargo?.brushPrompt(player, keyboard) ?? null;
       const flagPrompt = flagPlant.update(dt, player, keyboard);
       const relayPrompt = relay.update(player, keyboard);
-      const darkPrompt = darkCrater.update(player, keyboard);
+      const darkPrompt = player.interactionBusy ? null : darkCrater.update(player, keyboard);
       const stormPrompt = storm.update(dt, player);
       prompt = stormPrompt ?? cargoPrompt ?? winchPrompt ?? brushPrompt ?? flagPrompt ?? relayPrompt ?? darkPrompt ?? modulePrompt ?? repairPrompt ?? sciencePrompt ?? edsPrompt();
       // Climbing into the rover comes last: every other E action near it wins.
@@ -495,8 +537,8 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
     survival.paused = panel.open || !!descent?.active;
     survival.update(dt, player, !descent?.active);
     science.lidarRangeM = upgrades().lidarRangeM;
-    hud.showPrompt(micaSys.silent || lock.locked ? null : storyPrompt ?? meetPrompt ?? roverPrompt ?? prompt, dialogue.bottomInset);
-    if (!lock.locked) {
+    hud.showPrompt(micaSys.silent || lock.locked ? null : player.interactionPrompt ?? storyPrompt ?? meetPrompt ?? roverPrompt ?? prompt, dialogue.bottomInset);
+    if (!lock.locked && !player.interactionBusy) {
       if (keyboard.consume('Tab')) notebook.toggle();
       if (keyboard.consume('KeyM')) {
         if (upgrades().map) map.toggle();
@@ -523,6 +565,8 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
     applyCoat(pipCoatMats, pipCoat);
     sky.update();
     sky.updateNight(dt, survival.lastEnv ? !survival.lastEnv.playerInSun : false);
+    workAreaFill.update(dt, player.position, survival.lastEnv?.playerInSun ?? true,
+      thermal.on || act5.stage === 'liftoff' || act5.stage === 'record');
     glow.update(dt, player, thermal.on);
     if (opts.autosave && state.flags.has('landing:done') && !descent?.active && shouldAutosave(state.flags)) {
       saveT += dt;
@@ -626,7 +670,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
     startLanding(assist: boolean, prepared = false) {
       if (descent?.active) return;
       survival.setHudVisible(false);
-      descent = createFinalDescent({ scene, hm, ui: hud.ui, state, dust, hud, dialogue, lock, player, pip }, hlsRoot, { assist, rig: hlsRig, groundY: hlsGroundY, prepared, onTouchdown:()=>music?.touchdownImpact?.() });
+      descent = createFinalDescent({ scene, hm, ui: hud.ui, state, dust, hud, dialogue, lock, player, pip, onPause: () => pauseMenu.open(), onExplosion: () => music?.explosionImpact?.() }, hlsRoot, { assist, rig: hlsRig, groundY: hlsGroundY, prepared, onTouchdown:()=>music?.touchdownImpact?.() });
     },
   };
 }

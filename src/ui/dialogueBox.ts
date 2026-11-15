@@ -11,6 +11,7 @@ const COLOR: Record<Speaker, string> = { pip: '#ffa040', mica: '#9fc4e8', housto
 
 export interface DialogueBox {
   cancel(): void;
+  interrupt?(): void;
   play(id: string): Promise<void>;
   /** Called as each line appears (the music plays Pip's and MICA's motifs). */
   onLine: ((line: Line) => void) | null;
@@ -64,16 +65,17 @@ export function createDialogueBox(ui: AdvancedDynamicTexture, scene: Scene, runn
 
   let skip = false;
   let cancelled = false;
+  let generation = 0;
   const nextLine = (event: KeyboardEvent) => {
     if (event.code === 'Enter' && !event.repeat && !gamePauseClock.isPaused) skip = true;
   };
   window.addEventListener('keydown', nextLine);
   scene.onDisposeObservable.addOnce(() => window.removeEventListener('keydown', nextLine));
 
-  const wait = async (ms: number, skippable: boolean) => {
+  const wait = async (ms: number, skippable: boolean, token: number) => {
     skip = false;
     const end = gamePauseClock.now(performance.now()) + ms;
-    while (!cancelled && !scene.isDisposed && (gamePauseClock.isPaused || (gamePauseClock.now(performance.now()) < end && (!skippable || !skip)))) {
+    while (token === generation && !cancelled && !scene.isDisposed && (gamePauseClock.isPaused || (gamePauseClock.now(performance.now()) < end && (!skippable || !skip)))) {
       await sleep(50);
     }
   };
@@ -82,7 +84,7 @@ export function createDialogueBox(ui: AdvancedDynamicTexture, scene: Scene, runn
   let idleSince = 0;
   let queue = Promise.resolve();
 
-  async function show(line: Line): Promise<void> {
+  async function show(line: Line, token: number): Promise<void> {
     if (line.face && line.speaker === 'pip') pip.setFace(line.face);
     if (line.pauseBeforeMs) {
       // Silence beats keep the box hidden; Houston shows the radio delay ticking.
@@ -96,8 +98,8 @@ export function createDialogueBox(ui: AdvancedDynamicTexture, scene: Scene, runn
       } else {
         box.isVisible = false;
       }
-      await wait(line.pauseBeforeMs, false);
-      if (scene.isDisposed || cancelled) return;
+      await wait(line.pauseBeforeMs, false, token);
+      if (scene.isDisposed || cancelled || token !== generation) return;
     }
     waiting.isVisible = false;
     if (!line.text) return;
@@ -107,12 +109,13 @@ export function createDialogueBox(ui: AdvancedDynamicTexture, scene: Scene, runn
     text.text = line.text;
     pip.talking = line.speaker === 'pip';
     api.onLine?.(line);
-    await wait(1800 + line.text.length * 45, true);
+    await wait(1800 + line.text.length * 45, true, token);
     pip.talking = false;
   }
 
   const api: DialogueBox = {
     cancel() { cancelled=true;pending.clear();pip.talking=false;box.isVisible=false;window.removeEventListener('keydown',nextLine); },
+    interrupt() { generation++; pending.clear(); pip.talking=false; box.isVisible=false; },
     onLine: null,
     get busy() {
       return pending.size > 0;
@@ -127,18 +130,19 @@ export function createDialogueBox(ui: AdvancedDynamicTexture, scene: Scene, runn
       if (cancelled || scene.isDisposed) return Promise.resolve();
       const existing = pending.get(id);
       if (existing) return existing;
+      const token = generation;
       const next = queue.then(async () => {
         while (gamePauseClock.isPaused && !scene.isDisposed && !cancelled) await sleep(50);
-        if (scene.isDisposed || cancelled) return;
+        if (scene.isDisposed || cancelled || token !== generation) return;
         let line: Line | null = runner.start(id);
         while (line) {
-          await show(line);
-          if (scene.isDisposed || cancelled) return;
+          await show(line, token);
+          if (scene.isDisposed || cancelled || token !== generation) return;
           line = runner.next();
         }
         box.isVisible = false;
       }).finally(() => {
-        pending.delete(id);
+        if (pending.get(id) === next) pending.delete(id);
         if (!pending.size) {
           box.isVisible = false;
           pip.talking = false;

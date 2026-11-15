@@ -1,7 +1,7 @@
 import { Constants, Matrix, Mesh, MeshBuilder, StandardMaterial, Color3, PBRMaterial, Quaternion, RawCubeTexture, Vector3, VertexData, TransformNode,
   type Scene, type ShadowGenerator } from '@babylonjs/core';
 import { rcsNozzles, type ExhaustNozzle } from '../fx/exhaustNozzles';
-import { elevatorPose, guardPose, stepElevatorMotion } from '../demo/hlsElevatorMotion';
+import { elevatorPose, guardPose, frontGuardOpen, stepElevatorMotion } from '../demo/hlsElevatorMotion';
 import { landingGearPose, stepLandingGear } from '../demo/hlsLandingGearMotion';
 import { loadModel, type LoadedModel } from './loadModel';
 import { withPreparationTarget } from '../core/preparationRender';
@@ -67,6 +67,8 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
   }
   let gear: Motion = { position: 0, velocity: 0 }, elevator: Motion = { position: 0, velocity: 0 };
   let gearTarget: 0 | 1 = 0, elevatorTarget: 0 | 1 = 0, lod: Lod | undefined;
+  let gate = 0, gateTarget: 0 | 1 = 0;
+  const GATE_SECONDS = 1.2;
   const snapshots: Record<Lod, Map<string, Mesh>> = { near: new Map(), far: new Map() };
   const fixed:Record<Lod,{source:Set<Mesh>;batch:Mesh}|undefined>={near:undefined,far:undefined};
   let visibleKey = '';
@@ -83,7 +85,7 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
       ship.floor.rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), -Math.PI / 2 * (1 - p.floor));
       ship.guards[0].rotationQuaternion = Quaternion.RotationAxis(Vector3.Forward(), -Math.PI / 2 * (1 - guard.sides));
       ship.guards[1].rotationQuaternion = Quaternion.RotationAxis(Vector3.Forward(), Math.PI / 2 * (1 - guard.sides));
-      ship.guards[2].rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), -Math.PI / 2 * (1 - guard.front));
+      ship.guards[2].rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), -Math.PI / 2 * (1 - frontGuardOpen(elevator.position, gate)));
       ship.arms.position.z = ship.car.position.z - .95;
       ship.car.computeWorldMatrix(true); ship.arms.computeWorldMatrix(true); ship.cables.computeWorldMatrix(true);
       const inverse = ship.cables.getWorldMatrix().clone().invert();
@@ -201,7 +203,7 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
     setOffset(y: number) { exhaustMount.position.y=y;for (const ship of Object.values(ships)) ship.root.position.y = y; applyPose(); },
     setTargets(g: 0 | 1, e: 0 | 1, immediate = false) {
       gearTarget = g; elevatorTarget = e;
-      if (immediate) { gear = { position: g, velocity: 0 }; elevator = { position: e, velocity: 0 }; applyPose(); setLod(lod ?? 'near'); }
+      if (immediate) { gate = 0; gateTarget = 0; gear = { position: g, velocity: 0 }; elevator = { position: e, velocity: 0 }; applyPose(); setLod(lod ?? 'near'); }
     },
     snapshotMotion() { return { gear: { ...gear }, elevator: { ...elevator }, gearTarget, elevatorTarget }; },
     restoreMotion(state: { gear: typeof gear; elevator: typeof elevator; gearTarget: 0 | 1; elevatorTarget: 0 | 1 }) {
@@ -210,12 +212,34 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
     },
     update(dt: number) {
       const moving = gear.position !== gearTarget || elevator.position !== elevatorTarget || gear.velocity !== 0 || elevator.velocity !== 0;
-      if (moving && dt > 0) {
+      const gateMoving = gate !== gateTarget;
+      if ((moving || gateMoving) && dt > 0) {
         gear = stepLandingGear(gear, gearTarget, dt);
         elevator = stepElevatorMotion(elevator, elevatorTarget, dt);
+        if (gateMoving) gate = gateTarget === 1 ? Math.min(1, gate + dt / GATE_SECONDS) : Math.max(0, gate - dt / GATE_SECONDS);
         applyPose();
       }
       updateLod();
+    },
+    /** Front gate of the crew car: 1 folds it down so the astronaut can step out. Eased in update(dt). */
+    setGate(open: 0 | 1, immediate = false) { gateTarget = open; if (immediate) { gate = open; applyPose(); } },
+    get gateOpen() { return gate; },
+    /**
+     * World-space anchors of the near-LOD car. `floor` is the 'elevatorFloor' node (child of floorHinge);
+     * `top` is `floor` lifted to elevator position 0 (car at its authored start height), without touching the pose.
+     * The car travels out along the rig root's local +Z (car.position.z = 6.05 + .45*support), so outwardYaw
+     * is the world yaw of that axis.
+     */
+    carAnchor() {
+      const ship = ships.near;
+      ship.root.computeWorldMatrix(true); ship.car.computeWorldMatrix(true);
+      const node = ship.root.getChildTransformNodes(false, n => n.name === 'elevatorFloor')[0] ?? ship.car;
+      node.computeWorldMatrix(true);
+      const floor = node.getAbsolutePosition().clone();
+      const parentMatrix = (ship.car.parent as TransformNode | null)?.getWorldMatrix() ?? Matrix.Identity();
+      const lift = Vector3.TransformNormal(new Vector3(0, ship.start - ship.car.position.y, 0), parentMatrix);
+      const dir = Vector3.TransformNormal(Vector3.Forward(), ship.root.getWorldMatrix());
+      return { floor, top: floor.add(lift), outwardYaw: Math.atan2(dir.x, dir.z) };
     },
     get elevatorStowed() { return elevator.position === 0 && elevator.velocity === 0; },
     get elevatorDeployed() { return elevator.position === 1 && elevator.velocity === 0; },

@@ -57,7 +57,7 @@ export const MODELS: Record<ModelId, ModelSpec> = {
       'ankle_L', 'ankle_R', 'wrist_L', 'wrist_R',
       ...lr('upperArm', 'foreArm', 'glove', 'thigh', 'shin', 'boot'),
     ],
-    materials: ['Suit_White', 'Suit_Legs', 'Suit_Boots', 'Suit_Stripe', 'Visor_Gold', 'PLSS'],
+    materials: ['Suit_White', 'Suit_Coverall', 'Suit_Legs', 'Suit_Boots', 'Visor_Gold', 'PLSS'],
     heightM: [1.85, 1.95],
     // The visor pivots at the helmet centre (z = 0), so the helmet lamp marks the front.
     front: 'lamp_L',

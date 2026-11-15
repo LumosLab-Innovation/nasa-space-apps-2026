@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { nearLander } from '../src/story/endingSystem';
+import { resetLanderSite, setLanderSite } from '../src/world/landerSite';
+import { HLS_POS } from '../src/world/zones';
 import { createState } from '../src/core/gameState';
 import { plumeVelocities } from '../src/fx/ballistic';
 import { LUNAR_G } from '../src/config/constants';
@@ -49,5 +52,13 @@ describe('mission record (v2 K.4)', () => {
     }
     const best = Math.max(...v.map((g) => (2 * g.vy * Math.hypot(g.vx, g.vz)) / LUNAR_G));
     expect(best).toBeGreaterThan(50);
+  });
+});
+describe('farewell approach', () => {
+  afterEach(() => resetLanderSite());
+  it('farewell approach uses the landed ship', () => {
+    setLanderSite({ x: HLS_POS.x + 25, z: HLS_POS.z });
+    expect(nearLander({ x: HLS_POS.x + 26, z: HLS_POS.z }, 5)).toBe(true);
+    expect(nearLander({ x: HLS_POS.x, z: HLS_POS.z }, 5)).toBe(false);
   });
 });

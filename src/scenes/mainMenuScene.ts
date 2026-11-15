@@ -13,13 +13,12 @@ import { onLangChange, tr } from '../i18n/i18n';
 import { MenuColumn, MenuDialog, MenuKeys, menuButton, menuColors, menuLabel, menuRule, revealMenuInput } from '../ui/menuControls';
 import { createMenuSettings } from '../ui/menuSettings';
 import { addTitleButtonHover } from '../ui/titleButton';
-import { createMenuWordmark, loadWordmarkFont } from '../ui/menuWordmark';
+import { createMenuLogo } from '../ui/menuWordmark';
 import { createOrbitArt, ORBIT_ART_SIZE } from '../ui/orbitArt';
 
 export type StartChoice = 'fly' | 'auto' | 'skip' | 'continue';
 
 export async function showMainMenu(engine: Engine, music: Music, hasSave: boolean): Promise<StartChoice> {
-  const titleFamily = await loadWordmarkFont();
   const scene = new Scene(engine);
   scene.clearColor = new Color4(0.024, 0.051, 0.114, 1);
   scene.activeCamera = new FreeCamera('mainMenuCamera', Vector3.Zero(), scene);
@@ -117,12 +116,12 @@ export async function showMainMenu(engine: Engine, music: Music, hasSave: boolea
       horizontalFade.addColorStop(0.83, '#08132605');
       sideShade.backgroundGradient = horizontalFade;
 
-      const wordmark = createMenuWordmark(titleFamily);
       // Leave room for the scrollbar when the menu is taller than the viewport.
-      const { missionHeight, titleHeight } = wordmark.fit(ui.getContext(), column.width - 16, 106);
-      column.add(wordmark.mission, missionHeight);
-      column.add(wordmark.title, titleHeight);
-      column.add(new Container(), compact ? 12 : 24);
+      const logoSize = Math.min(column.width - 16, 288, Math.max(144, Math.round(height * 0.36)));
+      const logo = createMenuLogo('mainMenuLogo');
+      logo.width = logoSize + 'px';
+      logo.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+      column.add(logo, logoSize);
 
       if (hasSave) {
         addAction(menuButton('continue', tr('Resume'), () => finish('continue'), {

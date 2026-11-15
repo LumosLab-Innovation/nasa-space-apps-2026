@@ -4,13 +4,23 @@ import {
   PhysicsCharacterController, Quaternion, Scene, SpotLight, TransformNode, Vector3,
 } from '@babylonjs/core';
 import { loadModel, type LoadedModel } from '../models/loadModel';
-import { initGait, stepGait, type GaitState } from './gait';
+import { initGait, stepGait, STANDING_POSE, type GaitState } from './gait';
+import { AstronautAction, type ActionRequest } from './astronautAction';
+import { AstronautRig } from './astronautRig';
+import { tr } from '../i18n/i18n';
 import { LUNAR_G } from '../config/constants';
 import { sampleHeight, type Heightmap } from '../data/heightmap';
 import { LandingDetector } from './landing';
 import { clampToWorld, computeMoveVelocity, isBelowGround, JUMP_SPEED_MS, LOPE_SPEED_MS, WALK_SPEED_MS, type MoveInput } from './movement';
 
+import { resolveFootprint, type Footprint, type XZ } from './footprintCollision';
+
 const HEIGHT = 1.9;
+
+/** Capsule-centre height while riding: standing on a floor at at.y, or seated 0.82 m below the seat surface. */
+export function rideRootY(at: { y: number }, standing: boolean): number {
+  return standing ? at.y + HEIGHT / 2 : at.y - 0.82 + HEIGHT / 2;
+}
 const RADIUS = 0.35;
 const GRAVITY = new Vector3(0, -LUNAR_G, 0);
 const DOWN = new Vector3(0, -1, 0);
@@ -38,6 +48,7 @@ interface Limbs {
 }
 
 const rotX = (a: number) => Quaternion.RotationAxis(Axis.X, a);
+export interface AstronautInteraction extends ActionRequest { target: Vector3; valid: () => boolean }
 
 /**
  * Third-person astronaut with a Havok character controller under lunar gravity. Body: AxEMU-style GLB
@@ -47,6 +58,7 @@ export class Astronaut {
   readonly camera: ArcRotateCamera;
   readonly root: Mesh;
   private readonly cc: PhysicsCharacterController;
+  private footprintObstacle: (() => Footprint | null) | null = null;
   private facingYaw = 0;
   private readonly landing = new LandingDetector();
   private stepDistM = 0;
@@ -60,11 +72,20 @@ export class Astronaut {
 
   private readonly limbs: Limbs | null = null;
   private gait: GaitState = initGait(0);
+  private readonly rig: AstronautRig | null = null;
+  private readonly action = new AstronautAction();
+  private interaction: AstronautInteraction | null = null;
+  private approach: { x: number; z: number; remaining: number; settled: number } | null = null;
+  private actionHeld = false;
+  private actionBlocked = false;
+  private supported = false;
   /** Seat on the lunar rover while driving (Plan 7), or null on foot. */
-  private seat: { x: number; y: number; z: number; yaw: number } | null = null;
+  private seat: { x: number; y: number; z: number; yaw: number; standing?: boolean } | null = null;
 
   static async create(scene: Scene, hm: Heightmap, spawn: Vector3): Promise<Astronaut> {
-    return new Astronaut(scene, hm, spawn, await loadModel(scene, 'astronaut'));
+    const player = new Astronaut(scene, hm, spawn, await loadModel(scene, 'astronaut'));
+    await player.rig?.warm();
+    return player;
   }
 
   constructor(scene: Scene, private readonly hm: Heightmap, spawn: Vector3, model: LoadedModel | null = null) {
@@ -105,6 +126,7 @@ export class Astronaut {
         wristL: n('wrist_L'),
         wristR: n('wrist_R'),
       };
+      if (model.skeletons?.length) this.rig = new AstronautRig(model);
     } else {
       this.buildPlaceholder(scene);
     }
@@ -118,6 +140,7 @@ export class Astronaut {
     this.camera.maxZ = 6000;
     this.camera.inputs.removeByType('ArcRotateCameraKeyboardMoveInput');
     this.camera.attachControl(scene.getEngine().getRenderingCanvas()!, true);
+    scene.onDisposeObservable.addOnce(() => { this.cancelInteraction(); this.rig?.dispose(); });
   }
 
   /** Plan 1 capsule body, kept as the fallback when astronaut.glb cannot load. */
@@ -150,19 +173,67 @@ export class Astronaut {
     return this.root.position;
   }
 
+  setFootprintObstacle(provider: () => Footprint | null): void {
+    this.footprintObstacle = provider;
+    this.enforceFootprint();
+  }
+
+  /** Recheck after towing, teleporting or opening a modal, without changing camera framing. */
+  enforceFootprint(): void {
+    this.constrainFootprint(this.cc.getPosition(), true);
+  }
+
+  private constrainFootprint(from: XZ, syncVisual = false): void {
+    if (this.seat) return;
+    const footprint = this.footprintObstacle?.();
+    if (!footprint) return;
+    const p = this.cc.getPosition();
+    const result = resolveFootprint(from, p, footprint, 0.5);
+    if (Math.hypot(result.x - p.x, result.z - p.z) < 1e-7) return;
+    const next = new Vector3(result.x, Math.max(p.y, sampleHeight(this.hm, result.x, result.z) + HEIGHT / 2), result.z);
+    this.cc.setPosition(next);
+    const velocity = this.cc.getVelocity().clone();
+    for (const normal of result.contacts) {
+      const inward = velocity.x * normal.x + velocity.z * normal.z;
+      if (inward < 0) { velocity.x -= normal.x * inward; velocity.z -= normal.z * inward; }
+    }
+    this.cc.setVelocity(velocity);
+    if (syncVisual) {
+      this.root.position.copyFrom(next);
+      this.camera.target.copyFrom(next.add(new Vector3(0, 0.8, 0)));
+    }
+  }
+
   /** Puts the astronaut on the ground at (x, z), at rest (rescue, demo jumps). */
   teleport(x: number, z: number): void {
+    this.cancelInteraction();
     const p = new Vector3(x, sampleHeight(this.hm, x, z) + HEIGHT / 2 + 0.2, z);
     this.cc.setPosition(p);
     this.cc.setVelocity(Vector3.Zero());
     this.root.position.copyFrom(p);
     this.seat = null;
     this.gait = initGait(this.facingYaw);
+    this.enforceFootprint();
   }
 
   /** Sit in the rover's driver seat (updated every frame while driving) or stand up (null). */
-  setRide(at: { x: number; y: number; z: number; yaw: number } | null): void {
+  setRide(at: { x: number; y: number; z: number; yaw: number; standing?: boolean } | null): void {
+    if (at) this.cancelInteraction();
     this.seat = at;
+  }
+
+  /** Stands the astronaut on a floor at height y (e.g. the elevator car), ending any ride. */
+  placeOnFloor(x: number, y: number, z: number, yaw: number): void {
+    this.cancelInteraction();
+    this.seat = null;
+    const p = new Vector3(x, y + HEIGHT / 2, z);
+    this.cc.setPosition(p);
+    this.cc.setVelocity(Vector3.Zero());
+    this.root.position.copyFrom(p);
+    this.facingYaw = yaw;
+    this.gait = initGait(yaw);
+    this.root.rotation.y = yaw;
+    this.camera.target.copyFrom(p.add(new Vector3(0, 0.8, 0)));
   }
 
   get riding(): boolean {
@@ -179,6 +250,34 @@ export class Astronaut {
     return Math.atan2(-Math.cos(this.camera.alpha), -Math.sin(this.camera.alpha));
   }
 
+  get interactionBusy(): boolean { return this.interaction !== null; }
+  get interactionPrompt(): string | null {
+    if (!this.interaction) return null;
+    if (this.approach) return tr('Finding a steady footing…');
+    return this.interaction.kind === 'sample' ? tr('Collecting and bagging sample…') : tr('Aligning… {pct}%', { pct: Math.round((this.action.snapshot?.progress ?? 0) * 100) });
+  }
+  beginInteraction(request: AstronautInteraction): boolean {
+    if (this.interactionBusy || this.seat || !this.supported || !request.valid()) return false;
+    const dx = this.position.x - request.target.x, dz = this.position.z - request.target.z;
+    const distance = Math.hypot(dx, dz), stance = request.kind === 'sample' ? .48 : .40;
+    if (distance < .05 || Math.abs(distance - stance) > .45) return false;
+    const x = request.target.x + dx / distance * stance, z = request.target.z + dz / distance * stance;
+    if (Math.abs(sampleHeight(this.hm, x, z) - sampleHeight(this.hm, this.position.x, this.position.z)) > .22) return false;
+    this.interaction = { ...request, target: request.target.clone() };
+    this.approach = { x, z, remaining: 2.5, settled: 0 };
+    return true;
+  }
+  updateInteraction(_dt: number, held: boolean, blocked: boolean): void {
+    this.actionHeld = held; this.actionBlocked = blocked;
+    if (blocked && !this.action.snapshot?.committed) this.cancelInteraction();
+  }
+  cancelInteraction(): void {
+    const pending = this.approach ? this.interaction : null;
+    this.approach = null; this.interaction = null;
+    this.action.cancel(); pending?.onCancel?.();
+    this.rig?.clearAction();
+  }
+
   update(dt: number, input: MoveInput): void {
     if (dt <= 0) return;
     if (this.seat) {
@@ -186,9 +285,20 @@ export class Astronaut {
       return;
     }
     const support = this.cc.checkSupport(dt, DOWN);
-    const h = computeMoveVelocity(input, this.cameraYaw, input.lope ? LOPE_SPEED_MS : WALK_SPEED_MS);
+    const cancel = !!(input.forward || input.right || input.jump);
+    if (this.approach && (cancel || this.actionBlocked || !this.interaction!.valid() || (this.interaction!.kind === 'install' && !this.actionHeld))) this.cancelInteraction();
+    const move = this.interactionBusy ? { forward: 0, right: 0, jump: false } : input;
+    const h = computeMoveVelocity(move, this.cameraYaw, input.lope ? LOPE_SPEED_MS : WALK_SPEED_MS);
+    if (this.approach) {
+      const dx = this.approach.x - this.position.x, dz = this.approach.z - this.position.z;
+      const distance = Math.hypot(dx, dz);
+      const speed = Math.min(.45, distance * 3);
+      if (distance > .015) { h.x = dx / distance * speed; h.z = dz / distance * speed; }
+      this.approach.remaining -= dt;
+    }
     const current = this.cc.getVelocity();
     const supported = support.supportedState === CharacterSupportedState.SUPPORTED;
+    this.supported = supported;
     const impact = this.landing.update(supported, current.y);
     if (impact !== null) this.onLand(impact);
     let next: Vector3;
@@ -197,7 +307,7 @@ export class Astronaut {
       const forward = desired.lengthSquared() > 0 ? desired.normalizeToNew() : new Vector3(Math.sin(this.facingYaw), 0, Math.cos(this.facingYaw));
       next = this.cc.calculateMovement(dt, forward, support.averageSurfaceNormal, current, support.averageSurfaceVelocity, desired, UP);
       next.subtractInPlace(support.averageSurfaceVelocity);
-      if (input.jump) {
+      if (move.jump) {
         next.y = JUMP_SPEED_MS;
         this.onJump(JUMP_SPEED_MS);
       }
@@ -219,9 +329,10 @@ export class Astronaut {
     } else if (c.x !== p.x || c.z !== p.z) {
       this.cc.setPosition(new Vector3(c.x, p.y, c.z));
     }
+    this.constrainFootprint(this.root.position);
     const moved = Math.hypot(this.cc.getPosition().x - this.root.position.x, this.cc.getPosition().z - this.root.position.z);
     // Facing turns smoothly at a capped rate (gait.ts); the movement direction still follows the keys at once.
-    const desiredYaw = Math.hypot(h.x, h.z) > 0.01 ? Math.atan2(h.x, h.z) : this.gait.yaw;
+    const desiredYaw = this.interaction ? Math.atan2(this.interaction.target.x - this.position.x, this.interaction.target.z - this.position.z) : Math.hypot(h.x, h.z) > 0.01 ? Math.atan2(h.x, h.z) : this.gait.yaw;
     const at = this.cc.getPosition();
     const g = stepGait(this.gait, {
       pos: { x: at.x, y: at.y - HEIGHT / 2, z: at.z },
@@ -235,6 +346,18 @@ export class Astronaut {
     });
     this.gait = g.st;
     this.facingYaw = g.st.yaw;
+    if (this.approach) {
+      const settled = Math.hypot(at.x - this.approach.x, at.z - this.approach.z) < .035;
+      const aligned = Math.abs(Math.atan2(Math.sin(desiredYaw - this.facingYaw), Math.cos(desiredYaw - this.facingYaw))) < .06;
+      this.approach.settled = settled && aligned && supported && moved / dt < .08 ? this.approach.settled + dt : 0;
+      if (this.approach.settled >= .35) { this.action.start(this.interaction!); this.approach = null; }
+      else if (this.approach.remaining <= 0 || !supported) this.cancelInteraction();
+    }
+    if (this.action.busy && this.interaction) {
+      const valid = supported && this.interaction.valid() && Math.hypot(at.x - this.interaction.target.x, at.z - this.interaction.target.z) < 1.15;
+      this.action.update(dt, { held: this.actionHeld, valid, cancel });
+      if (!this.action.busy) this.interaction = null;
+    }
     if (this.limbs) {
       this.applyPose();
       for (const foot of g.planted) this.onStep(foot);
@@ -248,6 +371,7 @@ export class Astronaut {
     }
     this.root.position.copyFrom(this.cc.getPosition());
     this.root.rotation.y = this.facingYaw;
+    this.rig?.apply(dt, this.action.snapshot, this.interaction?.target ?? null, this.root, this.gait.phase, moved / dt > .1, (x, z) => sampleHeight(this.hm, x, z));
     this.camera.target.copyFrom(this.root.position.add(new Vector3(0, 0.8, 0)));
   }
 
@@ -258,11 +382,21 @@ export class Astronaut {
    */
   private updateSeated(dt: number): void {
     const at = this.seat!;
-    // Feet-level root sits 0.82 m below the seat surface, the capsule centre HEIGHT/2 above that.
-    this.root.position.set(at.x, at.y - 0.82 + HEIGHT / 2, at.z);
+    const standing = !!at.standing;
+    // Seated: feet-level root sits 0.82 m below the seat surface; standing: feet on the floor.
+    this.root.position.set(at.x, rideRootY(at, standing), at.z);
     this.facingYaw = at.yaw;
     this.gait.yaw = at.yaw;
     this.root.rotation.y = at.yaw;
+    if (standing) {
+      this.lastSeat = { x: at.x, z: at.z };
+      if (this.limbs) {
+        this.gait.pose = { ...STANDING_POSE };
+        this.applyPose();
+      }
+      this.camera.target.copyFrom(this.root.position.add(new Vector3(0, 0.8, 0)));
+      return;
+    }
     if (this.limbs) {
       this.gait.pose = {
         ...this.gait.pose,
@@ -286,6 +420,7 @@ export class Astronaut {
 
   /** Puts the gait pose (gait.ts) on the GLB pivots. Footfalls (onStep) fire when a foot plants. */
   private applyPose(): void {
+    this.rig?.reset();
     const l = this.limbs!;
     const p = this.gait.pose;
     l.pelvis.position.y = l.pelvisY0 + p.bob;

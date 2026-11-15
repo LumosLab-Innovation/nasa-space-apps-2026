@@ -86,7 +86,7 @@ export const LINES_VI: Script = {
   stop_landing: [
     { speaker: 'pip', face: 'happy', text: 'Bãi đáp! Mình tự tay quét đấy. Mà nói thật thì Tay làm gần hết.' },
     { speaker: 'pip', face: 'curious', text: 'Tàu đổ bộ của bạn cao năm mươi mét. Bóng của nó dài hai cây số. Mặt Trời ở đây thấp đến vậy đó.' },
-    { speaker: 'pip', face: 'excited', text: 'Ồ! Bạn còn mang theo lá cờ nữa. Vòng màu cam cạnh tàu đổ bộ là chỗ cắm. Bấm E ở đó nhé.' },
+    { speaker: 'pip', face: 'excited', text: 'Ồ! Bạn còn mang theo lá cờ nữa. Đến dấu ngắm cạnh tàu đổ bộ rồi bấm E để cắm cờ nhé.' },
   ],
   stop_base: [
     { speaker: 'pip', face: 'happy', text: 'Chào mừng tới Trại Shackleton! Bốn bệ trống, bốn thùng hàng ngoài kia. Đến giờ làm việc nhóm rồi.' },

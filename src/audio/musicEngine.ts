@@ -11,6 +11,7 @@ export interface Music {
   stinger(kind: 'touchdown' | 'discovery'): void;
   /** Dry contact foley, fired immediately once by the successful landing transition. */
   touchdownImpact?(): void;
+  explosionImpact?(): void;
   motif(who: 'pip' | 'mica'): void;
   setOn(on: boolean): void;
   readonly on: boolean;
@@ -72,6 +73,7 @@ export function createMusic(): Music {
   let sub = 0;
   let pendingStinger = false;
   let touchdownBuffer: AudioBuffer | null = null;
+  let explosionBuffer: AudioBuffer | null = null;
 
   function impulse(c: AudioContext, seconds: number): AudioBuffer {
     const len = Math.floor(c.sampleRate * seconds);
@@ -92,6 +94,14 @@ export function createMusic(): Music {
     const contactSamples=touchdownSamples(c.sampleRate);
     touchdownBuffer=c.createBuffer(1,contactSamples.length,c.sampleRate);
     touchdownBuffer.getChannelData(0).set(contactSamples);
+    explosionBuffer = c.createBuffer(1, Math.floor(c.sampleRate * 1.1), c.sampleRate);
+    const explosionSamples = explosionBuffer.getChannelData(0);
+    let low = 0;
+    for (let i = 0; i < explosionSamples.length; i++) {
+      const time = i / c.sampleRate;
+      low = .94 * low + .06 * (Math.random() * 2 - 1);
+      explosionSamples[i] = (low * 1.6 + Math.sin(time * 260) * .12) * Math.min(1, time / .008) * Math.exp(-time * 5);
+    }
     // Output level for dev checks (window.__music.debug.peak).
     meter = c.createAnalyser();
     meter.fftSize = 512;
@@ -267,6 +277,14 @@ export function createMusic(): Music {
         return;
       }
       playStinger(kind);
+    },
+    explosionImpact() {
+      if (!ctx || !master || !explosionBuffer || ctx.state !== 'running' || !on || vol <= 0) return;
+      const source = ctx.createBufferSource();
+      source.buffer = explosionBuffer;
+      source.connect(master);
+      source.onended = () => source.disconnect();
+      source.start(ctx.currentTime);
     },
     touchdownImpact() {
       // Never queue a late impact if audio is locked; reuse the gesture-unlocked context.

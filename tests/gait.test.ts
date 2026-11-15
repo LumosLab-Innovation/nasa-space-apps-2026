@@ -120,6 +120,25 @@ describe('natural lunar gait (plan 7)', () => {
 });
 
 describe('feet on slopes (plan 7 final review)', () => {
+  it('retains capsule clearance during a brief loss of ground contact', () => {
+    let st = initGait();
+    for (let i = 0; i < 90; i++) st = step(st, { pos: { x: 0, y: .146, z: .03 * i }, speedMs: 1.8 }).st;
+    const before = st.pose.bob;
+    st = step(st, { pos: { x: 0, y: .146, z: 2.7 }, speedMs: 1.8, supported: false, vy: -.03 }).st;
+    expect(Math.abs(st.pose.bob - before)).toBeLessThan(.03);
+  });
+  it.each([30, 60, 120])('keeps pelvis continuous across walking contacts at %i fps with capsule clearance', (fps) => {
+    let st = initGait();
+    let previous = st.pose.bob, worstSpeed = 0;
+    for (let i = 0; i < fps * 8; i++) {
+      st = step(st, { pos: { x: 0, y: .146, z: 1.8 * i / fps }, speedMs: 1.8, dt: 1 / fps }).st;
+      if (i > fps) worstSpeed = Math.max(worstSpeed, Math.abs(st.pose.bob - previous) * fps);
+      previous = st.pose.bob;
+    }
+    // A relaxed walk must not teleport the hips by a capsule skin-width at toe-off.
+    expect(worstSpeed).toBeLessThan(.8);
+  });
+
   it('the rendered leg reaches the planted foot on a 17° slope (no floating boots)', () => {
     const k = Math.tan((17 * Math.PI) / 180);
     const slope = (_x: number, z: number) => k * z;
@@ -144,5 +163,14 @@ describe('feet on slopes (plan 7 final review)', () => {
       }
     }
     expect(worst).toBeLessThan(0.01);
+  });
+});
+
+import { STANDING_POSE } from '../src/player/gait';
+
+describe('STANDING_POSE', () => {
+  it('equals the idle pose of a fresh grounded, motionless gait', () => {
+    expect(STANDING_POSE).toEqual(initGait(0).pose);
+    expect(STANDING_POSE.bob).toBeCloseTo(-BODY.flexM, 9);
   });
 });

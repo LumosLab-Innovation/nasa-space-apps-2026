@@ -121,12 +121,12 @@ export function createDescentHud(ui: AdvancedDynamicTexture, dialogue: DialogueB
       panel.isVisible = gauge.isVisible = true;
       lateral.isVisible = prompt.isVisible = false;
       heading.title.text = tr('Orbit').toUpperCase();
-      heading.mode.text = r.guidance ? tr('Aligning for braking') : tr(r.assist ? 'Braking · Auto ×{warp}' : 'Braking ×{warp}', { warp: hudNumber(r.warp, r.warp % 1 ? 1 : 0) });
+      heading.mode.text = r.guidance ? tr('Aligning for braking') : r.assist ? tr('Braking · Auto ×{warp}', { warp: hudNumber(r.warp, r.warp % 1 ? 1 : 0) }) : tr('Manual · Attitude assist');
       first.update('Speed', hudNumber(r.v, 0), 'm/s');
       second.update('Altitude', hudNumber(r.h / 1000, 2), 'km');
       fuel.update(r.fuelKg / r.fuelMaxKg);
       thrust.update(r.throttle);
-      caption.text = tr('Target speed band');
+      caption.text = tr(r.assist ? 'Target speed band' : r.v > r.centre * (1 + r.band) ? 'Increase braking' : r.v < r.centre * (1 - r.band) ? 'Reduce braking' : 'Keep steady');
       keys.forEach((key, index) => { labels[index].text = tr(key); });
       band.update(gaugeX(1 - r.band), gaugeX(1 + r.band), '#3D836C', gaugeX(r.v / r.centre));
     },
@@ -134,7 +134,7 @@ export function createDescentHud(ui: AdvancedDynamicTexture, dialogue: DialogueB
       panel.isVisible = lateral.isVisible = prompt.isVisible = true;
       gauge.isVisible = false;
       heading.title.text = tr('Landing').toUpperCase();
-      heading.mode.text = tr(r.guidance ? 'Landing guidance' : r.autopilot ? 'Autopilot' : 'Manual flight');
+      heading.mode.text = tr(r.guidance ? 'Landing guidance' : r.autopilot ? 'Autopilot' : 'Manual · Light assist');
       prompt.isVisible = !r.guidance;
       first.update('Altitude', hudNumber(r.h, 1), 'm');
       second.update('Descent rate', hudNumber(-r.vy, 1), 'm/s');

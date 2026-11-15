@@ -14,7 +14,7 @@ import shipUrl from '../assets/loading-ship.png?no-inline';
 import type { Music } from '../audio/musicEngine';
 import { tr } from '../i18n/i18n';
 import { MenuKeys, menuButton, menuColors, menuLabel, menuRule } from './menuControls';
-import { createMenuWordmark, loadWordmarkFont } from './menuWordmark';
+import { createMenuLogo } from './menuWordmark';
 import { ORBIT_ART_SIZE } from './orbitArt';
 
 // Placement of the separately rendered ship layer in the shared orbit frame.
@@ -25,7 +25,6 @@ export type LoadingProgress = (percent: number, message: string) => void;
 export async function withLoadingScreen<T>(
   engine: Engine, music: Music, initial: string, load: (report: LoadingProgress) => Promise<T>,
 ): Promise<T | null> {
-  const wordmark = createMenuWordmark(await loadWordmarkFont());
   const scene = new Scene(engine);
   scene.clearColor = Color4.FromHexString('#060D1DFF');
   scene.activeCamera = new FreeCamera('loadingCamera', Vector3.Zero(), scene);
@@ -41,11 +40,9 @@ export async function withLoadingScreen<T>(
   const shade = menuRule(menuColors.space);
   ui.addControl(shade);
 
-  for (const line of [wordmark.mission, wordmark.title]) {
-    line.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
-    line.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    ui.addControl(line);
-  }
+  const logo = createMenuLogo('loadingLogo');
+  logo.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+  ui.addControl(logo);
 
   const footer = new Container('loadingFooter');
   footer.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
@@ -112,11 +109,10 @@ export async function withLoadingScreen<T>(
     shade.backgroundGradient = fade;
 
     const availableWidth = Math.max(1, size.width - 48);
-    const maxTitleSize = Math.min(76, Math.max(30, Math.round(size.height * 0.09)));
-    const { missionHeight, titleHeight } = wordmark.fit(ui.getContext(), availableWidth, maxTitleSize);
-    const top = Math.min(64, Math.max(12, Math.round(size.height * 0.064)));
-    place(wordmark.mission, top, missionHeight);
-    place(wordmark.title, top + missionHeight + 4, titleHeight);
+    const logoSize = Math.min(availableWidth, 248, Math.round(size.height * 0.38));
+    const logoTop = Math.min(32, Math.round(size.height * 0.03));
+    logo.width = logoSize + 'px';
+    place(logo, logoTop, logoSize);
 
     const bottom = Math.min(60, Math.max(14, Math.round(size.height * 0.055)));
     footer.width = Math.min(560, availableWidth) + 'px';

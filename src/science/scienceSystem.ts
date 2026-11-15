@@ -127,7 +127,16 @@ export class ScienceSystem {
       if (here.id === 'experiment') void this.runExperiment();
       else if (here.id === 'shadow') void this.shadowQuiz();
       else if (here.id === 'antenna') void this.deployAntenna();
-      else if (here.id.startsWith('sample:')) this.collect(here.id.slice(7) as SampleId);
+      else if (here.id.startsWith('sample:')) {
+        const id = here.id.slice(7) as SampleId, rock = this.rocks.get(id)!;
+        if (!player.beginInteraction({
+          kind: 'sample', id, target: rock.position,
+          valid: () => !rock.isDisposed() && !this.state.samples.has(id),
+          onAcquire: () => rock.setEnabled(false),
+          onCancel: () => { if (!rock.isDisposed() && !this.state.samples.has(id)) rock.setEnabled(true); },
+          onCommit: () => this.collect(id),
+        })) return tr('Move closer and stand still to reach the sample');
+      }
     }
     return here.prompt;
   }

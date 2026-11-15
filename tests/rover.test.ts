@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { deployPoint } from '../src/rover/roverSystem';
+import { resetLanderSite, setLanderSite } from '../src/world/landerSite';
 import { createState } from '../src/core/gameState';
 import { ROVER, ROVER_PARK, canBoard, canLeave, initRover, roverStep, type RoverGround, type RoverState } from '../src/rover/rover';
 import { restoreSteps } from '../src/save/save';
-import { zone } from '../src/world/zones';
+import { HLS_POS, zone } from '../src/world/zones';
 
 const flat: RoverGround = { height: () => 0, slopeDeg: () => 0, forbidden: () => false };
 const drive = (s: RoverState, input: { throttle: number; steer: number }, seconds: number, ground = flat, dt = 1 / 60) => {
@@ -103,5 +105,12 @@ describe('rover and busy moments (plan 7 final review)', () => {
     }
     expect(pipBusyFor(calm)).toBe(false);
     for (const k of ['pipCarrying', 'pipSleeping', 'towing', 'winchHoldsPip'] as const) expect(pipBusyFor({ ...calm, [k]: true }), k).toBe(true);
+  });
+});
+describe('rover deploy site', () => {
+  afterEach(() => resetLanderSite());
+  it('deploy point follows the landed ship', () => {
+    setLanderSite({ x: HLS_POS.x + 25, z: HLS_POS.z - 12 });
+    expect(deployPoint()).toEqual({ x: HLS_POS.x + 35, z: HLS_POS.z - 8 });
   });
 });
