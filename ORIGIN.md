@@ -19,3 +19,7 @@ Anthropic Claude and OpenAI Codex assisted development. Third-party source notic
 ## Gameplay integration — 15 November 2026
 
 The AxEMU/gameplay update is transferred from development commit `23f6dcb` on `codex/axemu-character-rig`, using development base `8176fa6`. The integration branch is based on the organization release, retaining its source provenance, deployment configuration, submission materials and gameplay QA fixes. Dialogue queue deduplication is preserved alongside interruption for flight retries; a regression test covers replaying the same dialogue after interruption. This transfer does not merge the separate `claude/axemu-realistic-body` branch or ongoing uncommitted development edits.
+
+## Gameplay integration — 15 November 2026 (update)
+
+Development commits `f209dec`..`9dd4a5f` on `codex/axemu-character-rig` (after `23f6dcb`) are transferred on top of the organization release by re-applying their changes, not by merging the unrelated development history: rover lowered at landing and Pip kept hidden after touchdown, the Science Notebook photo album, ignoring local QA artifacts, and module installation reachable by holding E anywhere the prompt shows (including while walking). The elevator-disembark sequence code is included but not wired into the game.
