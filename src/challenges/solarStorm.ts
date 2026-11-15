@@ -9,7 +9,8 @@ import type { RescueKind } from '../survival/survivalSystem';
 import type { DialogueBox } from '../ui/dialogueBox';
 import type { Hud } from '../ui/hud';
 import type { Sky } from '../world/sky';
-import { HLS_POS, SHELTER_POS } from '../world/zones';
+import { SHELTER_POS } from '../world/zones';
+import { landerSite } from '../world/landerSite';
 import { tr } from '../i18n/i18n';
 
 /**
@@ -54,12 +55,13 @@ export function stormStep(
 }
 
 export function isSheltered(p: { x: number; z: number; y?: number }, groundY = 0): boolean {
+  const lander = landerSite();
   const radius = Math.hypot(p.x - SHELTER_POS.x, p.z - SHELTER_POS.z);
   const ceiling = groundY - 0.1 + DOME_HEIGHT_M * Math.sqrt(Math.max(0, 1 - radius ** 2 / 9));
   const head = (p.y ?? groundY + 1.2) + 1;
   return (
     (radius <= SHELTER_RADIUS_M && head <= ceiling && (p.y ?? groundY) >= groundY - 0.3) ||
-    Math.hypot(p.x - HLS_POS.x, p.z - HLS_POS.z) <= LANDER_RADIUS_M
+    Math.hypot(p.x - lander.x, p.z - lander.z) <= LANDER_RADIUS_M
   );
 }
 

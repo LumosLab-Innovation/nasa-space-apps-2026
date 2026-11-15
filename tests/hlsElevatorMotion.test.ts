@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { elevatorPose, advanceElevator, ELEVATOR_DURATION,stepElevatorMotion,guardPose } from '../src/demo/hlsElevatorMotion';
+import { elevatorPose, advanceElevator, ELEVATOR_DURATION,stepElevatorMotion,guardPose,frontGuardOpen } from '../src/demo/hlsElevatorMotion';
+
+describe('front gate', () => {
+ it('is closed at gate 0 and stowed at gate 1',()=>{
+  expect(frontGuardOpen(1,0)).toBe(guardPose(1).front);
+  expect(frontGuardOpen(1,1)).toBe(0);
+ });
+ it('opens monotonically',()=>{
+  let prev=Infinity;
+  for(let i=0;i<=50;i++){const v=frontGuardOpen(1,i/50);expect(v).toBeLessThanOrEqual(prev);prev=v;}
+ });
+});
 
 describe('folding elevator sequence', () => {
  it('reverses velocity gradually and comes to rest at both endpoints',()=>{

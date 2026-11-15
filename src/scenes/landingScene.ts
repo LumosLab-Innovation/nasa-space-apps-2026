@@ -1,3 +1,6 @@
+import { FailureCameraShake } from '../landing/failureCameraShake';
+import { reducedCameraMotion } from '../core/accessibility';
+import { TargetCamera } from '@babylonjs/core';
 import {
   Matrix, Color3, Color4, Constants, RawCubeTexture, DirectionalLight, FreeCamera, HemisphericLight, MeshBuilder, PBRMaterial, PointsCloudSystem, Quaternion, Scene,
   StandardMaterial, TransformNode, Vector3, ShadowGenerator, type Engine, type Mesh,
@@ -39,7 +42,10 @@ import { LAND } from '../landing/descent';
 import type { SurfaceWorld } from './surfaceScene';
 import { HLS_POS, PLAYER_SPAWN } from '../world/zones';
 import { followCamera, seedFlightFromBase, settleFlightRotation, separationOffsetKm, type CameraFollow } from '../landing/coherentMotion';
-import { stepFlight } from '../landing/guidedFlight';
+import { stepFlight, flightReference, type FlightState } from '../landing/guidedFlight';
+import { BrakingFailureMonitor, FailureAttempt, type FlightFailureReason } from '../landing/assistedFlight';
+import { FlightExplosion } from '../fx/flightExplosion';
+import { createFlightFailureDialog } from '../ui/flightFailure';
 import { createLiveTransition } from '../landing/liveTransition';
 import { retireScene } from '../landing/retireScene';
 import { flightScale, flightWarp, smoother, flightNearPlaneKm } from '../landing/descentGeometry';
@@ -47,7 +53,6 @@ import { descentFraming, landingCamera } from '../landing/descentCamera';
 import { BURN_ENTRY_SECONDS, burnEntryBlend, blendBurnCamera } from '../landing/burnEntry';
 import {prepareExhaustAssets} from '../fx/exhaustAssets';
 import {SpacecraftExhaust} from '../fx/spacecraftExhaust';
-import {BrakingPlasma} from '../fx/brakingPlasma';
 import {orionAuxiliaries} from '../fx/exhaustNozzles';
 import {orionDeparturePower} from '../fx/exhaustState';
 
@@ -281,7 +286,6 @@ export async function prepareLandingIntro(
   for (const n of shipNodes) n.scaling.setAll(SHIP_SCALE);
   let hlsRig!: HlsRig;
   let exhaust!:SpacecraftExhaust,orionExhaust!:SpacecraftExhaust;
-  let brakingPlasma!:BrakingPlasma;
   let hlsNose = 0;
   const shipsReady = Promise.all([prepareExhaustAssets(scene,files),prepareModels(scene, files, ['hls', 'hlsFar', 'orion'])]).then(() => Promise.all([
     (async () => {
@@ -291,7 +295,6 @@ export async function prepareLandingIntro(
       hlsRig.setOffset(offset);
       hlsNose = hlsRig.dockingHeight + offset;
       exhaust=new SpacecraftExhaust(scene,hlsRig.exhaustMount,hlsRig.exhaustNozzles());
-      brakingPlasma=new BrakingPlasma(scene,hlsRig.exhaustMount);
     })(),
     swapInModel(scene, 'orion', orion, 0, () => false).then(()=>{orionExhaust=new SpacecraftExhaust(scene,orion,orionAuxiliaries(),undefined,false);}),
   ]));
@@ -318,16 +321,6 @@ export async function prepareLandingIntro(
   const script = { ...linesFor(getLang()) };
   const dialogue = createDialogueBox(ui, scene, new DialogueRunner(script, createState()), pipStub);
   const hud = createDescentHud(ui, dialogue);
-  const fictionNotice = menuLabel(tr('Cinematic glow — not a lunar atmosphere'), 14, '#FFD390');
-  fictionNotice.textWrapping = true;
-  fictionNotice.height = '42px';
-  fictionNotice.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
-  fictionNotice.isVisible = false;
-  ui.addControl(fictionNotice);
-  fitHud(ui, fictionNotice, width => {
-    fictionNotice.width = Math.min(340, width - 28) + 'px';
-    fictionNotice.top = width < 800 ? '280px' : '76px';
-  });
   // Pip's first radio call gets its motif.
   dialogue.onLine = (l) => {
     if (l.speaker === 'pip') opts.music?.motif('pip');
@@ -429,6 +422,8 @@ export async function prepareLandingIntro(
   let returnFadeT = 0;
   let wasLocal = false;
 
+  const explosion = new FlightExplosion(scene);
+  const bridgeExplosion = opts.destination ? new FlightExplosion(opts.destination.scene) : undefined;
   let live:Awaited<ReturnType<typeof createLiveTransition>>|undefined;
   let earth: Mesh;
   let heritage: Awaited<ReturnType<typeof createApolloHeritage>>;
@@ -448,7 +443,8 @@ export async function prepareLandingIntro(
     }
     await scene.whenReadyAsync();
     await hlsRig.warm();
-    await exhaust.warm();await orionExhaust.warm();await brakingPlasma.warm();
+    await exhaust.warm();await orionExhaust.warm();
+    await explosion.warm(); await bridgeExplosion?.warm();
     if(opts.destination){
       cam.position.copyFrom(frameAt(START_LON,ORBIT_H_KM,elevation).pos.add(new Vector3(9,2,-6)));cam.setTarget(frameAt(START_LON,ORBIT_H_KM,elevation).pos);
       live=await createLiveTransition(engine,scene,opts.destination.scene);live.warm();
@@ -480,13 +476,59 @@ export async function prepareLandingIntro(
     let separationDialogueDone=false;
     let previousPosition=new Vector3(),previousCamera=new Vector3(),previousTarget=new Vector3();
     let velocityReady=false,shipVelocity=new Vector3(),cameraVelocity=new Vector3(),targetVelocity=new Vector3();
+    const failure = new FailureAttempt();
+    const failureMonitor = new BrakingFailureMonitor();
+    let failureDrift = Vector3.Zero();
+    const failureShake = new FailureCameraShake(), bridgeFailureShake = new FailureCameraShake();
+    let checkpoint: { flight: FlightState; lon: number; datum: number; flightLon: number; orionLon: number | null;
+      camera: Vector3; target: Vector3; up: Vector3; shipPosition: Vector3; shipRotation: Quaternion; scale: number } | undefined;
     let finished = false;
     let skipRequested = false;
     const pauseMenu = createPauseMenu(ui, scene, {
       enabled:()=>!finished, music: opts.music ?? null, phase: () => 'orbit', hasSave: () => !!loadSave(safeStorage()),
-      onSkip: () => { skipRequested = true; }, onMainMenu: opts.onMainMenu,
+      onSkip: () => { if (!failure.active) skipRequested = true; }, onMainMenu: opts.onMainMenu,
       onChange: () => keyboard.reset(),
     });
+    const failureDialog = createFlightFailureDialog(ui, scene, automatic => {
+      if (!failure.choose() || !checkpoint) return;
+      const c = checkpoint;
+      keyboard.reset(); dialogue.interrupt?.();
+      failure.reset(); failureMonitor.reset(); failureDialog.hide();
+      explosion.reset(); bridgeExplosion?.reset(); failureShake.reset(); bridgeFailureShake.reset();
+      bridge = null; approach = null;
+      opts.destination?.descent?.resetPreparation();
+      d.restart(automatic, c.flight);
+      lon = c.lon; flightDatum = c.datum; flightLon = c.flightLon; orionLon = c.orionLon;
+      lastStage = 'brake'; stageT = 0; alarmT = fadeOut = -1; warnCooldown = holdT = 0;
+      hls.setEnabled(true); hls.position.copyFrom(c.shipPosition);
+      hls.rotationQuaternion = c.shipRotation.clone(); hls.scaling.setAll(c.scale);
+      hlsRig.setTargets(0, 0, true); exhaust.reset(); orionExhaust.reset();
+      camPos.copyFrom(c.camera); camTgt.copyFrom(c.target); cam.position.copyFrom(c.camera); cam.upVector.copyFrom(c.up); cam.setTarget(c.target);
+      camInit = true; followPosition = followTarget = undefined; lastWantPos = lastWantTarget = undefined;
+      velocityReady = false; cameraVelocity.setAll(0); targetVelocity.setAll(0); shipVelocity.setAll(0);
+      burnEntry = { elapsed: 0, cameraVelocity: Vector3.Zero(), targetVelocity: Vector3.Zero(), camera: c.camera.clone(), target: c.target.clone(), shipRotation: c.shipRotation.clone(), shipScale: c.scale };
+      hud.alarm(null);
+      void dialogue.play(automatic ? 'landing_brake_assist' : 'landing_burn');
+    }, () => pauseMenu.open());
+    const failFlight = (reason: FlightFailureReason) => {
+      if (!failure.fail(reason)) return;
+      keyboard.reset(); dialogue.interrupt?.(); hud.alarm(null);
+      exhaust.reset(); exhaust.update(0, 0, false); orionExhaust.reset(); orionExhaust.update(0, 0, false, false, 0);
+      const center = Vector3.TransformCoordinates(new Vector3(0, 0, 0), hls.computeWorldMatrix(true));
+      failureDrift = shipVelocity.scale(.001);
+      failureShake.start(cam, failureDrift, reducedCameraMotion());
+      explosion.start(center, 18 * hls.scaling.x, failureDrift);
+      hls.setEnabled(false);
+      if (bridge?.last && opts.destination && bridgeExplosion) {
+        const position = Vector3.FromArray(bridge.last.position).add(new Vector3(0, 25, 0));
+        bridgeExplosion.start(position, 16);
+        const bridgeCamera = opts.destination.scene.activeCamera;
+        if (bridgeCamera instanceof TargetCamera) bridgeFailureShake.start(bridgeCamera, Vector3.Zero(), reducedCameraMotion());
+        opts.destination.descent?.clearExhaust();
+        opts.destination.hlsRig.parent.setEnabled(false);
+      }
+      opts.music?.explosionImpact?.();
+    };
     const finish = (r: IntroResult) => {
       if (finished) return;
       finished = true;
@@ -494,6 +536,7 @@ export async function prepareLandingIntro(
       pauseMenu.close();
       keyboard.dispose();
       hud.dispose();
+      failureDialog.dispose(); explosion.dispose(); bridgeExplosion?.dispose();
       dialogue.cancel();ui.dispose();
       retireScene(scene,()=>live?.dispose());
       if (import.meta.env.DEV) delete (window as unknown as { __intro?: unknown }).__intro;
@@ -509,6 +552,13 @@ export async function prepareLandingIntro(
         opts.music?.update(dt);
         if(bridge&&live)live.render(bridge.blend,ui.layer);else scene.render();
         return;
+      }
+      if (failure.active) {
+        failure.update(dt); explosion.update(dt); bridgeExplosion?.update(dt);
+        failureShake.update(dt); bridgeFailureShake.update(dt);
+        if (failure.canChoose && !failureDialog.visible) { keyboard.reset(); failureDialog.show(failure.reason!); }
+        if (bridge && live) live.render(bridge.blend, ui.layer); else scene.render();
+        keyboard.endFrame(); opts.music?.update(dt); return;
       }
       const music = opts.music;
       if (music && keyboard.consume('KeyB')) toggleMusic(music);
@@ -571,6 +621,9 @@ export async function prepareLandingIntro(
           const seed=seedFlightFromBase(previousPosition,shipVelocity,flightDatum);
           flightLon=seed.longitude;lon=flightLon;undockOff=0;d.flight=seed.flight;
           d.brake.h=d.flight.y;
+          checkpoint = { flight: { ...d.flight }, lon, datum: flightDatum, flightLon, orionLon,
+            camera: camPos.clone(), target: camTgt.clone(), up: cam.upVector.clone(), shipPosition: hls.position.clone(), shipRotation: hls.rotationQuaternion!.clone(), scale: hls.scaling.x };
+          failureMonitor.reset();
         }
         lastStage = d.stage;
         stageT = 0;
@@ -607,7 +660,7 @@ export async function prepareLandingIntro(
 
       if (burnEntry) burnEntry.elapsed = Math.min(BURN_ENTRY_SECONDS, burnEntry.elapsed + dt);
       const aligningBurn = !!burnEntry && burnEntry.elapsed < BURN_ENTRY_SECONDS;
-      const warp=flightWarp(Math.max(0,stageT-BURN_ENTRY_SECONDS),d.brake.h);
+      const warp=flightWarp(Math.max(0,stageT-BURN_ENTRY_SECONDS),d.brake.h,d.assist);
       if (d.stage === 'brake') {
         const radius=MOON_R_KM*1000;
         d.ground=renderedSurfaceRadius(0,lon,elevation)*1000-flightDatum;
@@ -617,6 +670,8 @@ export async function prepareLandingIntro(
         d.brake.h=d.flight.y-d.ground;
         // The controller sampled the old ground before advancing; only finish on the new terrain.
         if(d.brake.h>300)d.stage='brake';
+        const failureReason = failureMonitor.update(dt, d.brake.h, d.flight.vx, flightReference(d.brake.h).vx, d.flight.vy);
+        if (failureReason) { failFlight(failureReason); if (bridge && live) live.render(bridge.blend, ui.layer); else scene.render(); keyboard.endFrame(); return; }
         warnCooldown -= dt;
         for (const e of ev) {
           if (e === 'alarm') {
@@ -632,13 +687,13 @@ export async function prepareLandingIntro(
         const b = d.band;
         hud.showBrake({
           v: d.brake.v, h: d.brake.h, fuelKg: d.brake.fuelKg, fuelMaxKg: HLS.fuelKg, throttle: d.throttle,
-          centre: (b.lo + b.hi) / 2, band: 0.12, warp, assist: d.assist,
+          centre: (b.lo + b.hi) / 2, band: (b.hi-b.lo)/(b.hi+b.lo), warp, assist: d.assist,
         });
       }
       if (aligningBurn) {
         const b=d.band;
         hud.showBrake({v:d.brake.v,h:d.brake.h,fuelKg:d.brake.fuelKg,fuelMaxKg:HLS.fuelKg,
-          throttle:d.throttle,centre:(b.lo+b.hi)/2,band:.12,warp,assist:d.assist,guidance:true});
+          throttle:d.throttle,centre:(b.lo+b.hi)/2,band:(b.hi-b.lo)/(b.hi+b.lo),warp,assist:d.assist,guidance:true});
       }
       if (alarmT >= 0) {
         alarmT += dt;
@@ -753,10 +808,6 @@ export async function prepareLandingIntro(
         cam.minZ=flightNearPlaneKm(hullGap,renderedTerrainClearance(cam.position,elevation));
       };
       if(isFlight)updateFlightDepth();
-      brakingPlasma.update(dt,isFlight,d.brake.h,d.throttle);
-      fictionNotice.isVisible = brakingPlasma.diagnostics.power > 0.01;
-      fictionNotice.text = tr('Cinematic glow — not a lunar atmosphere');
-      if(import.meta.env.DEV)Object.assign(scene.metadata??(scene.metadata={}),{brakingPlasma:brakingPlasma.diagnostics});
       apolloMarker.update(openingTime === openingEndsAt && (d.stage === 'm1' || d.stage === 'tranquility'),localView,1-heritageAlpha);
 
       const root=Vector3.TransformCoordinates(new Vector3(0,-hlsRig.dockingHeight/2,0),hls.computeWorldMatrix(true)).scale(1000),cp=cam.position.scale(1000),ct=camTgt.scale(1000);
@@ -769,7 +820,7 @@ export async function prepareLandingIntro(
         const x=forward.scale(Math.cos(yaw)).add(right.scale(Math.sin(yaw))),z=forward.scale(-Math.sin(yaw)).add(right.scale(Math.cos(yaw)));
         const matrix=Matrix.FromValues(x.x,x.y,x.z,0,up.x,up.y,up.z,0,z.x,z.y,z.z,0,0,0,0,1),basis=Quaternion.FromRotationMatrix(matrix);
         let predicted={...d.flight,y:d.brake.h},elapsed=0;
-        while(predicted.y>300&&elapsed<8){predicted=stepFlight(predicted,{assist:d.assist,throttle:d.throttle},1/60);elapsed+=1/60;}
+        while(predicted.y>300&&elapsed<8){predicted=stepFlight(predicted,{assist:d.assist,lightAssist:true,throttle:keyboard.isHeld('Space')?1:0},1/60);elapsed+=1/60;}
         const endPoint=root.scale(.001).add(forward.scale((predicted.x-d.flight.x)/1000));const coord=lunarCoordinates(endPoint);
         const origin=surface(coord.lat,coord.lon,renderedSurfaceRadius(coord.lat,coord.lon,elevation)-MOON_R_KM);
         const local=(p:Vector3)=>{const delta=p.scale(.001).subtract(origin).scale(1000);return landing.add(new Vector3(Vector3.Dot(delta,x),Vector3.Dot(delta,up),Vector3.Dot(delta,z)));};
@@ -800,7 +851,7 @@ export async function prepareLandingIntro(
         hud.alarm(null);hud.showLand({...presentation,tiltDeg:-d.flight.pitch*180/Math.PI,fuelKg:LAND.fuelKg,fuelMaxKg:LAND.fuelKg,autopilot:d.assist,guidance:true});
         opts.destination?.descent?.present(presentation);
         if(live)live.render(bridge.blend,ui.layer);else scene.render();
-        if(d.brake.h<=300){opts.onBridge!({startHeight:d.brake.h,startSpeed:d.flight.vx,throttle:d.throttle,cameraPosition:presentation.camera,cameraTarget:presentation.target,cameraUp:[0,1,0],fov:cam.fov,rig:presentation.rig,held:keyboard.heldCodes(),presentation});return finish('done');}
+        if(d.brake.h<=300){opts.onBridge!({assist:d.assist,startHeight:d.brake.h,startSpeed:d.flight.vx,throttle:d.throttle,cameraPosition:presentation.camera,cameraTarget:presentation.target,cameraUp:[0,1,0],fov:cam.fov,rig:presentation.rig,held:keyboard.heldCodes(),presentation});return finish('done');}
         hlsRig.update(dt);keyboard.endFrame();return;
       }
       // Fades.

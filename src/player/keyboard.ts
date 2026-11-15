@@ -36,8 +36,8 @@ export class Keyboard {
     if (enabled) for (const code of held) this.held.add(code);
   }
 
-  reset(): void {
-    this.held.clear();
+  reset(preserveHeld: readonly string[] = []): void {
+    this.held = new Set(preserveHeld.filter((code) => this.held.has(code)));
     this.pressedOnce.clear();
   }
 

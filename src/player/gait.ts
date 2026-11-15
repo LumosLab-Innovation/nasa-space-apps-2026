@@ -104,7 +104,7 @@ export const MAX_TURN_RAD_S = 6;
 /** Landing crouch = min(max, perMs · |fall speed|), recovered in about 0.4 s. */
 export const LAND_CROUCH = { perMs: 0.12, max: 0.35 } as const;
 /** astronaut.glb measurements (tools/blender/build_astronaut.py): hip pivot height, leg bones, ankle height. */
-export const BODY = { hipY: 0.92, hipX: 0.11, thighM: 0.41, shinM: 0.4, ankleM: 0.12, flexM: 0.04, crouchDropM: 0.4 } as const;
+export const BODY = { hipY: 0.94, hipX: 0.13, thighM: 0.41, shinM: 0.4, ankleM: 0.13, flexM: 0.04, crouchDropM: 0.4 } as const;
 
 /**
  * Walk 1.8 m/s: a "đi nhún" with a short float between steps (the stance covers only ~0.5 m of each 0.7 m
@@ -133,6 +133,8 @@ export interface GaitState {
   liftL: number;
   liftR: number;
   airVy: number;
+  /** Capsule-to-ground render offset, retained in flight to avoid a contact-state pop. */
+  groundOffset: number;
   crouchPeak: number;
   landT: number;
   /** 0 → 1 over a quarter second after a gait change (blends the legs, then they follow IK exactly). */
@@ -153,11 +155,14 @@ export interface GaitInput {
   dt: number;
 }
 
+/** Grounded, motionless pose (also used while riding the lander elevator standing up). */
+export const STANDING_POSE: Pose = { ...ZERO, bob: -BODY.flexM };
+
 export function initGait(yaw = 0): GaitState {
   return {
     phase: 0, footL: null, footR: null, crouch: 0, lean: 0, yaw, roll: 0, t: 0, mode: 'idle',
-    stanceL: false, stanceR: false, liftL: 0, liftR: 0, airVy: 0, crouchPeak: 0, landT: Infinity, settle: 1,
-    pose: { ...ZERO, bob: -BODY.flexM },
+    stanceL: false, stanceR: false, liftL: 0, liftR: 0, airVy: 0, groundOffset: 0, crouchPeak: 0, landT: Infinity, settle: 1,
+    pose: { ...STANDING_POSE },
   };
 }
 
@@ -209,6 +214,11 @@ export function stepGait(prev: GaitState, inp: GaitInput): { st: GaitState; pose
 
   // Pelvis: suit flex, landing crouch, stance compression, then a ballistic float between contacts.
   let bob = -BODY.flexM - st.crouch * BODY.crouchDropM;
+  // Havok's supported capsule includes a contact clearance above the terrain.
+  // Compensate it throughout the stride, not only while a foot is planted:
+  // otherwise releasing the last support snaps the pelvis back up by ~15 cm.
+  if (inp.supported) st.groundOffset = clamp(inp.groundAt(inp.pos.x, inp.pos.z) - inp.pos.y, -.3, .3);
+  bob += st.groundOffset;
   if (moving) {
     const q = frac(st.phase * g.steps);
     const dutyQ = g.duty * g.steps;
@@ -276,14 +286,16 @@ export function stepGait(prev: GaitState, inp: GaitInput): { st: GaitState; pose
   };
   const footL = leg('L');
   const footR = leg('R');
-  // Pelvis adjustment: on slopes a planted foot downhill can be out of the leg's reach; sink the hips just
-  // enough that every planted foot is reached (else the boot would hang in the air).
+  // Keep a continuous support envelope through toe-off and heel-strike. The
+  // swing foot contributes its terrain projection, not its animated lift, so
+  // the hips cannot jump when a binary stance flag changes on a slope.
   const reach = (BODY.thighM + BODY.shinM) * 0.995;
   let drop = 0;
   for (const ft of [footL, footR]) {
-    if (!ft || !ft.stance) continue;
+    if (!ft || (mode === 'lope' && !ft.stance)) continue;
     const f = Math.min(Math.abs(ft.fwd), reach * 0.98);
-    const maxHipY = ft.foot.y + Math.sqrt(reach * reach - f * f);
+    const supportY = inp.groundAt(ft.foot.x, ft.foot.z) + BODY.ankleM;
+    const maxHipY = supportY + Math.sqrt(reach * reach - f * f);
     drop = Math.max(drop, hipY - maxHipY);
   }
   drop = Math.min(drop, 0.3);
@@ -318,8 +330,8 @@ export function stepGait(prev: GaitState, inp: GaitInput): { st: GaitState; pose
   }
   if (mode === 'walk') {
     // A stiff suit: small arm swing, opposite to the leg on the same side.
-    target.shoulderL = 0.1 - 0.5 * (L?.fwd ?? 0);
-    target.shoulderR = 0.1 - 0.5 * (R?.fwd ?? 0);
+    target.shoulderL = 0.1 - 0.7 * (L?.fwd ?? 0);
+    target.shoulderR = 0.1 - 0.7 * (R?.fwd ?? 0);
     target.elbowL = target.elbowR = 0.4;
   } else if (mode === 'lope') {
     const s = Math.sin(st.phase * Math.PI * 2);

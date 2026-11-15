@@ -3,7 +3,7 @@
 Except for the NASA Apollo asset below, models in this folder are built from scratch by `tools/blender/build_*.py`.
 The real-world references used for shapes and details are listed here.
 
-## astronaut.glb: Axiom AxEMU suit (Artemis III), flight configuration
+## astronaut.glb: AxEMU-inspired game reconstruction (not flight CAD)
 
 - NASA, "Spacesuit for NASA's Artemis III Moon Surface Mission Debuts" (15 March 2023):
   https://www.nasa.gov/humans-in-space/spacesuit-for-nasas-artemis-iii-moon-surface-mission-debuts/
@@ -16,9 +16,18 @@ The real-world references used for shapes and details are listed here.
 - images.nasa.gov, AxEMU mock-up photos (search "AxEMU"): https://images.nasa.gov/search?q=AxEMU
 - Checked: 2026-11-09.
 
-Simplified or invented for the game: red ID stripes, patch layout, the chest control module's buttons, the
-glove and boot shapes, and the rigid segments with metal bearings and bellows over the joints (the real suit
-is soft goods with bearings).
+Revision 2026-11-14: original skinned adult-proportioned mesh made by `tools/blender/build_axemu.py`.
+Additional public references: [Axiom's suit overview](https://www.axiomspace.com/axiom-suit) and
+[NASA AxEMU testing photographs](https://www.nasa.gov/image-article/axiom-space-tests-lunar-spacesuit-at-nasas-johnson-space-center/).
+The woven colour/normal maps and motion clips are generated locally; no external texture or motion license is needed.
+White outer cover, helmet/visor, bearings and PLSS follow the public visual references. Red stripes,
+connector controls, sampler, pouch, finger/boot shapes and 1.90 m suited height are illustrative game choices.
+This is not a confirmed Artemis IV suit configuration. Soft sleeves/trousers use blended skin weights;
+helmet, PLSS and bearings are rigid bone attachments. Four in-place authored clips accompany terrain-aware gait/IK.
+
+Joint refinement 2026-11-14: one voxel-welded and decimated coverall with relaxed skin weights at shoulders/hips; softened shoulder profile, larger visor assembly, rounded utility pouch, baked equipment bevels, waist connectors and stitched reinforcement panels. Garment details also reference [Axiom's AxEMU overview](https://assets.axiom.space/asset/d2bb9cbf-c76a-4b2d-893c-208cc986e019/Axiom-Space-AxEMU-Overview.pdf). Panel artwork/UVs are original and embedded. Identification bands now belong to `Suit_Coverall`, replacing the separate `Suit_Stripe` geometry/material.
+
+Arm-clearance correction: torso profile and slightly splayed arm bind pose leave open armpits and separate the wrists from the hips before voxel welding. Only the shoulder joins each sleeve to the torso. Elbow/wrist joints, glove hardware and tool sockets follow the revised bind positions; cross-section regression tests cover the wrist-to-armpit region in the exported GLB.
 
 ## hls.glb: SpaceX Starship Human Landing System (Artemis III/IV)
 

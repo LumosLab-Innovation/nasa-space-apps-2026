@@ -103,14 +103,22 @@ export function createDarkCrater(
         return pip.lampOn ? tr('Wait for Pip: you need its light to see the ice') : tr('Q — "Pip, light!"');
       }
       if (keyboard.consume('KeyE')) {
-        addSample(state, 'iceRegolith');
-        setFlag(state, 'act4:ice');
-        ice.setEnabled(false);
-        beacon.isVisible = false;
-        pip.setFace('excited');
-        void dialogue.play(iceLines('found', state.flags.has('act4:micaAwake')));
-        if (unlockCard(state, 'lcrossIce')) hud.toast(tr('New discovery in your Science Notebook (Tab)'), 3);
-        return null;
+        const started = player.beginInteraction({
+          kind: 'sample', id: 'iceRegolith', target: ice.position,
+          valid: () => !state.samples.has('iceRegolith') && iceCollectable(pip.lampOn, Math.hypot(pip.position.x - ICE_SPOT.x, pip.position.z - ICE_SPOT.z), Math.hypot(player.position.x - ICE_SPOT.x, player.position.z - ICE_SPOT.z)),
+          onAcquire: () => ice.setEnabled(false),
+          onCancel: () => { if (!ice.isDisposed() && !state.samples.has('iceRegolith')) ice.setEnabled(true); },
+          onCommit: () => {
+            if (!addSample(state, 'iceRegolith')) return;
+            setFlag(state, 'act4:ice');
+            ice.setEnabled(false);
+            beacon.isVisible = false;
+            pip.setFace('excited');
+            void dialogue.play(iceLines('found', state.flags.has('act4:micaAwake')));
+            if (unlockCard(state, 'lcrossIce')) hud.toast(tr('New discovery in your Science Notebook (Tab)'), 3);
+          },
+        });
+        return started ? null : tr('Move closer and stand still to reach the sample');
       }
       return tr('E — sample the icy regolith');
     },

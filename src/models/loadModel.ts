@@ -1,9 +1,11 @@
-import { LoadAssetContainerAsync, type AbstractMesh, type AssetContainer, type Material, type Scene, type TransformNode } from '@babylonjs/core';
+import { LoadAssetContainerAsync, type AbstractMesh, type AssetContainer, type Material, type Scene, type TransformNode, type Skeleton, type AnimationGroup } from '@babylonjs/core';
 import { MODELS, glbPath, type ModelId } from './manifest';
 
 export interface LoadedModel {
   root: TransformNode;
   meshes: AbstractMesh[];
+  skeletons?: Skeleton[];
+  animationGroups?: AnimationGroup[];
   /** Finds a node inside THIS instance; throws if the GLB breaks the manifest contract. */
   node(name: string): TransformNode;
   material(name: string): Material | null;
@@ -20,9 +22,11 @@ export function missingNodes(id: ModelId, names: string[]): string[] {
 const sources = new WeakMap<Scene, ReadonlyMap<string, ArrayBuffer>>();
 const defaultImporter: Importer = (url, scene) => {
   const bytes = sources.get(scene)?.get(url);
+  // Cached source skeletons must stay in bind pose. FIRST (loader default) runs hidden source clips.
+  const pluginOptions = { gltf: { animationStartMode: 0 } } as const;
   return bytes
-    ? LoadAssetContainerAsync(new Uint8Array(bytes), scene, { pluginExtension: '.glb', name: url })
-    : LoadAssetContainerAsync(url, scene);
+    ? LoadAssetContainerAsync(new Uint8Array(bytes), scene, { pluginExtension: '.glb', name: url, pluginOptions })
+    : LoadAssetContainerAsync(url, scene, { pluginOptions });
 };
 /** Per scene: a container belongs to the scene it was loaded into (the intro and the surface are two scenes). */
 const caches = new WeakMap<Scene, Map<string, Promise<AssetContainer>>>();
@@ -59,6 +63,7 @@ export async function loadModel(scene: Scene, id: ModelId, importer: Importer = 
   try {
     const container = await (importer === defaultImporter ? modelContainer(scene, url) : importer(url, scene));
     const inst = container.instantiateModelsToScene((n) => n, true);
+    for (const group of inst.animationGroups ?? []) group.stop();
     const root = inst.rootNodes[0] as TransformNode;
     root.name = `${id}-model`;
     const meshes = root.getChildMeshes(false);
@@ -68,11 +73,15 @@ export async function loadModel(scene: Scene, id: ModelId, importer: Importer = 
     const miss = missingNodes(id, nodes.map((n) => n.name));
     if (miss.length) {
       root.dispose();
+      for (const group of inst.animationGroups ?? []) group.dispose();
+      for (const skeleton of inst.skeletons ?? []) skeleton.dispose();
       throw new Error(`breaks the manifest contract, missing nodes: ${miss.join(', ')}`);
     }
     return {
       root,
       meshes,
+      skeletons: inst.skeletons ?? [],
+      animationGroups: inst.animationGroups ?? [],
       node(name) {
         const n = nodes.find((x) => x.name === name);
         if (!n) throw new Error(`model ${id}: missing node ${name}`);

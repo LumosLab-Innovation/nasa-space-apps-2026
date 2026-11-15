@@ -86,7 +86,7 @@ export const LINES: Script = {
   stop_landing: [
     { speaker: 'pip', face: 'happy', text: 'Landing Zone! I swept it myself. With my arm. Arm did most of the work, to be fair.' },
     { speaker: 'pip', face: 'curious', text: 'Your lander is fifty meters tall. Its shadow is two kilometers long. The Sun is that low here.' },
-    { speaker: 'pip', face: 'excited', text: 'Oh! And you brought a flag. The orange ring by the lander is the spot. Press E there.' },
+    { speaker: 'pip', face: 'excited', text: 'Oh! And you brought a flag. Plant it at the target marker by the lander. Press E there.' },
   ],
   stop_base: [
     { speaker: 'pip', face: 'happy', text: 'Welcome to Shackleton Camp! Four empty pads, four crates out there. Teamwork time.' },

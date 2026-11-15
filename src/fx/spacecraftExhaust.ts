@@ -80,7 +80,12 @@ export class SpacecraftExhaust{
  present(s:ExhaustTransfer){this.mount.computeWorldMatrix(true);const matrix=this.mount.getWorldMatrix(),scale=new Vector3(),rotation=new Quaternion();matrix.decompose(scale,rotation);this.scale=Math.abs(scale.y);this.state.restore(s.state);this.state.previous=rotation;
   for(let i=0;i<this.particles.length;i++){const p=this.particles[i],k=i*10;if(k<s.particles.length){p.p.copyFrom(Vector3.TransformCoordinates(Vector3.FromArray(s.particles,k),matrix));p.v.copyFrom(Vector3.TransformNormal(Vector3.FromArray(s.particles,k+3),matrix));p.age=s.particles[k+6];p.life=s.particles[k+7];p.size=s.particles[k+8]*this.scale;p.alpha=s.particles[k+9];}else p.life=0;}
   this.last.copyFrom(matrix);this.hasLast=true;this.drawJets();this.drawParticles();this.drawGround();}
- reset(){this.state.reset();for(const p of this.particles)p.life=0;this.carry=0;this.hasLast=false;}
+ reset(){
+  if(this.disposed)return;
+  this.state.reset();for(const p of this.particles)p.life=0;this.carry=0;this.hasLast=false;
+  for(const j of this.jets){j.strength=0;j.mesh.isVisible=false;j.mat.setFloat('power',0);}
+  this.sps.mesh.isVisible=false;for(const fan of this.fans)fan.isVisible=false;
+ }
  async warm(){await withPreparationTarget(this.scene,async()=>{for(const j of this.jets){j.mesh.isVisible=true;j.mesh.scaling.setAll(1);j.mat.setFloat('power',.01);await j.mat.forceCompilationAsync(j.mesh);}this.sps.mesh.isVisible=true;for(const f of this.fans){f.isVisible=true;await this.fanMat.forceCompilationAsync(f);}this.scene.render();this.sps.mesh.isVisible=false;for(const j of this.jets){j.mesh.isVisible=false;j.mat.setFloat('power',0);}for(const f of this.fans)f.isVisible=false;});}
  get diagnostics(){return {time:this.state.time,power:this.state.power,pulse:this.state.pulse,demand:this.state.demand.asArray(),particles:this.particles.filter(p=>p.age<p.life).length,jets:this.jets.filter(j=>j.strength>.001).map(j=>({kind:j.n.kind,position:j.n.position.asArray(),power:j.strength})),contactTime:this.state.contactTime};}
  dispose(){if(this.disposed)return;this.disposed=true;for(const j of this.jets){j.mesh.dispose();j.mat.dispose();}this.sps.dispose();this.particlesMat.dispose();for(const f of this.fans)f.dispose();this.fanMat.dispose();}

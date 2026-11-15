@@ -16,6 +16,7 @@ export function bridgeSample(seconds: number, startHeight=500, startSpeed=100) {
   return {h,vy,vx,offset:offset===0?0:offset};
 }
 export interface DescentHandoff {
+  assist?: boolean;
   startHeight: number; startSpeed: number; throttle: number;
   cameraPosition: number[]; cameraTarget: number[]; cameraUp: number[]; fov: number;
   rig: ReturnType<HlsRig['snapshotMotion']>; held: string[];

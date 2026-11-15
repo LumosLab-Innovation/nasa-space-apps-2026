@@ -1,7 +1,8 @@
-import { AbstractMesh, Axis, Color3, Mesh, MeshBuilder, PBRMaterial, Quaternion, Scene, StandardMaterial, TransformNode } from '@babylonjs/core';
+import { AbstractMesh, Axis, Color3, Mesh, MeshBuilder, PBRMaterial, Quaternion, Scene, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core';
 import { gamePauseClock } from '../core/pause';
 import { sampleHeight, type Heightmap } from '../data/heightmap';
 import { loadModel, type LoadedModel } from '../models/loadModel';
+import type { Footprint } from '../player/footprintCollision';
 import { wheelSpin } from '../pip/pipRig';
 
 const SILVER = new Color3(0.72, 0.73, 0.75);
@@ -23,6 +24,7 @@ export class Mica {
   private readonly eyeMat: { emissiveColor: Color3 };
   private readonly wheels: TransformNode[] = [];
   private readonly hatch: TransformNode | null = null;
+  private readonly footprintCorners: Vector3[] = [];
   private dustLevel = 1;
   private roll = 0;
   private hatchAngle = 0;
@@ -54,6 +56,21 @@ export class Mica {
     this.root.position.set(pos.x, sampleHeight(hm, pos.x, pos.z), pos.z);
     // Stalled on the rim, tilted: it stopped where the ground gave out.
     this.root.rotation.set(0.06, -0.9, -0.08);
+    // Cache geometry in root-local space; towing only transforms these eight corners.
+    const inverse = this.root.computeWorldMatrix(true).clone().invert();
+    const min = new Vector3(Infinity, Infinity, Infinity);
+    const max = new Vector3(-Infinity, -Infinity, -Infinity);
+    for (const mesh of this.meshes) {
+      mesh.computeWorldMatrix(true);
+      for (const corner of mesh.getBoundingInfo().boundingBox.vectorsWorld) {
+        const local = Vector3.TransformCoordinates(corner, inverse);
+        min.minimizeInPlace(local);
+        max.maximizeInPlace(local);
+      }
+    }
+    for (const x of [min.x, max.x]) for (const y of [min.y, max.y]) for (const z of [min.z, max.z]) {
+      this.footprintCorners.push(new Vector3(x, y, z));
+    }
     this.dust = 1;
     scene.onBeforeRenderObservable.add(() => {
       if (gamePauseClock.isPaused || !this.hatch || Math.abs(this.hatchTarget - this.hatchAngle) < 1e-3) return;
@@ -92,6 +109,24 @@ export class Mica {
     add(MeshBuilder.CreateCylinder('micaMast', { diameter: 0.06, height: 0.55 }, scene), body).position.set(0, 1.03, 0.45);
     add(MeshBuilder.CreateSphere('micaEyeBall', { diameter: 0.2 }, scene), eye).position.set(0, 1.32, 0.5);
     return { body, cells, eye };
+  }
+
+  /** Ground projection includes solar panels, regardless of astronaut jump height. */
+  get footprint(): Footprint {
+    const matrix = this.root.computeWorldMatrix(true);
+    const yaw = Math.atan2(matrix.m[8], matrix.m[10]);
+    const c = Math.cos(yaw), s = Math.sin(yaw), origin = this.root.getAbsolutePosition();
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const corner of this.footprintCorners) {
+      const world = Vector3.TransformCoordinates(corner, matrix);
+      const dx = world.x - origin.x, dz = world.z - origin.z;
+      const x = dx * c - dz * s, z = dx * s + dz * c;
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
+    }
+    const x = (minX + maxX) / 2, z = (minZ + maxZ) / 2;
+    return { x: origin.x + x * c + z * s, z: origin.z - x * s + z * c, yaw,
+      halfX: (maxX - minX) / 2 + 0.05, halfZ: (maxZ - minZ) / 2 + 0.05 };
   }
 
   get dust(): number {

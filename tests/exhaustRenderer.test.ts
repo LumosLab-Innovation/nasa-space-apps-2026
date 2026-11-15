@@ -26,7 +26,8 @@ describe('exhaust scene lifecycle',()=>{
   const engine=new NullEngine(),scene=new Scene(engine);new FreeCamera('c',new Vector3(0,0,10),scene);
   const fx=new SpacecraftExhaust(scene,new TransformNode('mount',scene),[nozzle]);
   for(let i=0;i<20;i++)fx.update(1/60,.7,true);
-  const textures=[...scene.textures];fx.reset();fx.update(0,0,false);
+  const textures=[...scene.textures];fx.reset();
+  expect(scene.meshes.filter(m => m.name.startsWith('exhaust') && m.isVisible)).toHaveLength(0);
   expect(fx.diagnostics.particles).toBe(0);expect(fx.diagnostics.jets).toHaveLength(0);
   fx.dispose();fx.dispose();fx.update(.1,1,true);expect(scene.meshes.filter(m=>m.name.startsWith('exhaust'))).toHaveLength(0);
   expect(scene.textures).toEqual(textures);scene.dispose();engine.dispose();

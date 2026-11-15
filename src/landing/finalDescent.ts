@@ -13,17 +13,21 @@ import type { Hud } from '../ui/hud';
 import type { InputLock } from '../ui/inputLock';
 import { HLS_POS, PLAYER_SPAWN } from '../world/zones';
 import {
-  LAND, autopilot, failureLineId, fuelSecondsLeft, landStart, landStep, retryLand, suggestAutopilot, touchdown, type LandAttempt, type Touchdown,
+  LAND, autopilot, fuelSecondsLeft, landStart, landStep, retryLand, touchdown, type LandAttempt, type Touchdown,
 } from './descent';
 import { tr } from '../i18n/i18n';
 import { gamePauseClock } from '../core/pause';
 import type { HlsRig } from '../models/hlsRig';
 import { type FlightPresentation, type DescentHandoff } from './descentBridge';
 import { landingCamera } from './descentCamera';
+import { FailureCameraShake } from './failureCameraShake';
 import { LandingCameraShake } from './landingCameraShake';
 import { reducedCameraMotion } from '../core/accessibility';
 import { transferLandingState } from './coherentMotion';
 import {SpacecraftExhaust} from '../fx/spacecraftExhaust';
+import { FlightExplosion } from '../fx/flightExplosion';
+import { createFlightFailureDialog } from '../ui/flightFailure';
+import { assistedLandingInput, manualTouchdown, MANUAL_THROTTLE_RATE, FailureAttempt, type FlightFailureReason } from './assistedFlight';
 
 export { introMode } from './introMode';
 
@@ -45,7 +49,6 @@ export function plumeRate(h: number, throttle: number): number {
   return Math.round(66*Math.min(1,throttle)*near*near*(3-2*near)*densityBoost);
 }
 
-const THROTTLE_RATE = 2.5;
 const CARD_S = 4.5;
 
 export interface DescentWorld {
@@ -59,6 +62,8 @@ export interface DescentWorld {
   lock: InputLock;
   player: Astronaut;
   pip: Pip;
+  onPause?: () => void;
+  onExplosion?: () => void;
 }
 
 export interface FinalDescent {
@@ -69,11 +74,13 @@ export interface FinalDescent {
   readonly bridgeTime: number;
   present(pose: FlightPresentation): void;
   beginBridge(handoff: DescentHandoff): void;
+  resetPreparation(): void;
+  clearExhaust(): void;
   setPaused(paused: boolean): void;
   /** 'flying', 'contact' (ok, card showing), 'failed' (explaining, then retry) or 'done'. */
   readonly phase: 'flying' | 'contact' | 'failed' | 'done';
   readonly state: LandAttempt['state'];
-  update(dt: number, keyboard: { isHeld(code: string): boolean; consume(code: string): boolean }): void;
+  update(dt: number, keyboard: { isHeld(code: string): boolean; consume(code: string): boolean; reset?(): void }): void;
   skip(): void;
 }
 
@@ -99,10 +106,13 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
   let plumeAcc = 0;
   let active = true;
   const cameraShake = new LandingCameraShake();
+  const failureShake = new FailureCameraShake();
 
   const bridgeT = 5;
   let waiting = !!opts.prepared;
-  let failKind: Exclude<Touchdown, 'ok'> | null = null;
+  const failure = new FailureAttempt();
+  let resetInput: (() => void) | undefined;
+  let readyTime = 0;
 
   w.lock.push('landing');
   w.player.root.setEnabled(false);
@@ -116,6 +126,11 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
 
   const hud = createDescentHud(w.ui, w.dialogue);
   const exhaust=new SpacecraftExhaust(w.scene,opts.rig?.exhaustMount??hls,opts.rig?.exhaustNozzles()??[],(x,z)=>sampleHeight(w.hm,x,z));
+
+  const explosion = new FlightExplosion(w.scene);
+  const failureDialog = createFlightFailureDialog(w.ui, w.scene, automatic => {
+    if (failure.choose()) retry(automatic);
+  }, () => w.onPause?.());
 
   const card = new Rectangle('landingCard');
   card.width = card.height = 1;
@@ -137,10 +152,9 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
     const s = attempt.state;
     const pos = new Vector3(arrivalBase.x, groundY + s.h, arrivalBase.z).add(side.scale(offset));
     hls.position.copyFrom(pos);
-    // A tipped lander keeps falling over onto its side (Odysseus, 2024).
-    const fall = phase === 'failed' && failKind === 'tipped' ? Math.min(1, phaseT / 1.5) ** 2 * 70 * Math.sign(s.tiltDeg || 1) : 0;
+
     hls.rotation.x = phase === 'contact' ? groundTilt.x : 0;
-    hls.rotation.z = phase === 'contact' ? groundTilt.z : -((s.tiltDeg + fall) * Math.PI) / 180;
+    hls.rotation.z = phase === 'contact' ? groundTilt.z : -((s.tiltDeg) * Math.PI) / 180;
   };
 
   const finish = (withCard: boolean) => {
@@ -152,6 +166,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
     hls.rotation.copyFrom(groundTilt);
     opts.rig?.setTargets(1, 1, true);
     exhaust.dispose();
+    explosion.dispose(); failureDialog.dispose();
     hud.dispose();
     // The title card fades out over the first second of Act 1.
     const fadeObs = w.scene.onBeforeRenderObservable.add(() => {
@@ -178,29 +193,35 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
     }
   };
 
-  const fail = (k: Exclude<Touchdown, 'ok'>) => {
-    phase = 'failed';
-    phaseT = 0;
-    if (k === 'tipped' && unlockCard(w.state, 'story_odysseus')) w.hud.toast(tr('New discovery in your Science Notebook (Tab)'), 3);
-    failKind = k;
-    void w.dialogue.play(failureLineId(k, attempt.state));
+  const fail = (reason: FlightFailureReason) => {
+    if (!failure.fail(reason)) return;
+    phase = 'failed'; phaseT = 0;
+    failureShake.start(cam, Vector3.Zero(), reducedCameraMotion());
+    throttle = 0; exhaust.reset(); exhaust.update(0, 0, false); resetInput?.();
+    w.dialogue.interrupt?.(); hud.alarm(null);
+    explosion.start(hls.position.add(new Vector3(0, 25, 0)), 16, Vector3.Zero(), (x, z) => sampleHeight(w.hm, x, z));
+    hls.setEnabled(false);
+    w.onExplosion?.();
   };
-  const retry = () => {
-    exhaust.reset();
-    attempt = retryLand(attempt);
-    offset = 0;
-    arrivalBase.set(HLS_POS.x,groundY,HLS_POS.z);
+  const retry = (automatic: boolean) => {
+    resetInput?.(); failureDialog.hide(); failure.reset(); explosion.reset(); failureShake.reset();
+    w.dialogue.interrupt?.(); exhaust.reset();
+    attempt = retryLand(attempt); auto = automatic;
+    offset = 0; phaseT = 0; plumeAcc = 0; readyTime = .5;
+    arrivalBase.set(HLS_POS.x, groundY, HLS_POS.z);
     throttle = 0;
     phase = 'flying';
-    failKind = null;
-    cameraShake.reset();
-    if (suggestAutopilot(attempt) && !auto) void w.dialogue.play('land_suggest_auto');
+    hls.setEnabled(true); hls.rotationQuaternion = null; hls.scaling.setAll(1);
+    opts.rig?.setTargets(1, 0, true);
+    cameraShake.reset(); place();
+    hud.alarm(null);
+    void w.dialogue.play(auto ? 'land_start_auto' : 'land_start');
   };
 
   place();
   cam.target = hls.position.add(new Vector3(0, initialCamera.targetHeight, 0));
   return {
-    warmExhaust:()=>exhaust.warm(),
+    warmExhaust:async()=>{ await Promise.all([exhaust.warm(), explosion.warm()]); },
     get exhaustDiagnostics(){return exhaust.diagnostics;},
     get cinematic() { return waiting; },
     get bridgeTime() { return bridgeT; },
@@ -213,8 +234,21 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
       cam.setTarget(Vector3.FromArray(data.target));cam.setPosition(Vector3.FromArray(data.camera));
       throttle=data.throttle;if(data.exhaust)exhaust.present(data.exhaust);
     },
+    clearExhaust() { exhaust.reset(); exhaust.update(0, 0, false); },
+    resetPreparation() {
+      waiting = true; offset = phaseT = throttle = plumeAcc = 0;
+      failure.reset(); failureDialog.hide(); explosion.reset(); failureShake.reset(); exhaust.reset(); exhaust.update(0, 0, false);
+      attempt = { state: landStart(), attempts: 0 };
+      arrivalBase.set(HLS_POS.x, groundY, HLS_POS.z);
+      phase = 'flying'; hls.setEnabled(true); hls.rotationQuaternion = null; hls.scaling.setAll(1);
+      opts.rig?.setTargets(0, 0, true); place();
+      cam.upVector = Vector3.Up();
+      cam.target = hls.position.add(new Vector3(0, initialCamera.targetHeight, 0));
+      cam.alpha = yaw + Math.PI * .75; cam.beta = initialCamera.beta; cam.radius = initialCamera.radius;
+    },
     beginBridge(data) {
       this.present(data.presentation);
+      auto = data.assist ?? opts.assist;
       waiting=false;phaseT=0;offset=0;
       cameraShake.reset();
       const p=data.presentation;
@@ -237,6 +271,16 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
     },
     update(dt, keyboard) {
       if (!active || waiting) return;
+      if (gamePauseClock.isPaused) return;
+      resetInput = () => keyboard.reset?.();
+      if (phase === 'failed') {
+        failure.update(dt); explosion.update(dt); failureShake.update(dt);
+        if (failure.canChoose && !failureDialog.visible) {
+          resetInput(); failureDialog.show(failure.reason!);
+        }
+        return;
+      }
+      if (readyTime > 0) { readyTime -= dt; resetInput(); dt = 0; }
       phaseT += dt;
       const s = attempt.state;
       if (phase === 'flying') {
@@ -244,22 +288,25 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
         let input: { throttle: number; tiltInput: number };
         if (auto) {
           input = autopilot({...s,h:Math.max(0,groundY+s.h-sampleHeight(w.hm,hls.position.x,hls.position.z))});
-          throttle = input.throttle;
+          throttle = s.fuelKg > 0 ? throttle + Math.max(-MANUAL_THROTTLE_RATE * dt, Math.min(MANUAL_THROTTLE_RATE * dt, input.throttle - throttle)) : 0;
+          input.throttle = throttle;
         } else {
-          const want = keyboard.isHeld('Space') ? 1 : 0;
-          throttle += Math.sign(want - throttle) * Math.min(Math.abs(want - throttle), dt * THROTTLE_RATE);
-          input = { throttle, tiltInput: (keyboard.isHeld('KeyD') ? 1 : 0) - (keyboard.isHeld('KeyA') ? 1 : 0) };
+          const steering = (keyboard.isHeld('KeyD') ? 1 : 0) - (keyboard.isHeld('KeyA') ? 1 : 0);
+          const assisted = assistedLandingInput({...s, h: Math.max(0, groundY+s.h-sampleHeight(w.hm,hls.position.x,hls.position.z))}, keyboard.isHeld('Space'), steering);
+          throttle = s.fuelKg > 0 ? throttle + Math.max(-MANUAL_THROTTLE_RATE * dt, Math.min(MANUAL_THROTTLE_RATE * dt, assisted.throttle - throttle)) : 0;
+          input = { ...assisted, throttle };
         }
         const n = landStep(s, input, dt);
+        if (n.fuelKg <= 0) { throttle = 0; input.throttle = 0; exhaust.reset(); }
         offset += (s.vx+n.vx)*.5*dt;
         attempt = { ...attempt, state: n };
         place();
         // Do not freeze horizontal motion at the old 30 m clamp. Leaving the playable map fails/retries.
-        if(Math.abs(hls.position.x)>700||Math.abs(hls.position.z)>700){throttle=0;fail('tooFast');return;}
+        if(Math.abs(hls.position.x)>700||Math.abs(hls.position.z)>700){throttle=0;fail('outside');return;}
         const floor=sampleHeight(w.hm,hls.position.x,hls.position.z);
         const footFloor=opts.rig?.contactHeight((x,z)=>sampleHeight(w.hm,x,z)) ?? floor;
         const clearance=groundY+n.h-footFloor;
-        const result = touchdown({...n,h:clearance});
+        const result = (auto ? touchdown : manualTouchdown)({...n,h:clearance});
         if (result) {
           if(result==='ok')exhaust.update(0,throttle,false,true);
           attempt = { ...attempt, state: { ...n, h: footFloor-groundY } };
@@ -269,7 +316,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
             phaseT = 0;
             opts.onTouchdown?.();
             void w.dialogue.play('land_ok');
-          } else fail(result);
+          } else { fail(result === 'tipped' ? 'tipped' : 'impact'); return; }
         }
         // Low dust clumps strengthen below 20 m, especially during the final five metres.
         const rate = plumeRate(Math.max(0,clearance), input.throttle);
@@ -292,11 +339,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
           card.alpha = Math.min(1, phaseT - cardAt);
         }
         if (ready && phaseT >= cardAt + CARD_S) finish(true);
-      } else if (phase === 'failed') {
-        const banner = failKind === 'tipped' ? tr('TIPPED OVER') : attempt.state.fuelKg <= 0 ? tr('OUT OF FUEL') : tr('HARD LANDING');
-        hud.alarm(phaseT < 4 ? banner : null);
-        // Retry once Pip has explained (never waits on an unrelated dialogue queue for long).
-        if ((phaseT >= 5 && !w.dialogue.busy) || phaseT >= 14) retry();
+
       }
       if (!active) return;
       // Keep the earlier close landing composition; the bridge shares its endpoint and velocity.
@@ -305,7 +348,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
       const framing = landingCamera(attempt.state.h);
       const alpha=yaw+Math.PI*.75;
       const clearance=Math.max(0,hls.position.y-sampleHeight(w.hm,hls.position.x,hls.position.z));
-      const shake=phase==='failed'||reducedCameraMotion()?{x:0,y:0}:cameraShake.step(dt,clearance,throttle,phase==='contact');
+      const shake=reducedCameraMotion()?{x:0,y:0}:cameraShake.step(dt,clearance,throttle,phase==='contact');
       const target=hls.position.add(new Vector3(0,framing.targetHeight,0));
       // Translate camera and target together in the view plane. Rebuild from the
       // unshaken target every frame so no drift, orbit rotation or zoom accumulates.
@@ -320,7 +363,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
       cam.radius = framing.radius;
     },
     skip() {
-      finish(escapeKeepsLanding(phase));
+      if (phase !== 'failed') finish(escapeKeepsLanding(phase));
     },
   };
 }

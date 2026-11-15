@@ -4,7 +4,7 @@ import { G_MOON, HLS, LAND } from './descent';
 export interface FlightState {
  x:number; y:number; vx:number; vy:number; fuelKg:number; throttle:number; pitch:number; t:number;
 }
-export interface FlightCommand { assist:boolean; throttle:number; ground?:number; attitudeTimeScale?:number }
+export interface FlightCommand { lightAssist?:boolean; assist:boolean; throttle:number; ground?:number; attitudeTimeScale?:number }
 const clamp=(x:number,a:number,b:number)=>Math.max(a,Math.min(b,x));
 const smooth=(x:number)=>{const u=clamp(x,0,1);return u*u*u*(10+u*(-15+6*u));};
 export function nominalApproach(height:number) {
@@ -47,7 +47,8 @@ export function stepFlight(input:FlightState,command:FlightCommand,dt:number):Fl
   // Blend into actual AGL guidance before the close approach; HUD/contact always use raw ground.
   const terrainWeight=smooth((4000-clearance)/2200);
   const ref=flightReference(s.y-ground*terrainWeight);
-  const ax=Math.min(0,ref.ax+.55*(ref.vx-s.vx));
+  const playerControlled=!!command.lightAssist&&!command.assist;
+  const ax=Math.min(0,ref.ax+(playerControlled?0:.55*(ref.vx-s.vx)));
   const highWeight=smooth((clearance-4000)/1000);
   const attitudeScale=clamp(command.attitudeTimeScale??1,0,1);
   // vy is radial velocity. Adding local slope * orbital speed made crater edges demand
@@ -67,8 +68,13 @@ export function stepFlight(input:FlightState,command:FlightCommand,dt:number):Fl
   const pitch=s.pitch+clamp((targetPitch-s.pitch)*response,-maxTurn,maxTurn);
   const mass=HLS.dryKg+s.fuelKg;
   const maxThrust=availableThrust(clearance);
-  const wanted=command.assist?clamp(Math.hypot(ax,Math.max(.05,ay))*mass/maxThrust,0,1):clamp(command.throttle,0,1);
-  const throttle=s.fuelKg>0?s.throttle+clamp(wanted-s.throttle,-.5*step,.5*step):0;
+  const automatic = clamp(Math.hypot(ax,Math.max(.05,ay))*mass/maxThrust,0,1);
+  // Space controls the applied throttle directly, in unpaused playback seconds.
+  // Attitude assistance must not silently pull speed back toward the reference.
+  const playerThrottle=clamp(s.throttle+(command.throttle>.5?.12:-.10)*step*attitudeScale,0,1);
+  const wanted=command.assist?automatic:clamp(command.throttle,0,1);
+  const throttle=s.fuelKg<=0?0:playerControlled?playerThrottle
+    :s.throttle+clamp(wanted-s.throttle,-.5*step,.5*step);
   const force=Math.min(throttle*maxThrust,s.fuelKg*HLS.ve/step);
   const vx=s.vx-Math.sin(pitch)*force/mass*step;
   const vy=s.vy+(Math.cos(pitch)*force/mass-G_MOON)*step;

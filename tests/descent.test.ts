@@ -167,11 +167,11 @@ describe('orbital intro (plan 5, task 2)', () => {
     expect(t).toBeLessThan(40);
   });
 
-  it('drifting out of the green band for 3 s brings a reminder from Houston, not a failure', () => {
+  it('sustained speed error brings a reminder while the scene owns failure presentation', () => {
     const d = new IntroDirector({ assist: false });
     while (d.stage !== 'brake') d.next();
     const ev: string[] = [];
-    for (let i = 0; i < 30 * 8; i++) ev.push(...d.stepBrake(1 / 30, 0));
+    for (let i = 0; i < 30 * 8; i++) { d.flight.vx = 2500; ev.push(...d.stepBrake(1 / 30, 0)); }
     expect(ev.filter((e) => e === 'bandWarn').length).toBeGreaterThanOrEqual(1);
     expect(d.stage).toBe('brake');
   });

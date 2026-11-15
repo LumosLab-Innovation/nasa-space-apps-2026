@@ -38,7 +38,7 @@ export function currentObjective(c: ObjectiveContext): Objective {
     return { title: 'Help the stranded rover', hint: 'Get close to MICA and use the Q prompt to ask PIP to tow it.', target: c.mica };
   }
   if (!f.has('dialogue:meetPip:done')) return { title: 'Meet your robot partner', hint: 'Walk towards the habitat crate near the lander. Listen, then approach PIP and follow the E prompt.', target: CRATES.find(x => x.moduleId === 'habitat')! };
-  if (c.carrying) return { title: 'Install the module PIP is carrying', hint: 'Lead PIP to the orange installation ring. Wait for PIP, then hold E to align the module. On the steep hill, watch for the anchor and winch prompts.', target: CRATES.find(x => x.moduleId === c.carrying)!.site };
+  if (c.carrying) return { title: 'Install the module PIP is carrying', hint: 'Lead PIP to the installation marker. Wait for PIP, then hold E to align the module. On the steep hill, watch for the anchor and winch prompts.', target: CRATES.find(x => x.moduleId === c.carrying)!.site };
   if (c.state.modules.size < 4) {
     const id = (['habitat', 'radiator', 'antenna', 'solarTower'] as const).find(x => !c.state.modules.has(x))!;
     return { title: 'Build a working outpost', hint: 'Suggested next crate: {module}. E opens it; Q asks PIP to lift it. Each module adds a capability. You can explore and collect samples in any order.', target: CRATES.find(x => x.moduleId === id)! };

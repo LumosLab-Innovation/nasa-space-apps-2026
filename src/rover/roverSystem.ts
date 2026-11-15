@@ -12,14 +12,18 @@ import { clampToWorld } from '../player/movement';
 import { pipKnown, type MeetStage } from '../story/pipMeeting';
 import type { DialogueBox } from '../ui/dialogueBox';
 import type { Hud } from '../ui/hud';
-import { HLS_POS, SHELTER_POS, zone } from '../world/zones';
+import { SHELTER_POS, zone } from '../world/zones';
+import { landerSite } from '../world/landerSite';
 import { ROVER, ROVER_PARK, canBoard, canLeave, initRover, roverArrival, roverStep, type RoverGround, type RoverState } from './rover';
 
 type Stage = 'stowed' | 'lowering' | 'parked';
 type Seat = { x: number; y: number; z: number; yaw: number };
 
 /** Next to the lander (outside its 8 m keep-out ring), where the rover comes down after the first meeting. */
-const DEPLOY = { x: HLS_POS.x + 10, z: HLS_POS.z + 4 };
+export const deployPoint = (): { x: number; z: number } => {
+  const s = landerSite();
+  return { x: s.x + 10, z: s.z + 4 };
+};
 const LOWER_S = 5;
 const LOWER_FROM_M = 9;
 const WHEEL_R = 0.41;
@@ -30,7 +34,8 @@ export function roverForbidden(x: number, z: number): boolean {
   const dark = zone('darkCrater');
   if (Math.hypot(x - dark.x, z - dark.z) < dark.radius + 10) return true;
   if (Math.hypot(x - SHELTER_POS.x, z - SHELTER_POS.z) < 10) return true;
-  if (Math.hypot(x - HLS_POS.x, z - HLS_POS.z) < 8) return true;
+  const lander = landerSite();
+  if (Math.hypot(x - lander.x, z - lander.z) < 8) return true;
   const c = clampToWorld(x, z);
   return c.x !== x || c.z !== z;
 }
@@ -192,11 +197,12 @@ export async function createRoverSystem(w: {
         if (arrival === 'lower') {
           stage = 'lowering';
           lowerT = 0;
-          s = initRover(DEPLOY.x, DEPLOY.z, Math.PI / 2);
+          const dep = deployPoint();
+          s = initRover(dep.x, dep.z, Math.PI / 2);
           holder.setEnabled(true);
           w.hud.toast(tr('🚙 The rover is coming down from the lander…'), 5);
           if (w.pip.mode === 'follow') {
-            w.pip.gotoTarget = { x: DEPLOY.x - 3, z: DEPLOY.z - 2 };
+            w.pip.gotoTarget = { x: dep.x - 3, z: dep.z - 2 };
             w.pip.mode = 'goto';
           }
         } else park(ROVER_PARK.x, ROVER_PARK.z, 0);

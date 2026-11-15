@@ -35,10 +35,10 @@ export type WinchState = 'idle' | 'stuck' | 'anchored' | 'reeling' | 'done';
 
 export const ANCHOR_REACH_M = 2.5;
 
-/** The anchor prompt near the ring: E only works within reach; further out it says how far to walk. */
+/** E only works within reach of the anchor point. Further out, show how far to walk. */
 export function anchorPrompt(distM: number): { text: string; canPlant: boolean } {
   if (distM <= ANCHOR_REACH_M) return { text: tr('E — plant the winch anchor'), canPlant: true };
-  return { text: tr('Walk onto the anchor ring: {m} m to go', { m: (distM - ANCHOR_REACH_M).toFixed(1) }), canPlant: false };
+  return { text: tr('Walk to the anchor marker: {m} m to go', { m: (distM - ANCHOR_REACH_M).toFixed(1) }), canPlant: false };
 }
 
 /** While stuck, anchored or reeling, the winch owns Pip: nothing else may move or free it. */

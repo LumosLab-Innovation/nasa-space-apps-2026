@@ -11,6 +11,10 @@ export function elevatorPose(t:number){
 export function guardPose(t:number){
  return {front:stage(t,.36,.44),sides:stage(t,.44,.52)};
 }
+/** Front guard fold amount (1 = closed) once the disembark gate (0..1, linear) starts opening. */
+export function frontGuardOpen(t:number,gate:number){
+ return guardPose(t).front*(1-stage(gate,0,1));
+}
 export type ElevatorMotion={position:number;velocity:number};
 /** Velocity-limited reversal avoids an instantaneous direction flip mid-stroke. */
 export function stepElevatorMotion(state:ElevatorMotion,target:0|1,dt:number):ElevatorMotion{

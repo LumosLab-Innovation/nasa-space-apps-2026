@@ -101,7 +101,7 @@ describe('plan 3 and plan 2 player-facing minors (plan 5, task 7)', () => {
     expect(anchorPrompt(2)).toEqual({ text: 'E — plant the winch anchor', canPlant: true });
     const far = anchorPrompt(4.3);
     expect(far.canPlant).toBe(false);
-    expect(far.text).toBe('Walk onto the anchor ring: 1.8 m to go');
+    expect(far.text).toBe('Walk to the anchor marker: 1.8 m to go');
   });
 
   it('a GLB that breaks the node contract falls back to the placeholder', async () => {
