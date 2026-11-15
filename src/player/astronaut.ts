@@ -22,8 +22,19 @@ import { resolveFootprint, type Footprint, type XZ } from './footprintCollision'
  */
 export function interactionReach(kind: 'install' | 'sample') {
   return kind === 'install'
-    ? { stance: .40, minStart: .05, maxStart: 2.5, speed: WALK_SPEED_MS, timeout: (d: number) => 1 + d / WALK_SPEED_MS }
+    ? { stance: .40, minStart: .05, maxStart: 2.5, speed: WALK_SPEED_MS, timeout: (d: number) => Math.max(2.5, 1.6 + d / WALK_SPEED_MS) }
     : { stance: .48, minStart: Math.max(.05, .48 - .45), maxStart: .48 + .45, speed: .45, timeout: (_d: number) => 2.5 };
+}
+
+/**
+ * Horizontal velocity toward the stance point: eases in over the last few decimetres and never covers more than
+ * the remaining distance in one frame, so the astronaut cannot step past the stance into the target.
+ */
+export function approachVelocity(dx: number, dz: number, maxSpeed: number, dt: number): { x: number; z: number } {
+  const d = Math.hypot(dx, dz);
+  if (d <= .015) return { x: 0, z: 0 };
+  const s = Math.min(maxSpeed, d * 3, d / Math.max(dt, 1e-6));
+  return { x: dx / d * s, z: dz / d * s };
 }
 
 type MoveBaseline = { forward: number; right: number };
@@ -340,10 +351,8 @@ export class Astronaut {
     const move = this.interactionBusy ? { forward: 0, right: 0, jump: false } : input;
     const h = computeMoveVelocity(move, this.cameraYaw, input.lope ? LOPE_SPEED_MS : WALK_SPEED_MS);
     if (this.approach) {
-      const dx = this.approach.x - this.position.x, dz = this.approach.z - this.position.z;
-      const distance = Math.hypot(dx, dz);
-      const speed = Math.min(this.approach.speed, distance * 3);
-      if (distance > .015) { h.x = dx / distance * speed; h.z = dz / distance * speed; }
+      const v = approachVelocity(this.approach.x - this.position.x, this.approach.z - this.position.z, this.approach.speed, dt);
+      h.x = v.x; h.z = v.z;
       this.approach.remaining -= dt;
     }
     const current = this.cc.getVelocity();
@@ -357,6 +366,9 @@ export class Astronaut {
       const forward = desired.lengthSquared() > 0 ? desired.normalizeToNew() : new Vector3(Math.sin(this.facingYaw), 0, Math.cos(this.facingYaw));
       next = this.cc.calculateMovement(dt, forward, support.averageSurfaceNormal, current, support.averageSurfaceVelocity, desired, UP);
       next.subtractInPlace(support.averageSurfaceVelocity);
+      // The controller only blends a fraction toward the desired velocity each frame; a scripted walk to the
+      // stance point sets it directly so it stops on the spot instead of swinging past into the target.
+      if (this.approach) { next.x = h.x; next.z = h.z; }
       if (move.jump) {
         next.y = JUMP_SPEED_MS;
         this.onJump(JUMP_SPEED_MS);

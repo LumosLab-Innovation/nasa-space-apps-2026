@@ -156,3 +156,27 @@ describe('movement keys held before holding E do not cancel the install', async 
     expect(moveCancel(s.baseline, walk(0, -1)).cancel).toBe(true);
   });
 });
+
+describe('install approach settles without overshooting (review I1/I2)', async () => {
+  const { approachVelocity, interactionReach } = await import('../src/player/astronaut');
+  const simulate = (fps: number, start: number) => {
+    const dt = 1 / fps, reach = interactionReach('install');
+    let x = start, t = 0, closest = Infinity, overshoot = false;
+    while (t < 10) {
+      const v = approachVelocity(reach.stance - x, 0, reach.speed, dt);
+      x += v.x * dt; t += dt;
+      if (x < reach.stance - 1e-9) overshoot = true;
+      closest = Math.min(closest, Math.abs(x - reach.stance));
+      if (Math.abs(x - reach.stance) < .035) break;
+    }
+    return { t, closest, overshoot };
+  };
+  it.each([30, 60, 144])('never passes the stance point at %i fps', (fps) => {
+    expect(simulate(fps, 2.5).overshoot).toBe(false);
+  });
+  it.each([30, 60, 144])('settles inside the timeout with margin at %i fps', (fps) => {
+    const reach = interactionReach('install'), s = simulate(fps, 2.5);
+    // arrival + 0.35 s settle + 0.5 s margin for turning to face the connector and frame jitter
+    expect(s.t + .35 + .5).toBeLessThanOrEqual(reach.timeout(2.5 - reach.stance));
+  });
+});
