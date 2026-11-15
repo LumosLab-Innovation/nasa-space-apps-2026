@@ -451,4 +451,7 @@ export const LINES_VI: Script = {
     { speaker: 'pip', face: 'curious', text: 'Nhìn kìa, ngay trên đường chân trời về phía Mặt Trời. Ánh sáng mờ mờ đó!' },
     { speaker: 'pip', face: 'curious', text: 'Có thể là bụi tích điện đang lơ lửng... các nhà khoa học vẫn còn tranh luận. Mình đứng về phe... để mình xem thêm chút nữa.' },
   ],
+  rover_ready_houston: [
+    { speaker: 'houston', text: 'Artemis IV, xe tự hành đã xuống bề mặt. Tốc độ tối đa 18 km/giờ, và xe không leo được dốc quá 20 độ.' },
+  ],
 };

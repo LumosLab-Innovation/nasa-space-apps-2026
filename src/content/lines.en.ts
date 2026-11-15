@@ -451,4 +451,7 @@ export const LINES: Script = {
     { speaker: 'pip', face: 'curious', text: 'Look, just above the horizon toward the Sun. That faint glow!' },
     { speaker: 'pip', face: 'curious', text: 'Could be charged dust floating... scientists still argue about it. I am on the side of... let me watch a bit longer.' },
   ],
+  rover_ready_houston: [
+    { speaker: 'houston', text: 'Artemis IV, your rover is on the surface. Top speed is eighteen kilometres per hour, and it will not climb slopes steeper than twenty degrees.' },
+  ],
 };

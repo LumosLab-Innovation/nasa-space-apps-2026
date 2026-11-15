@@ -3,7 +3,10 @@ export type Vec3 = [number, number, number];
 export type CamPose = { alpha: number; beta: number; radius: number; target: [number, number, number] };
 export type DisembarkStage = 'deploying' | 'riding' | 'arrived' | 'stepped' | 'done';
 
-export const DISEMBARK = { appearAt: 0.30, cameraMoveS: 3.5, presentFallbackS: 20, stepOffM: 1.2 };
+/** Capsule height of the player; the gameplay camera aims at root (floor + HEIGHT/2) + CAMERA_AIM_M. */
+export const PLAYER_HEIGHT_M = 1.9;
+export const CAMERA_AIM_M = 0.8;
+export const DISEMBARK = { appearAt: 0.36, cameraMoveS: 3.5, presentFallbackS: 20, stepOffM: 1.2 };
 
 const CAMERA_MOVE_START_S = 1;
 const OFFSET_RAD = (55 * Math.PI) / 180;
@@ -35,7 +38,7 @@ export function sidePose(carTop: Vec3, outwardYaw: number): CamPose {
 }
 
 export function endPose(carFloor: Vec3, outwardYaw: number, _hullCentre: Vec3): CamPose {
-  return { alpha: outwardAlpha(outwardYaw), beta: 1.25, radius: 7, target: [carFloor[0], carFloor[1] + 0.8, carFloor[2]] };
+  return { alpha: outwardAlpha(outwardYaw), beta: 1.25, radius: 7, target: [carFloor[0], carFloor[1] + PLAYER_HEIGHT_M / 2 + CAMERA_AIM_M, carFloor[2]] };
 }
 
 function blend(a: CamPose, b: CamPose, t: number): CamPose {

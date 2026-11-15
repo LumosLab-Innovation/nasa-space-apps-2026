@@ -10,12 +10,13 @@ import { AstronautRig } from './astronautRig';
 import { tr } from '../i18n/i18n';
 import { LUNAR_G } from '../config/constants';
 import { sampleHeight, type Heightmap } from '../data/heightmap';
+import { PLAYER_HEIGHT_M } from '../landing/disembarkTimeline';
 import { LandingDetector } from './landing';
 import { clampToWorld, computeMoveVelocity, isBelowGround, JUMP_SPEED_MS, LOPE_SPEED_MS, WALK_SPEED_MS, type MoveInput } from './movement';
 
 import { resolveFootprint, type Footprint, type XZ } from './footprintCollision';
 
-const HEIGHT = 1.9;
+const HEIGHT = PLAYER_HEIGHT_M;
 
 /** Capsule-centre height while riding: standing on a floor at at.y, or seated 0.82 m below the seat surface. */
 export function rideRootY(at: { y: number }, standing: boolean): number {
@@ -204,6 +205,17 @@ export class Astronaut {
     }
   }
 
+  private floorOverride: ((x: number, z: number) => number | null) | null = null;
+
+  /** Walking surface above the terrain (e.g. the elevator car deck); null clears it. Ground = max(terrain, override). */
+  setFloorOverride(fn: ((x: number, z: number) => number | null) | null): void { this.floorOverride = fn; }
+
+  private groundAt(x: number, z: number): number {
+    const terrain = sampleHeight(this.hm, x, z);
+    const o = this.floorOverride?.(x, z);
+    return o == null ? terrain : Math.max(terrain, o);
+  }
+
   /** Puts the astronaut on the ground at (x, z), at rest (rescue, demo jumps). */
   teleport(x: number, z: number): void {
     this.cancelInteraction();
@@ -322,7 +334,7 @@ export class Astronaut {
 
     const p = this.cc.getPosition();
     const c = clampToWorld(p.x, p.z);
-    const ground = sampleHeight(this.hm, c.x, c.z);
+    const ground = this.groundAt(c.x, c.z);
     if (isBelowGround(p.y, ground)) {
       this.cc.setPosition(new Vector3(c.x, ground + HEIGHT / 2 + 0.2, c.z));
       this.cc.setVelocity(Vector3.Zero());
@@ -340,7 +352,7 @@ export class Astronaut {
       lope: !!input.lope,
       supported,
       vy: this.cc.getVelocity().y,
-      groundAt: (x, z) => sampleHeight(this.hm, x, z),
+      groundAt: (x, z) => this.groundAt(x, z),
       desiredYaw,
       dt,
     });
@@ -371,7 +383,7 @@ export class Astronaut {
     }
     this.root.position.copyFrom(this.cc.getPosition());
     this.root.rotation.y = this.facingYaw;
-    this.rig?.apply(dt, this.action.snapshot, this.interaction?.target ?? null, this.root, this.gait.phase, moved / dt > .1, (x, z) => sampleHeight(this.hm, x, z));
+    this.rig?.apply(dt, this.action.snapshot, this.interaction?.target ?? null, this.root, this.gait.phase, moved / dt > .1, (x, z) => this.groundAt(x, z));
     this.camera.target.copyFrom(this.root.position.add(new Vector3(0, 0.8, 0)));
   }
 

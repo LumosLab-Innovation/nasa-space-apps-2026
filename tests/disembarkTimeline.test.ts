@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DISEMBARK, cameraAt, endPose, moveProgress, sidePose, stageFor, type CamPose, type DisembarkStage,
+  DISEMBARK, PLAYER_HEIGHT_M, CAMERA_AIM_M, cameraAt, endPose, moveProgress, sidePose, stageFor, type CamPose, type DisembarkStage,
 } from '../src/landing/disembarkTimeline';
 import { elevatorPose } from '../src/demo/hlsElevatorMotion';
 
@@ -36,7 +36,7 @@ describe('disembark timeline', () => {
       const p = endPose(floor, yaw, hull);
       expect(p.beta).toBe(1.25);
       expect(p.radius).toBe(7);
-      expect(p.target).toEqual([floor[0], floor[1] + 0.8, floor[2]]);
+      expect(p.target).toEqual([floor[0], floor[1] + PLAYER_HEIGHT_M / 2 + CAMERA_AIM_M, floor[2]]);
       const c = camPos(p);
       expect(Math.hypot(c[0] - hull[0], c[2] - hull[2])).toBeGreaterThanOrEqual(5.5);
     }

@@ -11,14 +11,25 @@ import { DISEMBARK, cameraAt, endPose, moveProgress, sidePose, stageFor, type Ca
 
 export interface Disembark {
   readonly stage: DisembarkStage;
+  /** Hint the host should show through its prompt chain (the HUD prompt is owned by the scene); null when none. */
+  readonly prompt: string | null;
   update(dt: number, move: MoveInput): void;
   skip(): void;
   dispose(): void;
 }
 
 type Collider = { dispose(): void };
+const STILL_MOVE: MoveInput = { forward: 0, right: 0, jump: false, lope: false };
 const FOOTPRINT_M = 1.9;
 const SLAB_M = 0.3;
+
+/** True when (x, z) is inside the car footprint square centred on floor, rotated by yaw. */
+export function insideCarFootprint(x: number, z: number, floor: { x: number; z: number }, yaw: number): boolean {
+  const dx = x - floor.x, dz = z - floor.z;
+  const c = Math.cos(yaw), s = Math.sin(yaw);
+  const lx = dx * c - dz * s, lz = dx * s + dz * c;
+  return Math.abs(lx) <= FOOTPRINT_M / 2 && Math.abs(lz) <= FOOTPRINT_M / 2;
+}
 
 function realCollider(scene: Scene, floor: Vector3, yaw: number): Collider {
   const box = MeshBuilder.CreateBox('disembarkFloor', { width: FOOTPRINT_M, height: SLAB_M, depth: FOOTPRINT_M }, scene);
@@ -52,9 +63,14 @@ export function createDisembark(
   let presented = false;
   let disposed = false;
   let stage: DisembarkStage = 'deploying';
+  let prompt: string | null = null;
   let collider: Collider | null = null;
   let bannerDispose: (() => void) | null = null;
   let anchor0 = new Vector3();
+
+  // Warm the skinned-mesh shaders: enable the astronaut once, parked far below the terrain, until it appears.
+  player.root.position.set(o.hullCentre.x, o.hullCentre.y - 400, o.hullCentre.z);
+  player.root.setEnabled(true);
 
   const elevatorPos = () => rig.snapshotMotion().elevator.position;
 
@@ -74,13 +90,15 @@ export function createDisembark(
     anchor0 = a.floor.clone();
     collider = (o.makeFloorCollider ?? ((f, y) => realCollider(scene, f, y)))(a.floor, a.outwardYaw);
     player.root.setEnabled(true);
+    const deck = a.floor.clone();
+    player.setFloorOverride((x, z) => (insideCarFootprint(x, z, deck, a.outwardYaw) ? deck.y : null));
     player.placeOnFloor(a.floor.x, a.floor.y, a.floor.z, a.outwardYaw);
     const end = endPose(a.floor.asArray() as [number, number, number], a.outwardYaw, o.hullCentre.asArray() as [number, number, number]);
     const pc = player.camera;
     pc.alpha = end.alpha; pc.beta = end.beta; pc.radius = end.radius;
     pc.target.set(end.target[0], end.target[1], end.target[2]);
     releaseCamera();
-    hud.showPrompt(tr('W — take your first step'));
+    prompt = tr('W — take your first step');
     stage = 'arrived';
     o.onHandOver();
   };
@@ -88,19 +106,22 @@ export function createDisembark(
   const present = () => {
     if (presented) return;
     presented = true;
-    hud.showPrompt(null);
+    prompt = null;
     bannerDispose = showActBanner(ui, tr('Sea of Tranquility, 1969…\n\nSouth Pole, 2028.'));
     hud.toast(tr('New discoveries in your Science Notebook (Tab)'), 4);
     collider?.dispose(); collider = null;
+    player.setFloorOverride(null);
     stage = 'done';
   };
 
-  const drive = () => {
+  const drive = (dt: number) => {
     const a = rig.carAnchor();
     const elev = elevatorPos();
     if (elev >= DISEMBARK.appearAt) {
       player.root.setEnabled(true);
       player.setRide({ x: a.floor.x, y: a.floor.y, z: a.floor.z, yaw: a.outwardYaw, standing: true });
+      // setRide only stores the seat; update() applies it. The flight keeps input locked, so move is STILL.
+      player.update(dt, STILL_MOVE);
     }
     if (camOwned) {
       const poses = {
@@ -117,11 +138,12 @@ export function createDisembark(
 
   return {
     get stage() { return stage; },
+    get prompt() { return prompt; },
     update(dt, _move) {
       if (disposed || !(dt > 0) || stage === 'done') return;
       since += dt;
       if (!handedOver) {
-        drive();
+        drive(dt);
         if (rig.elevatorDeployed) rig.setGate(1);
         if (rig.elevatorDeployed && rig.gateOpen >= 1) handOver();
         else stage = stageFor({ elevator: elevatorPos(), deployed: rig.elevatorDeployed, gate: rig.gateOpen, steppedOff: false, sinceHandOver: 0 });
@@ -146,8 +168,9 @@ export function createDisembark(
       disposed = true;
       if (camOwned) { camOwned = false; cam.dispose(); }
       collider?.dispose(); collider = null;
+      if (handedOver) player.setFloorOverride(null);
       bannerDispose?.(); bannerDispose = null;
-      if (handedOver && !presented) hud.showPrompt(null);
+      prompt = null;
     },
   };
 }

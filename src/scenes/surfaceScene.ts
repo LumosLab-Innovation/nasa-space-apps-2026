@@ -14,6 +14,10 @@ import { createHud, type Hud } from '../ui/hud';
 import { addTerrainReticles, createTerrainRing } from '../ui/terrainReticles';
 import { createDialogueBox, type DialogueBox } from '../ui/dialogueBox';
 import { createNotebook, type Card } from '../ui/notebook';
+import { createPhotoStore } from '../save/photoStore';
+import { LANDING_CARDS, QUIET_CARDS, captureScene, createDiscoveryQueue, isCaptureTimeout, isOffscreenRender } from '../ui/discoveryCamera';
+import type { PhotoStore } from '../save/photoStore';
+import { createDiscoveryFlyIn } from '../ui/discoveryFlyIn';
 import { DialogueRunner } from '../dialogue/runner';
 import { cardsFor, linesFor } from '../content/content';
 import { ScienceSystem } from '../science/scienceSystem';
@@ -110,6 +114,10 @@ export interface SurfaceWorld {
   hlsRig: HlsRig;
   /** The Esc menu (Plan 6a). */
   pauseMenu: PauseMenu;
+  /** The notebook photo album, shared with the landing scene (it stores the Eagle photo). */
+  photos: PhotoStore;
+  /** A photo moment taken elsewhere (the Eagle, in the orbital intro): flash, shutter and polaroid right now. */
+  showDiscoveryMoment(id: string, jpeg: string): void;
   /** The act 2E cargo lander (null in the demo). */
   cargo: ReturnType<typeof createCargoLanding> | null;
   /** Start the final descent (after the orbital intro). */
@@ -210,7 +218,13 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   // Knowledge cards in the current language; replaced in place when the language changes.
   const cardList = [...cardsFor(getLang())] as Card[];
   const dialogue = createDialogueBox(hud.ui, scene, new DialogueRunner(script, state), pip, true);
-  const notebook = createNotebook(hud.ui, state, cardList);
+  // Notebook photo album: created before the pause menu and mission guide so its key listener runs first.
+  const photos = createPhotoStore(safeStorage(), !!opts.autosave && !opts.demo);
+  const notebook = createNotebook({ state, cards: () => cardList, store: photos, missionStartMs: mission.start });
+  const discoveries = createDiscoveryQueue(photos);
+  discoveries.sync(state.unlockedCards);
+  const flyIn = createDiscoveryFlyIn();
+  scene.onDisposeObservable.addOnce(() => { notebook.dispose(); flyIn.dispose(); });
   const science = new ScienceSystem(scene, hm, state, script, dialogue, pip, sky, hud);
   const micaSys = new MicaSystem(scene, hm, state, dialogue, pip, sky, hud, await Mica.create(scene, hm, MICA_POS));
   player.setFootprintObstacle(() => micaSys.mica.footprint);
@@ -349,6 +363,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
     Object.assign(script, structuredClone(linesFor(l)));
     applyNightLines();
     cardList.splice(0, cardList.length, ...(cardsFor(l) as Card[]));
+    notebook.refresh(); // its own language listener ran before the cards were swapped
   });
   scene.onDisposeObservable.addOnce(stopLanguageUpdates);
   const act5 = createAct5System({ ui: hud.ui, clock, state, dialogue, hud, pip, lock, towing: () => repairSys.isTowing, stormActive: () => storm.phase === 'warning' || storm.phase === 'storm' }, night);
@@ -427,7 +442,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   scene.onDisposeObservable.addOnce(() => guide.dispose());
   if (dormant) player.camera.detachControl();
   scene.onBeforeAnimationsObservable.add(() => {
-    if (dormant) return;
+    if (dormant || isOffscreenRender(scene)) return;
     if (!pauseMenu.isOpen && escOpensPause({ descentActive: !!descent?.active, horizonOpen: !!horizon?.active }) && keyboard.consume('Escape')) {
       pauseMenu.open();
     }
@@ -455,9 +470,55 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   ], () => !dormant && !descent?.active && !pauseMenu.isOpen && !panel.open && !notebook.open &&
     !map.open && !guide.open && act5.stage !== 'liftoff' && act5.stage !== 'record');
 
+  // Discoveries: a polaroid fly-in at once, then a scene-only photo the first frame the view is clear.
+  let captureBusy = false;
+  let captureRetryAt = 0; // performance.now() before which a failed capture is not retried
+  const updateDiscoveries = () => {
+    const viewClear = !dialogue.busy && !panel.open && !notebook.open && !map.open && !pauseMenu.isOpen && !guide.open &&
+      !descent?.active && !(horizon?.active) && scene.activeCamera === player.camera;
+    const step = discoveries.update(state.unlockedCards, viewClear, performance.now());
+    for (const batch of step.announce) {
+      // One moment: snapshot cards in front (their photo develops), quiet cards show their NASA thumbnail.
+      const ids = [...batch.ids].sort((a, b) => Number(QUIET_CARDS.has(a)) - Number(QUIET_CARDS.has(b)));
+      flyIn.show(ids.map((id) => {
+        const card = cardList.find((c) => c.id === id);
+        const thumb = QUIET_CARDS.has(id) && card?.photo ? import.meta.env.BASE_URL + card.photo.thumb : null;
+        const mine = photos.get(id)?.jpeg ?? null;
+        // A NASA thumbnail is shown whole with its credit line; the player's own photo needs none.
+        return { id, title: card?.title ?? id, photo: mine ?? thumb, credit: mine ? null : thumb ? card?.photo?.credit : null };
+      }), { quiet: batch.quiet });
+      if (!batch.quiet) music?.shutter?.();
+    }
+    if (step.announce.length > 0) notebook.preload();
+    if (step.capture.length === 0 || captureBusy || performance.now() < captureRetryAt) return;
+    const ids = step.capture;
+    const clockMs = clock.nowMs;
+    captureBusy = true;
+    captureScene(scene, player.camera).then((jpeg) => {
+      for (const id of ids) {
+        photos.put(id, { jpeg, clockMs });
+        photos.removePending(id);
+        flyIn.develop(id, jpeg);
+      }
+      // Starts the 90 s cooldown and hands this photo to cards that unlocked meanwhile.
+      discoveries.captured(ids, jpeg, performance.now());
+    }, (error: unknown) => {
+      if (isCaptureTimeout(error)) {
+        // Babylon froze the canvas for 30 s waiting for this shot: never risk that twice. No photo for these.
+        console.warn('[notebook] photo capture timed out; these cards keep only their NASA image', error);
+        for (const id of ids) photos.removePending(id);
+        return;
+      }
+      console.warn('[notebook] photo capture failed, retrying in 5 s', error);
+      captureRetryAt = performance.now() + 5000;
+    }).finally(() => { captureBusy = false; });
+  };
+
   scene.onBeforeRenderObservable.add(() => {
-    if (dormant) return;
+    // The notebook photo calls scene.render() itself (offscreen): never run a second game step for it.
+    if (dormant || isOffscreenRender(scene)) return;
     const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
+    updateDiscoveries();
     guide.update(currentObjective({ state, stage: act5.stage, carrying: modules.carryingId, towing: repairSys.isTowing,
       storm: storm.phase === 'warning' || storm.phase === 'storm', lowOxygen: survival.resources.o2 < 20,
       mica: micaSys.mica.root.position, repair: repairSys.repair.stage }), player.position, player.cameraYaw,
@@ -611,8 +672,10 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
         act5: stage === 'waiting' || stage === 'titleCard' ? null : stage,
       }));
       if (state.unlockedCards.size > cardsSeen) {
+        // The landing cards enter the notebook silently (their moment was the Eagle photo in the intro).
+        const fresh = [...state.unlockedCards].slice(cardsSeen);
         cardsSeen = state.unlockedCards.size;
-        music.stinger('discovery');
+        if (fresh.some((id) => !LANDING_CARDS.has(id))) music.stinger('discovery');
       }
       music.duck(dialogue.busy);
       music.update(dt);
@@ -628,7 +691,12 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
   });
 
   return {
-    scene, hm, clock, sky, state, bus, hud, keyboard, player, pip, rover, modules, dialogue, science, micaSys, repairSys, dust, mission, survival, winchSys, act5, memory, night, lock, panel, cargo, pauseMenu, hlsRig,
+    scene, hm, clock, sky, state, bus, hud, keyboard, player, pip, rover, modules, dialogue, science, micaSys, repairSys, dust, mission, survival, winchSys, act5, memory, night, lock, panel, cargo, pauseMenu, hlsRig, photos,
+    showDiscoveryMoment(id: string, jpeg: string) {
+      flyIn.show([{ id, title: cardList.find((c) => c.id === id)?.title ?? id, photo: jpeg }]);
+      music?.shutter?.();
+      notebook.preload();
+    },
     get descent() {
       return descent?.active ? descent : null;
     },
@@ -640,6 +708,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
       for (const f of plan.flags) state.flags.add(f);
       for (const c of plan.cards) state.unlockedCards.add(c);
       cardsSeen = state.unlockedCards.size;
+      discoveries.sync(state.unlockedCards); // saved cards are not new discoveries (pending photos still develop)
       // Already in state.modules, so installing emits no 'moduleInstalled' (no dialogue); quiet: no toast.
       for (const m of plan.modules) modules.forceInstall(m as ModuleId, true);
       const steps = restoreSteps(state);
@@ -666,6 +735,7 @@ export async function createSurfaceScene(engine: Engine, scene: Scene, opts: { d
       keyboard.setEnabled(!value, held);
       if (value || descent?.active) player.camera.detachControl();
       else player.camera.attachControl(engine.getRenderingCanvas()!, true);
+      if (!value) notebook.preload();
     },
     startLanding(assist: boolean, prepared = false) {
       if (descent?.active) return;

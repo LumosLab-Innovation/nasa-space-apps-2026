@@ -14,7 +14,7 @@ import type { DialogueBox } from '../ui/dialogueBox';
 import type { Hud } from '../ui/hud';
 import { SHELTER_POS, zone } from '../world/zones';
 import { landerSite } from '../world/landerSite';
-import { ROVER, ROVER_PARK, canBoard, canLeave, initRover, roverArrival, roverStep, type RoverGround, type RoverState } from './rover';
+import { ROVER, ROVER_PARK, canBoard, canLeave, initRover, roverArrival, roverReadyKey, roverStep, type RoverGround, type RoverState } from './rover';
 
 type Stage = 'stowed' | 'lowering' | 'parked';
 type Seat = { x: number; y: number; z: number; yaw: number };
@@ -77,7 +77,25 @@ export async function createRoverSystem(w: {
     body.material = m;
   }
   const meshes = holder.getChildMeshes(false);
-  holder.setEnabled(false);
+  // Warm-up: draw the rover once, far below the terrain, so its shaders compile now and not at the lowering.
+  // The holder is disabled again after the first rendered frame (or a short timeout if the scene is not rendering).
+  holder.position.set(ROVER_PARK.x, -500, ROVER_PARK.z);
+  holder.setEnabled(true);
+  {
+    // Out-of-frustum meshes are skipped, so force them into the draw list for this one frame.
+    for (const m of meshes) m.alwaysSelectAsActiveMesh = true;
+    let warmed = false;
+    const warmDone = () => {
+      if (warmed) return;
+      warmed = true;
+      for (const m of meshes) m.alwaysSelectAsActiveMesh = false;
+      w.scene.onAfterRenderObservable.remove(obs);
+      clearTimeout(timer);
+      if (stage === 'stowed') holder.setEnabled(false);
+    };
+    const obs = w.scene.onAfterRenderObservable.addOnce(warmDone);
+    const timer = setTimeout(warmDone, 3000);
+  }
 
   let stage: Stage = 'stowed';
   let s: RoverState = initRover(ROVER_PARK.x, ROVER_PARK.z, 0);
@@ -218,7 +236,7 @@ export async function createRoverSystem(w: {
           w.dust.burst(new Vector3(s.x, g, s.z), 1.2);
           if (w.pip.mode === 'goto') w.pip.mode = 'follow';
           if (unlockCard(w.state, 'artemisLTV')) w.hud.toast(tr('New discovery in your Science Notebook (Tab)'), 3);
-          void w.dialogue.play('rover_ready');
+          void w.dialogue.play(roverReadyKey(w.state.flags));
         }
         return null;
       }

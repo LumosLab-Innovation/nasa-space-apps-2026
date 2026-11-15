@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   BRAKE_START, HLS, LAND, autopilot, brakeAutopilot, brakeBand, brakeDone, brakeStep, failureLineId, landStart, landStep,
   retryLand, skipToEnd, suggestAutopilot, touchdown, type BrakeState, type LandState,
@@ -224,5 +224,180 @@ describe('landing cutscene details (M1 Earth, M6 fuel seconds)', () => {
     const deg = (2 * Math.atan(e.radius / 90_000) * 180) / Math.PI;
     expect(deg).toBeGreaterThan(1.8);
     expect(deg).toBeLessThan(2.0);
+  });
+});
+
+// ---- Task 6: hand control from the final descent to the elevator disembark ----
+import { NullEngine, Scene, TransformNode } from '@babylonjs/core';
+import { createFinalDescent } from '../src/landing/finalDescent';
+import { createState } from '../src/core/gameState';
+import { InputLock } from '../src/ui/inputLock';
+import { landerSite, resetLanderSite } from '../src/world/landerSite';
+import { HLS_POS, PLAYER_SPAWN } from '../src/world/zones';
+
+vi.mock('../src/fx/spacecraftExhaust', () => ({
+  SpacecraftExhaust: class {
+    state = { power: 0 }; diagnostics = { particles: 0, jets: [] };
+    async warm() {} reset() {} update() {} present() {} dispose() {}
+  },
+}));
+vi.mock('../src/fx/flightExplosion', () => ({
+  FlightExplosion: class { async warm() {} start() {} update() {} reset() {} dispose() {} },
+}));
+vi.mock('../src/ui/descentHud', () => ({
+  createDescentHud: () => ({ showLand() {}, showBrake() {}, alarm() {}, dispose() {} }),
+}));
+vi.mock('../src/ui/flightFailure', () => ({
+  createFlightFailureDialog: () => ({ visible: false, show() {}, hide() {}, dispose() {} }),
+}));
+
+function descentHarness(o: { assist: boolean; rig?: boolean; factory?: boolean; pip?: { mode: string; gotoTarget?: { x: number; z: number } } }) {
+  const engine = new NullEngine();
+  const scene = new Scene(engine);
+  const hls = new TransformNode('hls', scene);
+  const toast = vi.fn();
+  const teleport = vi.fn();
+  const state = createState();
+  const lock = new InputLock();
+  const w = {
+    scene, hm: { size: 2, worldSizeM: 4000, heights: new Float32Array(4), source: 'procedural' as const },
+    ui: { addControl() {} }, state, dust: { plume() {} }, hud: { toast }, dialogue: { play: () => Promise.resolve(), interrupt() {}, busy: false },
+    lock, player: { root: { setEnabled() {} }, teleport }, pip: o.pip ?? { mode: 'follow' },
+  } as any;
+  const rig = {
+    gate: 0, setGate(this: any, v: number) { this.gate = v; }, get gateOpen() { return this.gate; },
+    // Real contract (hlsRig): an immediate setTargets resets the front gate to closed.
+    setTargets: vi.fn(function (this: any, _g: number, _e: number, imm?: boolean) { if (imm) this.gate = 0; }), exhaustMount: undefined, exhaustNozzles: () => [], restoreMotion() {}, update() {},
+    contactHeight: () => 0, elevatorDeployed: true,
+  } as any;
+  const fake = { stage: 'riding' as string, update: vi.fn(), skip: vi.fn(), dispose: vi.fn() };
+  let ctxSeen: any;
+  const factory = vi.fn((ctx: any) => { ctxSeen = ctx; return fake as any; });
+  const d = createFinalDescent(w, hls, {
+    assist: o.assist, groundY: 0, rig: o.rig === false ? undefined : rig,
+    disembark: o.factory === false ? undefined : factory,
+  });
+  const keys = { isHeld: () => false, consume: () => false };
+  const run = (until: () => boolean, max = 6000) => { for (let i = 0; i < max && !until(); i++) d.update(1 / 30, keys); };
+  return { d, hls, run, keys, factory, fake, ctx: () => ctxSeen, toast, teleport, state, lock, scene };
+}
+
+describe('hand control to the disembark (elevator disembark, task 6)', () => {
+  it('successful contact hands control to the disembark factory once', () => {
+    const h = descentHarness({ assist: true });
+    h.run(() => h.d.phase === 'contact');
+    expect(h.d.phase).toBe('contact');
+    expect(h.factory).not.toHaveBeenCalled();
+    h.run(() => h.factory.mock.calls.length > 0, 300);
+    expect(h.factory).toHaveBeenCalledTimes(1);
+    const camBefore = h.scene.activeCamera;
+    for (let i = 0; i < 900; i++) h.d.update(1 / 30, h.keys);
+    expect(h.factory).toHaveBeenCalledTimes(1);
+    expect(h.fake.update).toHaveBeenCalled();
+    expect(h.d.active).toBe(true);
+    expect(h.d.busy).toBe(true);
+    expect(h.scene.activeCamera).toBe(camBefore);
+    expect(h.state.flags.has('landing:done')).toBe(false);
+    expect(h.ctx().from.target).toHaveLength(3);
+  });
+
+  it('skip during disembark commits once and keeps the touchdown position', () => {
+    resetLanderSite();
+    const h = descentHarness({ assist: true });
+    h.run(() => h.factory.mock.calls.length > 0);
+    const at = h.hls.position.clone();
+    h.d.skip();
+    expect(h.fake.skip).toHaveBeenCalledTimes(1);
+    h.ctx().commit();
+    h.ctx().commit();
+    expect(h.d.active).toBe(false);
+    expect(h.d.busy).toBe(true);
+    expect(h.state.flags.has('landing:done')).toBe(true);
+    expect(h.hls.position.x).toBeCloseTo(at.x, 6);
+    expect(h.hls.position.z).toBeCloseTo(at.z, 6);
+    expect(landerSite()).toEqual({ x: at.x, z: at.z });
+    expect(h.teleport).not.toHaveBeenCalled();
+    expect(h.toast).not.toHaveBeenCalled();
+    expect(h.lock.locked).toBe(false);
+    // The disembark keeps being updated until it is done, then disposed once.
+    h.fake.update.mockClear();
+    h.d.update(1 / 30, h.keys);
+    expect(h.fake.update).toHaveBeenCalledTimes(1);
+    h.fake.stage = 'done';
+    h.d.update(1 / 30, h.keys);
+    h.d.update(1 / 30, h.keys);
+    expect(h.fake.dispose).toHaveBeenCalledTimes(1);
+    expect(h.d.busy).toBe(false);
+    expect(h.factory).toHaveBeenCalledTimes(1);
+    resetLanderSite();
+  });
+
+  it('skip right after touchdown (before the 1 s settle) creates and skips the disembark without a snap', () => {
+    const h = descentHarness({ assist: true });
+    h.run(() => h.d.phase === 'contact');
+    const at = h.hls.position.clone();
+    h.d.skip();
+    expect(h.factory).toHaveBeenCalledTimes(1);
+    expect(h.fake.skip).toHaveBeenCalledTimes(1);
+    expect(h.hls.position.x).toBeCloseTo(at.x, 6);
+    expect(h.teleport).not.toHaveBeenCalled();
+  });
+
+  it('the front gate stays open after the commit (normal and skip paths)', () => {
+    for (const viaSkip of [false, true]) {
+      const h = descentHarness({ assist: true });
+      h.run(() => h.factory.mock.calls.length > 0);
+      const rig = h.ctx().rig;
+      rig.setGate(1, true);
+      if (viaSkip) { h.d.skip(); rig.setGate(1, true); }
+      h.ctx().commit();
+      expect(h.d.active).toBe(false);
+      expect(rig.gateOpen).toBe(1);
+    }
+  });
+
+  it('Pip keeps its pre-landing mode and goto target after the commit', () => {
+    const hide = { x: 12, z: -7 };
+    for (const viaSkip of [false, true]) {
+      const pip = { mode: 'goto', gotoTarget: hide };
+      const h = descentHarness({ assist: true, pip });
+      expect(pip.mode).toBe('wait');
+      h.run(() => h.factory.mock.calls.length > 0);
+      if (viaSkip) h.d.skip();
+      h.ctx().commit();
+      expect(pip.mode).toBe('goto');
+      expect(pip.gotoTarget).toBe(hide);
+    }
+    const follow = { mode: 'follow' } as { mode: string; gotoTarget?: { x: number; z: number } };
+    const h = descentHarness({ assist: true, pip: follow });
+    h.run(() => h.factory.mock.calls.length > 0);
+    h.ctx().commit();
+    expect(follow.mode).toBe('follow');
+    const gp = { mode: 'goto', gotoTarget: hide };
+    const g = descentHarness({ assist: true, factory: false, pip: gp });
+    g.run(() => !g.d.active, 20000);
+    expect(g.d.phase).toBe('done');
+    expect(gp.mode).toBe('goto');
+    expect(gp.gotoTarget).toBe(hide);
+  });
+
+  it('failed contact never creates a disembark', () => {
+    const h = descentHarness({ assist: false });
+    h.run(() => h.d.phase === 'failed');
+    expect(h.d.phase).toBe('failed');
+    for (let i = 0; i < 300; i++) h.d.update(1 / 30, h.keys);
+    expect(h.factory).not.toHaveBeenCalled();
+    expect(h.d.busy).toBe(false);
+  });
+
+  it('without a factory the landing finishes as before', () => {
+    const h = descentHarness({ assist: true, factory: false });
+    h.run(() => !h.d.active, 20000);
+    expect(h.d.active).toBe(false);
+    expect(h.d.phase).toBe('done');
+    expect(h.hls.position.x).toBeCloseTo(HLS_POS.x, 6);
+    expect(h.teleport).toHaveBeenCalledWith(PLAYER_SPAWN.x, PLAYER_SPAWN.z);
+    expect(h.toast).toHaveBeenCalledTimes(1);
+    expect(h.state.flags.has('landing:done')).toBe(true);
   });
 });

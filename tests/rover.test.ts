@@ -79,15 +79,25 @@ describe('rover arrival after the first meeting (plan 7 final checks)', () => {
   it('waits while the greeting is still playing, comes down after a real meeting, parks after a jump', async () => {
     const { roverArrival } = await import('../src/rover/rover');
     const f = (...xs: string[]) => new Set(xs);
-    // The greeting chain finishes meetPip (flag) before Pip is marked met: still wait.
+    // Before the landing is done the rover stays stowed, whatever the meeting says.
     expect(roverArrival('greeted', f('dialogue:meetPip:done'))).toBe('wait');
     expect(roverArrival('hidden', f())).toBe('wait');
     expect(roverArrival('overheard', f())).toBe('wait');
-    // The meeting just ended in this session: lower it from the lander.
-    expect(roverArrival('done', f('dialogue:meetPip:done', 'pip:met'))).toBe('lower');
-    // Dev jumps and the demo mark the meeting done without pip:met; an already-deployed rover: park at camp.
-    expect(roverArrival('done', f('dialogue:meetPip:done'))).toBe('park');
+    // Landed: lowered right away, even before Pip is met.
+    expect(roverArrival('hidden', f('landing:done'))).toBe('lower');
+    expect(roverArrival('done', f('landing:done', 'pip:met'))).toBe('lower');
+    // An already-deployed rover parks at camp.
+    expect(roverArrival('hidden', f('landing:done', 'rover:deployed'))).toBe('park');
     expect(roverArrival('done', f('pip:met', 'rover:deployed'))).toBe('park');
+    // Dev jumps and the demo mark the meeting done without a landing: park at camp.
+    expect(roverArrival('done', f('dialogue:meetPip:done'))).toBe('park');
+  });
+
+  it('plays Houston alone until Pip is known, the full chat after', async () => {
+    const { roverReadyKey } = await import('../src/rover/rover');
+    expect(roverReadyKey(new Set(['landing:done']))).toBe('rover_ready_houston');
+    expect(roverReadyKey(new Set(['pip:met']))).toBe('rover_ready');
+    expect(roverReadyKey(new Set(['dialogue:meetPip:done']))).toBe('rover_ready');
   });
 });
 

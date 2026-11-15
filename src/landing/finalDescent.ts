@@ -19,6 +19,10 @@ import { tr } from '../i18n/i18n';
 import { gamePauseClock } from '../core/pause';
 import type { HlsRig } from '../models/hlsRig';
 import { type FlightPresentation, type DescentHandoff } from './descentBridge';
+import type { Disembark } from './disembark';
+import type { CamPose } from './disembarkTimeline';
+import type { MoveInput } from '../player/movement';
+import { setLanderSite } from '../world/landerSite';
 import { landingCamera } from './descentCamera';
 import { FailureCameraShake } from './failureCameraShake';
 import { LandingCameraShake } from './landingCameraShake';
@@ -50,6 +54,8 @@ export function plumeRate(h: number, throttle: number): number {
 }
 
 const CARD_S = 4.5;
+const STILL_MOVE: MoveInput = { forward: 0, right: 0, jump: false, lope: false };
+type DescentKeys = { isHeld(code: string): boolean; consume(code: string): boolean; reset?(): void; moveInput?(): MoveInput };
 
 export interface DescentWorld {
   scene: Scene;
@@ -70,6 +76,10 @@ export interface FinalDescent {
   warmExhaust():Promise<void>;
   readonly exhaustDiagnostics:SpacecraftExhaust['diagnostics'];
   readonly active: boolean;
+  /** True while the elevator disembark is alive (before or after the hand-over); keep calling update. */
+  readonly busy: boolean;
+  /** Prompt owned by the disembark (e.g. the first-step hint); null when none. */
+  readonly prompt: string | null;
   readonly cinematic: boolean;
   readonly bridgeTime: number;
   present(pose: FlightPresentation): void;
@@ -80,7 +90,7 @@ export interface FinalDescent {
   /** 'flying', 'contact' (ok, card showing), 'failed' (explaining, then retry) or 'done'. */
   readonly phase: 'flying' | 'contact' | 'failed' | 'done';
   readonly state: LandAttempt['state'];
-  update(dt: number, keyboard: { isHeld(code: string): boolean; consume(code: string): boolean; reset?(): void }): void;
+  update(dt: number, keyboard: DescentKeys): void;
   skip(): void;
 }
 
@@ -88,7 +98,7 @@ export interface FinalDescent {
  * Interaction 2 of the landing (v2 M5–M6): fly the HLS from 300 m onto the real landing site. Space is
  * thrust, A/D tilt, H the autopilot. Bad touchdowns explain (Odysseus) and retry with full fuel.
  */
-export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { assist: boolean; rig?: HlsRig; groundY?: number; prepared?: boolean; onTouchdown?:()=>void }): FinalDescent {
+export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { assist: boolean; rig?: HlsRig; groundY?: number; prepared?: boolean; onTouchdown?:()=>void; disembark?: (ctx: { hls: TransformNode; rig: HlsRig; from: CamPose; commit: () => void }) => Disembark }): FinalDescent {
   const groundY = opts.groundY ?? sampleHeight(w.hm, HLS_POS.x, HLS_POS.z);
   const groundTilt = hls.rotation.clone();
   opts.rig?.setTargets(0, 0, true);
@@ -105,6 +115,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
   let phaseT = 0;
   let plumeAcc = 0;
   let active = true;
+  let disembark: Disembark | undefined;
   const cameraShake = new LandingCameraShake();
   const failureShake = new FailureCameraShake();
 
@@ -116,6 +127,8 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
 
   w.lock.push('landing');
   w.player.root.setEnabled(false);
+  // Pip may be heading to its hiding spot for the first-meeting beat; put it back exactly as it was.
+  const pipBefore = { mode: w.pip.mode, gotoTarget: w.pip.gotoTarget };
   w.pip.mode = 'wait';
   const prevCam = w.scene.activeCamera;
   const initialCamera = landingCamera(300);
@@ -157,39 +170,66 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
     hls.rotation.z = phase === 'contact' ? groundTilt.z : -((s.tiltDeg) * Math.PI) / 180;
   };
 
-  const finish = (withCard: boolean) => {
+  const finish = (withCard: boolean, handOver = false) => {
     if (!active) return;
     waiting = false;hls.rotationQuaternion=null;hls.scaling.setAll(1);
     active = false;
     phase = 'done';
-    hls.position.set(HLS_POS.x, groundY, HLS_POS.z);
+    // After a disembark the ship stays where it touched down; otherwise it snaps to the nominal site.
+    if (handOver) setLanderSite({ x: hls.position.x, z: hls.position.z });
+    else hls.position.set(HLS_POS.x, groundY, HLS_POS.z);
     hls.rotation.copyFrom(groundTilt);
-    opts.rig?.setTargets(1, 1, true);
+    // An immediate setTargets would close the front gate the disembark just opened; the rig is already deployed.
+    if (!handOver) opts.rig?.setTargets(1, 1, true);
     exhaust.dispose();
     explosion.dispose(); failureDialog.dispose();
     hud.dispose();
     // The title card fades out over the first second of Act 1.
-    const fadeObs = w.scene.onBeforeRenderObservable.add(() => {
-      if (gamePauseClock.isPaused) return;
-      card.alpha -= w.scene.getEngine().getDeltaTime() / 1000;
-      if (card.alpha <= 0 || !card.isVisible) {
-        card.dispose();
-        w.scene.onBeforeRenderObservable.remove(fadeObs);
-      }
-    });
-    w.scene.activeCamera = prevCam;
+    if (handOver) card.dispose();
+    else {
+      const fadeObs = w.scene.onBeforeRenderObservable.add(() => {
+        if (gamePauseClock.isPaused) return;
+        card.alpha -= w.scene.getEngine().getDeltaTime() / 1000;
+        if (card.alpha <= 0 || !card.isVisible) {
+          card.dispose();
+          w.scene.onBeforeRenderObservable.remove(fadeObs);
+        }
+      });
+      // The disembark already swapped to the player camera; only the old paths restore the previous one.
+      w.scene.activeCamera = prevCam;
+    }
     w.scene.physicsEnabled = !gamePauseClock.isPaused;
-    if (!gamePauseClock.isPaused) prevCam?.attachControl(w.scene.getEngine().getRenderingCanvas()!, true);
+    if (!handOver && !gamePauseClock.isPaused) prevCam?.attachControl(w.scene.getEngine().getRenderingCanvas()!, true);
     cam.dispose();
     w.player.root.setEnabled(true);
-    w.player.teleport(PLAYER_SPAWN.x, PLAYER_SPAWN.z);
-    w.pip.mode = 'follow';
+    if (!handOver) w.player.teleport(PLAYER_SPAWN.x, PLAYER_SPAWN.z);
+    w.pip.mode = pipBefore.mode; w.pip.gotoTarget = pipBefore.gotoTarget;
     w.lock.pop('landing');
     // Landed or skipped, Act 1 begins (autosave starts from here); the discoveries need a real landing.
     setFlag(w.state, 'landing:done');
     if (withCard) {
       for (const id of ['apollo11Site', 'alarm1202', 'rocketEquation']) unlockCard(w.state, id);
-      w.hud.toast(tr('New discoveries in your Science Notebook (Tab)'), 4);
+      // After a disembark the toast is shown by the disembark itself, after the first step.
+      if (!handOver) w.hud.toast(tr('New discoveries in your Science Notebook (Tab)'), 4);
+    }
+  };
+
+  const ensureDisembark = () => {
+    if (disembark || !opts.rig || !opts.disembark) return;
+    opts.rig.setTargets(1, 1);
+    const t = cam.target;
+    disembark = opts.disembark({
+      hls, rig: opts.rig, from: { alpha: cam.alpha, beta: cam.beta, radius: cam.radius, target: [t.x, t.y, t.z] },
+      commit: () => finish(true, true),
+    });
+  };
+  const runDisembark = (dt: number, keyboard: DescentKeys) => {
+    if (!disembark) return;
+    disembark.update(dt, keyboard.moveInput?.() ?? STILL_MOVE);
+    if (disembark.stage === 'done') {
+      if (active) finish(true, true);
+      disembark.dispose();
+      disembark = undefined;
     }
   };
 
@@ -263,6 +303,12 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
     get active() {
       return active;
     },
+    get busy() {
+      return disembark !== undefined;
+    },
+    get prompt() {
+      return disembark?.prompt ?? null;
+    },
     get phase() {
       return phase;
     },
@@ -270,6 +316,7 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
       return attempt.state;
     },
     update(dt, keyboard) {
+      if (!active && disembark) { if (!gamePauseClock.isPaused) runDisembark(dt, keyboard); return; }
       if (!active || waiting) return;
       if (gamePauseClock.isPaused) return;
       resetInput = () => keyboard.reset?.();
@@ -331,20 +378,21 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
         hud.alarm(phaseT < 3 ? tr('CONTACT LIGHT · ENGINE STOP\nFUEL LEFT: {s} s of hover', { s: Math.round(fuelSecondsLeft(attempt.state.fuelKg)) }) : null);
         plumeAcc+=dt;if(plumeAcc>=.1){plumeAcc=0;const rate=plumeRate(0,exhaust.state.power);if(rate)w.dust.plume(new Vector3(hls.position.x,sampleHeight(w.hm,hls.position.x,hls.position.z),hls.position.z),18+10*exhaust.state.power,rate);}
         // Show the full mechanical deployment before fading to exploration.
-        if (phaseT >= 1) opts.rig?.setTargets(1, 1);
+        if (phaseT >= 1) { opts.rig?.setTargets(1, 1); ensureDisembark(); }
         const ready = !opts.rig || opts.rig.elevatorDeployed;
         const cardAt = opts.rig ? 14 : 3;
-        if (ready && phaseT > cardAt) {
+        if (!disembark && ready && phaseT > cardAt) {
           card.isVisible = true;
           card.alpha = Math.min(1, phaseT - cardAt);
         }
-        if (ready && phaseT >= cardAt + CARD_S) finish(true);
+        if (!disembark && ready && phaseT >= cardAt + CARD_S) finish(true);
 
       }
       if (!active) return;
       // Keep the earlier close landing composition; the bridge shares its endpoint and velocity.
       place();
       exhaust.update(dt,phase==='flying'?throttle:0,phase==='flying',phase==='contact');
+      if (disembark) { runDisembark(dt, keyboard); return; }
       const framing = landingCamera(attempt.state.h);
       const alpha=yaw+Math.PI*.75;
       const clearance=Math.max(0,hls.position.y-sampleHeight(w.hm,hls.position.x,hls.position.z));
@@ -363,6 +411,8 @@ export function createFinalDescent(w: DescentWorld, hls: TransformNode, opts: { 
       cam.radius = framing.radius;
     },
     skip() {
+      if (disembark) { if (active) disembark.skip(); return; }
+      if (phase === 'contact' && opts.rig && opts.disembark) { ensureDisembark(); (disembark as Disembark | undefined)?.skip(); return; }
       if (phase !== 'failed') finish(escapeKeepsLanding(phase));
     },
   };

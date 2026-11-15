@@ -1,7 +1,7 @@
 import { Constants, Matrix, Mesh, MeshBuilder, StandardMaterial, Color3, PBRMaterial, Quaternion, RawCubeTexture, Vector3, VertexData, TransformNode,
   type Scene, type ShadowGenerator } from '@babylonjs/core';
 import { rcsNozzles, type ExhaustNozzle } from '../fx/exhaustNozzles';
-import { elevatorPose, guardPose, frontGuardOpen, stepElevatorMotion } from '../demo/hlsElevatorMotion';
+import { elevatorPose, guardPose, frontGuardAngle, settledPoseKey, stepElevatorMotion } from '../demo/hlsElevatorMotion';
 import { landingGearPose, stepLandingGear } from '../demo/hlsLandingGearMotion';
 import { loadModel, type LoadedModel } from './loadModel';
 import { withPreparationTarget } from '../core/preparationRender';
@@ -85,7 +85,7 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
       ship.floor.rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), -Math.PI / 2 * (1 - p.floor));
       ship.guards[0].rotationQuaternion = Quaternion.RotationAxis(Vector3.Forward(), -Math.PI / 2 * (1 - guard.sides));
       ship.guards[1].rotationQuaternion = Quaternion.RotationAxis(Vector3.Forward(), Math.PI / 2 * (1 - guard.sides));
-      ship.guards[2].rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), -Math.PI / 2 * (1 - frontGuardOpen(elevator.position, gate)));
+      ship.guards[2].rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), frontGuardAngle(elevator.position, gate));
       ship.arms.position.z = ship.car.position.z - .95;
       ship.car.computeWorldMatrix(true); ship.arms.computeWorldMatrix(true); ship.cables.computeWorldMatrix(true);
       const inverse = ship.cables.getWorldMatrix().clone().invert();
@@ -105,9 +105,7 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
   function setLod(next: Lod) {
     // End poses are rigid: batch the same geometry into one draw, keeping the original
     // joints available for the next deployment. No extra asset or source geometry edits.
-    const settled = gear.velocity === 0 && elevator.velocity === 0 &&
-      (gear.position === 0 || gear.position === 1) && (elevator.position === 0 || elevator.position === 1);
-    const poseKey = settled ? `${gear.position}:${elevator.position}` : '';
+    const poseKey = settledPoseKey(gear.position, elevator.position, gate, gear.velocity, elevator.velocity);
     const key = next + '/' + poseKey;
     if (visibleKey === key) return;
     if (poseKey && !snapshots[next].has(poseKey)) {
@@ -171,10 +169,10 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
     fixed[key]={source:new Set(meshes),batch};
   }
   // Build settled poses during the loading screen, never on the first frame a leg finishes opening.
-  for(const [g,e] of [[0,0],[1,0],[1,1]] as const){
-    gear={position:g,velocity:0};elevator={position:e,velocity:0};applyPose();setLod('near');setLod('far');
+  for(const [g,e,o] of [[0,0,0],[1,0,0],[1,1,0],[1,1,1]] as const){
+    gear={position:g,velocity:0};elevator={position:e,velocity:0};gate=o;applyPose();setLod('near');setLod('far');
   }
-  gear={position:0,velocity:0};elevator={position:0,velocity:0};applyPose();setLod('near');
+  gate=0;gear={position:0,velocity:0};elevator={position:0,velocity:0};applyPose();setLod('near');
   scene.onDisposeObservable.addOnce(() => reflection.dispose());
   return {
     parent,
@@ -218,11 +216,12 @@ export async function createHlsRig(scene: Scene, parent: TransformNode, shadows:
         elevator = stepElevatorMotion(elevator, elevatorTarget, dt);
         if (gateMoving) gate = gateTarget === 1 ? Math.min(1, gate + dt / GATE_SECONDS) : Math.max(0, gate - dt / GATE_SECONDS);
         applyPose();
+        setLod(lod ?? 'near'); // key includes the gate: live meshes while it moves, the settled snapshot once it stops
       }
       updateLod();
     },
     /** Front gate of the crew car: 1 folds it down so the astronaut can step out. Eased in update(dt). */
-    setGate(open: 0 | 1, immediate = false) { gateTarget = open; if (immediate) { gate = open; applyPose(); } },
+    setGate(open: 0 | 1, immediate = false) { gateTarget = open; if (immediate) { gate = open; applyPose(); setLod(lod ?? 'near'); } },
     get gateOpen() { return gate; },
     /**
      * World-space anchors of the near-LOD car. `floor` is the 'elevatorFloor' node (child of floorHinge);

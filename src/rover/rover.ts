@@ -1,7 +1,7 @@
 import { LUNAR_G } from '../config/constants';
 import { tr } from '../i18n/i18n';
 import type { PipMode } from '../pip/brain';
-import type { MeetStage } from '../story/pipMeeting';
+import { pipKnown, type MeetStage } from '../story/pipMeeting';
 import { ROVER_PARK } from '../world/zones';
 
 export { ROVER_PARK };
@@ -112,14 +112,18 @@ export function canBoard(s: { distM: number; pipMode: PipMode; pipBusy: boolean 
 }
 
 /**
- * When the stowed rover appears: it waits until the first meeting is completely over (the greeting chain
- * marks meetPip done before Pip is marked met), comes down beside the lander after a meeting played in this
- * session ('pip:met'), and is simply parked at camp after a dev jump, the demo or an earlier deployment.
+ * When the stowed rover appears: it comes down beside the lander as soon as the landing is done (whether or
+ * not Pip has been met), and is simply parked at camp after an earlier deployment or a dev jump past the meeting.
  */
 export function roverArrival(meet: MeetStage, flags: Set<string>): 'wait' | 'lower' | 'park' {
-  if (meet !== 'done') return 'wait';
-  return flags.has('pip:met') && !flags.has('rover:deployed') ? 'lower' : 'park';
+  if (flags.has('rover:deployed')) return 'park';
+  if (flags.has('landing:done')) return 'lower';
+  return meet === 'done' ? 'park' : 'wait';
 }
+
+/** Houston alone while Pip is still unmet; the full chat with Pip once it is known. */
+export const roverReadyKey = (flags: Set<string>): 'rover_ready' | 'rover_ready_houston' =>
+  pipKnown(flags) ? 'rover_ready' : 'rover_ready_houston';
 
 /** What else is going on in the world, for the rover's rules. */
 export interface WorldBusy {
