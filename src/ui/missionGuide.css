@@ -1,0 +1,12 @@
+.mission-guide { position:fixed; right:18px; top:108px; width:min(290px,calc(100vw - 24px)); z-index:30; color:#e8eef5; font:14px/1.45 system-ui,sans-serif; background:#081321ed; border:1px solid #4b657e; border-radius:10px; box-shadow:0 4px 20px #0006; }
+.mission-guide[hidden], .mission-guide [hidden] { display:none; }
+.mission-guide button { display:flex; flex-direction:column; gap:5px; width:100%; background:none; border:0; color:inherit; text-align:left; padding:12px 14px; cursor:pointer; font:inherit; border-radius:9px; }
+.mission-guide strong { color:#ffd390; font-size:16px; }
+.mission-guide button span:last-child { color:#9ddcff; font-size:12px; }
+.mission-guide button:hover { background:#173249; }
+.mission-guide :focus-visible { outline:3px solid #9ddcff; outline-offset:2px; }
+.mission-guide div { padding:0 14px 14px; max-height:50vh; overflow:auto; }
+.mission-guide p { margin:8px 0 14px; }
+.mission-guide a { display:block; color:#9ddcff; padding:8px 0; }
+@media(max-width:850px) { .mission-guide { top:auto; bottom:160px; right:12px; width:250px; } .mission-guide button { padding:8px 12px; } }
+@media(max-width:550px) { .mission-guide { bottom:auto; top:198px; width:calc(100vw - 24px); } .mission-guide strong { font-size:14px; } }

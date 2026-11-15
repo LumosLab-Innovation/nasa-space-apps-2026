@@ -1,0 +1,15 @@
+import { describe,it,expect } from 'vitest';
+import { Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { ExhaustState, auxiliaryPulse, nozzleLength, attitudePulse, orionDeparturePower } from '../src/fx/exhaustState';
+const q=Quaternion.Identity();
+describe('exhaust timing',()=>{
+ it('keeps a weak attitude pulse visible past 90ms with a dark gap between pulses',()=>{expect(attitudePulse(.09,.02)).toBeGreaterThan(.1);expect(attitudePulse(.30,.02)).toBe(0);expect(attitudePulse(.09,0)).toBe(0);});
+ it('starts Orion auxiliary ignition at brake entry, not during separation, and does not loop',()=>{expect(orionDeparturePower('undock',1)).toBe(0);expect(orionDeparturePower('pip',4)).toBe(0);expect(orionDeparturePower('brake',.08)).toBeGreaterThan(.5);expect(orionDeparturePower('brake',3)).toBeGreaterThan(.5);expect(orionDeparturePower('brake',6)).toBe(0);expect(orionDeparturePower('done',.08)).toBe(0);});
+ it('holds contact 0.4s then decays to exact zero by 1.2s',()=>{const s=new ExhaustState();for(let i=0;i<60;i++)s.step(1/60,.6,q,false,false);const before=s.power;s.step(0,0,q,false,true);s.step(.3,0,q,false,true);expect(s.power).toBeCloseTo(before);s.step(.5,0,q,false,true);expect(s.power).toBeGreaterThan(0);expect(s.power).toBeLessThan(before);s.step(.4,0,q,false,true);expect(s.power).toBe(0);});
+ it('never reignites at contact and pauses exactly',()=>{const s=new ExhaustState();s.step(.1,0,q,false,true);expect(s.power).toBe(0);const a=s.snapshot();s.step(0,1,q,true,true);expect(s.snapshot()).toEqual(a);});
+ it('keeps different continuous nozzle lengths',()=>{expect(nozzleLength(1,0)).not.toBe(nozzleLength(1,1));expect(Math.abs(nozzleLength(1,0)-nozzleLength(1.001,0))).toBeLessThan(.01);});
+ it('uses ignition pulses then a bounded departure burn, never looping',()=>{expect(auxiliaryPulse(.8)).toBeGreaterThan(0);expect(auxiliaryPulse(0)).toBe(0);expect(auxiliaryPulse(4)).toBeGreaterThan(.5);expect(auxiliaryPulse(6)).toBe(0);expect(auxiliaryPulse(8.8)).toBe(0);expect(Math.abs(auxiliaryPulse(2.701)-auxiliaryPulse(2.7))).toBeLessThan(.01);});
+ it('ignores quaternion sign and stays quiet at stable attitude',()=>{const s=new ExhaustState();s.step(.02,0,q,true,false);for(let i=0;i<20;i++)s.step(.02,0,i%2?q:q.scale(-1),true,false);expect(s.demand.length()).toBeLessThan(1e-6);expect(s.pulse).toBe(0);});
+ it('changes torque sign between acceleration and deceleration',()=>{const s=new ExhaustState();let positive=false,negative=false;for(let i=0;i<180;i++){const t=i/179,a=t*t*t*(10-15*t+6*t*t);s.step(1/60,0,Quaternion.RotationAxis(Vector3.Forward(),a),true,false);positive ||=s.demand.z>.01;negative ||=s.demand.z<-.01;}expect(positive).toBe(true);expect(negative).toBe(true);});
+ it('restores continuous state without replaying ignition',()=>{const a=new ExhaustState();a.step(.05,.8,q,true,false);const b=new ExhaustState();b.restore(a.snapshot());a.step(.02,.8,q,true,false);b.step(.02,.8,q,true,false);expect(b.snapshot()).toEqual(a.snapshot());});
+});

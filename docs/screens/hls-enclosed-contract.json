@@ -1,0 +1,67 @@
+{
+  "ok": true,
+  "assets": [
+    {
+      "file": "public/models/review/hls-v2.glb",
+      "bytes": 1695936,
+      "triangles": 42036,
+      "primitives": 38,
+      "nodes": 95,
+      "materials": 1,
+      "textures": [
+        {
+          "width": 128,
+          "height": 8
+        },
+        {
+          "width": 128,
+          "height": 8
+        }
+      ],
+      "worldBounds": {
+        "min": [
+          -7.550000415445753,
+          -4.76837158203125e-7,
+          -6.800992111953324
+        ],
+        "max": [
+          7.550000369548798,
+          50.04499816894531,
+          7.500000238418579
+        ]
+      },
+      "clearanceVerified": true
+    },
+    {
+      "file": "public/models/review/hls-v2-far.glb",
+      "bytes": 700312,
+      "triangles": 12964,
+      "primitives": 38,
+      "nodes": 95,
+      "materials": 1,
+      "textures": [
+        {
+          "width": 128,
+          "height": 8
+        },
+        {
+          "width": 128,
+          "height": 8
+        }
+      ],
+      "worldBounds": {
+        "min": [
+          -7.550000415445753,
+          -4.76837158203125e-7,
+          -6.800992111953324
+        ],
+        "max": [
+          7.550000369548798,
+          50.04499816894531,
+          7.500000238418579
+        ]
+      },
+      "clearanceVerified": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NASA data & credits — Common Ground</title>
+<style>html{color-scheme:dark;background:#081321;color:#e8eef5;font:17px/1.65 system-ui}body{max-width:850px;margin:auto;padding:32px 22px}h1,h2{line-height:1.2;color:#ffd390}a{color:#9ddcff}a:focus-visible{outline:3px solid #9ddcff;outline-offset:4px}section{border-top:1px solid #4b657e;margin-top:32px;padding-top:18px}.label{color:#abc1d8}li{margin-bottom:10px}</style>
+<a href="./">← Main menu / Về menu</a>
+<p class="label">ARTEMIS IV: COMMON GROUND · Sources / Nguồn dữ liệu</p>
+<h1>Real data. Your engineering decisions.</h1>
+<p>This educational game combines NASA datasets with simplified resource rules. It is a Space Apps team project, not a NASA flight simulator or an official mission plan.</p>
+<p lang="vi">Địa hình và vị trí thiên thể lấy từ dữ liệu NASA; mức tiêu thụ tài nguyên là luật game đơn giản hóa. Người chơi tự quyết định cách chia điện và chấp nhận hệ quả.</p>
+<section><h2>Terrain → hills and shadows</h2>
+<p><a href="https://pgda.gsfc.nasa.gov/products/78">NASA GSFC / LRO LOLA: high-resolution lunar south pole topography</a>. Connecting Ridge, Site01. A 3 km crop is scaled to 1.5 km, with heights scaled equally to preserve slopes. Terrain shapes the route and blocks sunlight.</p>
+<p><a href="data/terrain/SOURCES.md">Exact product, citation and processing</a></p></section>
+<section><h2>Sun and Earth → night length and communications</h2>
+<p><a href="https://ssd.jpl.nasa.gov/horizons/">NASA/JPL Horizons</a> supplies hourly Sun/Earth azimuth and elevation for 2028 at 89.45° S, 222.7° E. Combined with the terrain, it determines the long shadow at camp (approximately 86 hours in the selected scenario). Predicting sunrise is part of your task.</p>
+<p><a href="data/ephemeris/SOURCES.md">Exact observation parameters and query links</a></p></section>
+<section><h2>Solar particles → storm context</h2>
+<p><a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/">NASA CCMC DONKI</a> supplies recorded solar energetic particle events. The game tries the live service and falls back to a shipped snapshot. If both fail, it uses a generic explanation instead of inventing an event.</p>
+<p>The countdown, protection zones and dose messages are teaching abstractions, not calibrated radiation predictions. <a href="data/donki/SOURCES.md">Snapshot provenance</a>.</p></section>
+<section><h2>What is simplified or fictional?</h2>
+<ul><li>PIP, MICA and the story are fictional. The mission dates are a game scenario.</li><li>Night energy uses percentages per rounded night-day. Heater, freezer, robot warmers, lights and comms share one reserve. These are game balance values, not NASA spacecraft specifications.</li><li>Keeping MICA warm can cost a science log if the sample freezer is switched off. Sealing heat leaks reduces heater demand.</li><li>Rescue helps you continue learning. It is not a prediction of survival or a procedure for real astronauts.</li><li>The cinematic braking glow is fictional; the Moon does not have a substantial atmosphere for aerodynamic re-entry heating.</li></ul></section>
+<section><h2>Assets and tools</h2>
+<p>Team: LumosEdu. <a href="models/SOURCES.md">Spacecraft and model credits</a> · <a href="textures/exhaust/SOURCES.md">Exhaust references and artistic interpretation</a>. Additional references appear on the Science Notebook cards.</p>
+<p>Built with TypeScript, Babylon.js, Havok and Vite. Anthropic Claude assisted gameplay implementation, dialogue and localization, procedural model-building scripts, animation, review and debugging. OpenAI Codex assisted development and revisions, source review, gameplay QA, tests, performance work, deployment preparation and submission writing. OpenAI ImageGen generated the visibly labeled concept illustrations in the submission slides; they are not gameplay screenshots. The team remains responsible for the work and its scientific claims.</p>
+<p><a href="https://github.com/LumosLab-Innovation/nasa-space-apps-2026">Project repository</a> · <a href="https://github.com/LumosLab-Innovation/nasa-space-apps-2026/blob/main/ORIGIN.md">Source provenance</a> · <a href="submission/LumosEdu_Common_Ground_7_slides.pdf">Seven-slide demo</a> · <a href="https://www.spaceappschallenge.org/2026/challenges/junior-astronaut-mission-trainer/">Challenge</a></p></section>
+</html>

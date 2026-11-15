@@ -1,0 +1,39 @@
+{
+  "source": "NASA/SpaceX 07-24-25 surface concept, published Oct 2026",
+  "near": {
+    "file": "public\\models\\review\\hls-v2.glb",
+    "bytes": 1695936,
+    "triangles": 42036,
+    "boundsBlender": {
+      "min": [
+        -7.550000190734863,
+        -7.5,
+        0.0
+      ],
+      "max": [
+        7.550000190734863,
+        6.800992012023926,
+        50.04499816894531
+      ]
+    },
+    "meshObjects": 38
+  },
+  "far": {
+    "file": "public\\models\\review\\hls-v2-far.glb",
+    "bytes": 700312,
+    "triangles": 12964,
+    "boundsBlender": {
+      "min": [
+        -7.550000190734863,
+        -7.5,
+        0.0
+      ],
+      "max": [
+        7.550000190734863,
+        6.800992012023926,
+        50.04499816894531
+      ]
+    },
+    "meshObjects": 38
+  }
+}

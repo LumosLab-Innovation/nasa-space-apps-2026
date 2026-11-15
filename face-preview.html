@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pip Face Preview</title>
+  <style>
+    body { margin: 0; background: #11141a; color: #cfd8e3; font-family: system-ui, sans-serif; }
+    h1 { font-size: 18px; margin: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 0 16px 16px; }
+    .cell { background: #1b2029; border-radius: 10px; padding: 10px; }
+    .screen { width: 100%; aspect-ratio: 2 / 1; border-radius: 14px; border: 3px solid #8a8f98; display: block; }
+    .name { margin-top: 6px; font-size: 14px; text-align: center; }
+    label { margin: 0 16px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Gương mặt của Pip: 12 biểu cảm (tự chớp mắt, mắt liếc, miệng nói)</h1>
+  <label><input id="talk" type="checkbox" /> Pip đang nói (miệng mấp máy)</label>
+  <div class="grid" id="grid"></div>
+  <script type="module">
+    import { drawPipFace, PIP_EXPRESSIONS, blinkAmount } from '/src/pip/faceArt.ts';
+    const names = { happy: 'Vui', curious: 'Tò mò', worried: 'Lo lắng', sad: 'Buồn', dots: 'Im lặng', sleep: 'Ngủ', excited: 'Phấn khích', laugh: 'Cười lăn', proud: 'Tự đắc', scared: 'Sợ hãi', love: 'Thích mê', dizzy: 'Chóng mặt' };
+    const grid = document.getElementById('grid');
+    const cells = PIP_EXPRESSIONS.map((e, i) => {
+      const d = document.createElement('div');
+      d.className = 'cell';
+      d.innerHTML = `<canvas class="screen" width="512" height="256"></canvas><div class="name">${names[e]} (${e})</div>`;
+      grid.appendChild(d);
+      return { e, i, ctx: d.querySelector('canvas').getContext('2d') };
+    });
+    const t0 = performance.now();
+    function frame() {
+      const t = (performance.now() - t0) / 1000;
+      const talking = document.getElementById('talk').checked;
+      for (const c of cells) {
+        drawPipFace(c.ctx, 512, 256, {
+          expression: c.e,
+          blink: blinkAmount(t, c.i),
+          lookX: Math.sin(t * 0.7 + c.i),
+          lookY: Math.sin(t * 0.45 + c.i) * 0.5,
+          talk: talking ? Math.abs(Math.sin(t * 11 + c.i)) : 0,
+          t,
+        });
+      }
+      requestAnimationFrame(frame);
+    }
+    frame();
+  </script>
+</body>
+</html>

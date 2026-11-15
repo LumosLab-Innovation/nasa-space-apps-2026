@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "samples": 202,
+  "closedMaxRadius": 4.226216158662718,
+  "minDoorSeparation": 0.18243570485115956,
+  "realCavities": true,
+  "worldDockingAndLod": true,
+  "pauseReverse": true,
+  "fullCycle": true,
+  "errors": []
+}

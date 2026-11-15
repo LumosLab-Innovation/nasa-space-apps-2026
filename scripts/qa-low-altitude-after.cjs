@@ -1,0 +1,8 @@
+const {chromium}=require('C:/Users/ADMIN/AppData/Local/npm-cache/_npx/9833c18b2d85bc59/node_modules/playwright');
+const fs=require('fs');
+(async()=>{const b=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});try{
+const p=await b.newPage({viewport:{width:1440,height:810}});await p.goto('http://localhost:5173/?intro=only&assist=1');await p.waitForFunction(()=>window.__intro,undefined,{timeout:120000});await p.keyboard.press('Enter');await p.waitForTimeout(3500);
+await p.evaluate(()=>{const d=window.__intro.director;d.stage='brake';d.brake.h=500;d.brake.v=110;d.stepBrake=()=>[];});await p.waitForTimeout(3500);
+const result=await p.evaluate(async()=>{const {readOrbitalElevation,renderedTerrainClearance}=await import('/src/world/orbitalTerrain.ts');const e=await readOrbitalElevation(await(await fetch('/textures/moon/lola-elevation-delta-v1.bin')).arrayBuffer());const s=window.__intro.scene,h=window.__intro.hlsRig.parent;h.computeWorldMatrix(true);let min=Infinity;for(const m of h.getChildMeshes()){if(!m.isEnabled()||!m.isVisible||m.name==='hlsPlume')continue;m.computeWorldMatrix(true);for(const q of m.getBoundingInfo().boundingBox.vectorsWorld)min=Math.min(min,renderedTerrainClearance(q,e));}return{hudM:window.__intro.director.brake.h,rootClearanceM:renderedTerrainClearance(h.position,e)*1000,hullMinimumM:min*1000,scale:h.scaling.x,cameraClearanceM:renderedTerrainClearance(s.activeCamera.position,e)*1000};});
+fs.writeFileSync('docs/screens/low-altitude-after.json',JSON.stringify(result,null,2));console.log(result);await p.screenshot({path:'docs/screens/low-altitude-after.png'});
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exit(1)});

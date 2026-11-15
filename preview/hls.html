@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HLS · Đối chiếu model</title></head>
+<body>
+  <header><div><span class="eyebrow">ARTEMIS IV / COMMON GROUND</span><h1>STARSHIP HLS <small>MODEL REVIEW 01</small></h1></div><a href="/">Về game ↗</a></header>
+  <nav aria-label="Góc nhìn"><div id="views"><button data-view="three-quarter" class="active">Góc ¾</button><button data-view="side">Chính diện</button><button data-view="surface">Trên bề mặt</button><button data-view="docking">Ghép nối Orion</button><button data-view="detail">Khoang & thang máy</button><button data-view="gear">Chân đáp</button><button data-view="underside">Đáy tàu</button><button data-view="engine-detail">Động cơ</button></div><div><button id="pose">Thu chân / thang máy</button><button id="pause">Tạm dừng</button><button id="lod">LOD: gần</button></div></nav>
+  <main>
+    <section class="reference"><div class="label">01 <b>ẢNH THAM CHIẾU NASA / SPACEX</b></div><div class="image-holder"><img id="reference" src="/docs/references/hls/nasa-spacex-surface-2025.jpg" alt="Concept Starship HLS do NASA công bố"></div><div class="caption" id="reference-caption">Concept 07/2025 · NASA công bố 10/2026 · Cắt khung để đối chiếu thân tàu</div></section>
+    <section class="render"><div class="label">02 <b>MODEL 3D ĐANG CHẠY TRONG BABYLON.JS</b><span id="status">Đang tải…</span></div><canvas id="review"></canvas><div class="caption">Kéo để xoay · Cuộn để zoom · Mặt nền thử nghiệm, không phải địa hình game</div><div id="failure" hidden></div></section>
+  </main>
+  <footer><p><strong>Tái dựng từ concept, không phải CAD NASA.</strong> Chi tiết khuất, số chân và cơ cấu thu/mở là diễn giải cho game. Chưa thay model trong màn chơi.</p><div><a href="https://www.nasa.gov/missions/artemis/nasa-partners-accelerate-lander-development-for-2028-moon-missions/" target="_blank" rel="noopener noreferrer">Nguồn NASA ↗</a><span id="stats"></span></div></footer>
+  <script type="module" src="/src/demo/hlsPreview.ts"></script>
+</body></html>

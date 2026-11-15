@@ -1,0 +1,342 @@
+[
+  {
+    "id": "hammerFeather",
+    "title": "The hammer and the feather",
+    "body": "In 1971, Apollo 15 astronaut David Scott dropped a hammer and a falcon feather on the Moon. With no air to slow the feather, both hit the ground at the same moment, just as Galileo predicted. From 1.5 m the fall takes about 1.36 s on the Moon and 0.55 s on Earth.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDC: The Apollo 15 Hammer-Feather Drop",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_15_feather_drop.html"
+    }
+  },
+  {
+    "id": "longShadows",
+    "title": "Endless shadows at the south pole",
+    "body": "Near the lunar south pole the Sun never climbs more than about 2 degrees above the horizon (2.05° in 2028 at this spot), and it circles the sky once a month. A 1 m rock can cast a shadow tens of metres long. The sun position in this game comes from real NASA/JPL Horizons data for this exact spot.",
+    "tag": "real",
+    "source": {
+      "label": "NASA GSFC PGDA: Lunar Polar Illumination",
+      "url": "https://pgda.gsfc.nasa.gov/products/69"
+    }
+  },
+  {
+    "id": "anorthosite",
+    "title": "Anorthosite: the Moon's ancient crust",
+    "body": "The bright lunar highlands are made of anorthosite, a rock that floated to the top of a global magma ocean more than 4 billion years ago. Apollo 15 brought back a famous piece, sample 15415, nicknamed the Genesis Rock.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Lunar Sample Compendium: 15415",
+      "url": "https://curator.jsc.nasa.gov/lunar/lsc/15415.pdf"
+    }
+  },
+  {
+    "id": "noSound",
+    "title": "Why the Moon is silent",
+    "body": "Sound is a vibration that travels through air, water or solid things. The Moon has almost no atmosphere, so outside your helmet there is total silence. You only hear sounds through your radio, or vibrations travelling through your own suit when you touch something.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Moon Facts",
+      "url": "https://science.nasa.gov/moon/facts/"
+    }
+  },
+  {
+    "id": "apollo17Dust",
+    "title": "The dust that fought Apollo 17",
+    "body": "Lunar dust is sharp like broken glass because there is no wind or water to round it off, and it clings because it carries electric charge. On Apollo 17 a broken rover fender sprayed dust everywhere, so the crew built a new fender from maps and tape. Dust also made gear overheat by covering radiators.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Lunar Dust and Duct Tape",
+      "url": "https://science.nasa.gov/image-article/apod-2004-april-17-lunar-dust-and-duct-tape/"
+    }
+  },
+  {
+    "id": "tracksLast",
+    "title": "Tracks that last for ages",
+    "body": "With no wind and no rain, footprints and wheel tracks on the Moon are only slowly erased by tiny meteorite impacts. The bootprints left by Apollo astronauts more than 50 years ago are still there today and may last for millions of years.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Apollo 11 Bootprint",
+      "url": "https://science.nasa.gov/resource/apollo-11-bootprint/"
+    }
+  },
+  {
+    "id": "eds",
+    "title": "The Electrodynamic Dust Shield",
+    "body": "NASA's Electrodynamic Dust Shield uses electric fields to push dust off surfaces like glass and radiators. In March 2025 it worked on the Moon for the first time, aboard Firefly's Blue Ghost lander. Keeping solar panels clean could decide whether a lunar robot lives or dies.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Dust shield successfully repels lunar regolith",
+      "url": "https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/"
+    }
+  },
+  {
+    "id": "lightDelay",
+    "title": "Talking to Earth takes time",
+    "body": "The Moon is about 384,400 km away. Radio waves travel at the speed of light, so a message takes about 1.28 s to reach Earth and the same to come back: about 2.6 s between your question and Houston's answer. From the south pole, Earth also sinks below the horizon for days at a time.",
+    "tag": "real",
+    "source": {
+      "label": "NASA/JPL Horizons System",
+      "url": "https://ssd.jpl.nasa.gov/horizons/"
+    }
+  },
+  {
+    "id": "sunFacingHeat",
+    "title": "Hot on one side, frozen on the other",
+    "body": "Without air to spread heat around, a surface facing the Sun can reach about 115 C while its shadowed side drops far below -100 C. NASA's Lunar Reconnaissance Orbiter measured craters near the poles colder than -240 C, among the coldest places in the solar system.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Lunar Reconnaissance Orbiter",
+      "url": "https://science.nasa.gov/mission/lro/"
+    }
+  },
+  {
+    "id": "micaFiction",
+    "title": "Who is MICA?",
+    "body": "MICA and Pip are made up for this game. But the problem MICA faced is real: lunar robots lose power when dust covers their solar panels or when long shadows fall, and several real landers never woke up again. Solving that is one of the open challenges of NASA's Artemis program.",
+    "tag": "fiction",
+    "source": {
+      "label": "NASA Artemis",
+      "url": "https://www.nasa.gov/humans-in-space/artemis/"
+    }
+  },
+  {
+    "id": "spiritStuck",
+    "title": "Stuck in soft ground",
+    "body": "In April 2009, NASA's Spirit rover broke through a crust at a site on Mars called Troy and dug its wheels into soft sand. It never got out. Stuck, it could not tilt its solar panels toward the winter Sun, and it fell silent on March 22, 2010. Soft, steep regolith is still one of the biggest dangers for any rover.",
+    "tag": "real",
+    "source": {
+      "label": "NASA JPL: NASA's Spirit Rover Completes Mission on Mars",
+      "url": "https://www.jpl.nasa.gov/news/nasas-spirit-rover-completes-mission-on-mars/"
+    }
+  },
+  {
+    "id": "boulderTracks",
+    "title": "Tracks that are not tracks",
+    "body": "NASA's Lunar Reconnaissance Orbiter camera has photographed boulders, some 7 to 9 meters wide, that rolled down crater walls and left smooth, curving trails, \"like a marble rolled down a pile of sand.\" With no wind or rain to erase them, such trails last for a very long time, and from a distance they can look a lot like vehicle tracks.",
+    "tag": "real",
+    "source": {
+      "label": "LROC (LRO Camera team): Rolling Rolling Rolling",
+      "url": "https://lroc.im-ldi.com/posts/509"
+    }
+  },
+  {
+    "id": "apolloFlags",
+    "title": "What happened to the 1969 flag?",
+    "body": "The flags are too small for NASA's Lunar Reconnaissance Orbiter to see, but not their shadows: photographing the Apollo sites at different times of day, scientists watched small shadows circle the flagpoles. The flags of Apollo 12, 16 and 17 are still standing. Apollo 11's flag was knocked over by engine exhaust when the crew lifted off, as Buzz Aldrin reported. After decades of harsh ultraviolet light and extreme temperatures, the nylon is probably badly faded.",
+    "tag": "real",
+    "source": {
+      "label": "NASA SSERVI: Apollo Moon Flags Still Standing",
+      "url": "https://sservi.nasa.gov/articles/apollo-moon-flags-still-standing/"
+    }
+  },
+  {
+    "id": "earthVisibility",
+    "title": "When Earth sets",
+    "body": "Seen from the lunar south pole, Earth is above the horizon only about half of each month, and even then it hangs low, where a hill can hide it. That is why NASA is planning relay satellites over the south pole (the Lunar Communications Relay and Navigation Systems project), so Artemis crews can talk to Earth even when it is out of view.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Lunar Communications Relay and Navigation Systems (LCRNS)",
+      "url": "https://www.nasa.gov/goddard/esc/lcrns/"
+    }
+  },
+  {
+    "id": "lcrossIce",
+    "title": "Ice in the dark",
+    "body": "On October 9, 2009, NASA's LCROSS mission crashed a spent rocket stage into Cabeus, a permanently shadowed crater near the lunar south pole, and flew through the plume of debris. Analysis found roughly 6% water in the impact area, including nearly pure ice crystals in some spots. Ice in these cold traps is a big reason Artemis is going to the south pole.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDCA: Water Ice on the Moon?",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/ice/ice_moon.html"
+    }
+  },
+  {
+    "id": "viperPanels",
+    "title": "Why VIPER's solar panels stand up",
+    "body": "NASA's VIPER rover carries its solar panels on its sides, not on top, because at the lunar south pole the Sun never climbs high: 10 or 11 degrees at most where VIPER was meant to drive, and only about 2 degrees here, almost on the pole. A flat panel facing up catches just a few percent of that grazing light (sin 2° ≈ 3.5%), while a panel standing upright and facing the Sun catches nearly all of it. MICA, a fictional older rover in this game, had flat panels. Pip learned from that.",
+    "tag": "real",
+    "source": {
+      "label": "NASA podcast: Houston We Have a Podcast, VIPER",
+      "url": "https://www.nasa.gov/podcasts/houston-we-have-a-podcast/viper/"
+    }
+  },
+  {
+    "id": "lunarRadiation",
+    "title": "Radiation on the lunar surface",
+    "body": "In 2019 the Chinese lander Chang'e 4 carried a German-built detector (LND) to the Moon's far side. It measured an average dose of about 1,369 microsieverts per day on the surface, and the daily cosmic-ray dose there is around 2.6 times the dose inside the International Space Station. Solar storms add sudden bursts on top of that.",
+    "tag": "real",
+    "source": {
+      "label": "Zhang et al. 2020, Science Advances: First measurements of the radiation dose on the lunar surface",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7518862/"
+    }
+  },
+  {
+    "id": "regolithShield",
+    "title": "A blanket of Moon soil",
+    "body": "During a solar particle storm, protons reach the Moon from almost every direction, so the shadow of a boulder does not protect you. A thick cover of lunar soil (regolith) over a shelter does. Since the 1980s NASA studies have modelled how much regolith a lunar base needs to keep its crew safe during solar proton events.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NTRS: Solar-flare shielding with regolith at a lunar-base site (1988)",
+      "url": "https://ntrs.nasa.gov/citations/19890004839"
+    }
+  },
+  {
+    "id": "shadowClock",
+    "title": "A sundial that never stops turning",
+    "body": "At the lunar south pole the Sun glides all the way around the horizon about once a month, never more than a few degrees up. Long shadows rotate across the ground like the hand of a clock, about 12 degrees a day. That is how MICA's photos could be put back in order.",
+    "tag": "real",
+    "source": {
+      "label": "NASA SVS: Lunar South Pole Illumination with Earth and Sun",
+      "url": "https://svs.gsfc.nasa.gov/5228"
+    }
+  },
+  {
+    "id": "peaksOfLight",
+    "title": "Peaks of light, pits of darkness",
+    "body": "Because the Moon's axis is tilted only about 1.5 degrees, some spots near the poles sit in permanent shadow while nearby ridges stay sunlit for most of the year. Scientists stacked about 1,700 orbital images over six months to map how often every spot is lit. Whether the Sun reaches you depends on the hills around you, which is why this camp goes dark for days even though the Sun has not set for the whole region.",
+    "tag": "real",
+    "source": {
+      "label": "LROC: South Pole Illumination Map",
+      "url": "https://lroc.im-ldi.com/images/271"
+    }
+  },
+  {
+    "id": "lunarNight",
+    "title": "Sleeping through the lunar night",
+    "body": "Away from the poles a lunar night lasts about 14 Earth days and gets bitterly cold. Small landers without nuclear heaters are not expected to survive it, yet Japan's SLIM lander woke up again after three lunar nights in 2024, surprising its own designers. At the south pole, hills can bring a 'night' of just a few days, like the one at our camp.",
+    "tag": "real",
+    "source": {
+      "label": "SpacePolicyOnline: SLIM Does It Again — Survives Another Lunar Night (2024)",
+      "url": "https://spacepolicyonline.com/news/slim-does-it-again-survives-another-lunar-night/"
+    }
+  },
+  {
+    "id": "earthshine",
+    "title": "Earthshine",
+    "body": "Sunlight bouncing off Earth lights up the Moon's night side with a faint ashen glow. Leonardo da Vinci explained it more than 500 years ago. How bright it is depends on Earth's phase seen from the Moon: during our camp night Earth sat close to the Sun in the sky, so it was only a thin crescent and its light was very weak.",
+    "tag": "real",
+    "source": {
+      "label": "NASA APOD: The Da Vinci Glow (2025)",
+      "url": "https://apod.nasa.gov/apod/ap250403.html"
+    }
+  },
+  {
+    "id": "story_pragyan",
+    "title": "Real story: Pragyan, 2023",
+    "body": "In August 2023 India's Chandrayaan-3 put the Vikram lander and the little Pragyan rover down near the lunar south pole. Pragyan's laser instrument made the first measurements on the surface there and confirmed sulphur in the soil, something orbiters could not do.",
+    "tag": "real",
+    "source": {
+      "label": "ISRO: LIBS confirms the presence of Sulphur on the lunar surface",
+      "url": "https://www.isro.gov.in/LIBSResults.html"
+    }
+  },
+  {
+    "id": "story_slim",
+    "title": "Real story: SLIM, 2024",
+    "body": "Japan's SLIM, the 'Moon Sniper', landed on 20 January 2024 and proved a pinpoint landing: JAXA estimated its accuracy at about 10 m or better, maybe 3–4 m, against a 100 m goal. It later survived several lunar nights.",
+    "tag": "real",
+    "source": {
+      "label": "JAXA press release, 25 January 2024",
+      "url": "https://global.jaxa.jp/press/2024/01/20240125-1_e.html"
+    }
+  },
+  {
+    "id": "story_odysseus",
+    "title": "Real story: Odysseus, 2024",
+    "body": "On 22 February 2024 Intuitive Machines' Odysseus became the first commercial spacecraft to soft-land on the Moon, near the crater Malapert A in the south pole region. A leg broke and it tipped over, but it still sent back NASA science data.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: First surface science in decades via commercial Moon mission",
+      "url": "https://www.nasa.gov/missions/artemis/clps/nasa-collects-first-surface-science-in-decades-via-commercial-moon-mission/"
+    }
+  },
+  {
+    "id": "story_eds",
+    "title": "Real story: the dust shield works, 2025",
+    "body": "In March 2025 NASA's Electrodynamic Dust Shield flew on Firefly's Blue Ghost lander. Using electric fields, it lifted lunar dust off glass and a thermal radiator on the real Moon, just like you cleaned MICA's panels.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Dust shield successfully repels lunar regolith on the Moon",
+      "url": "https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/"
+    }
+  },
+  {
+    "id": "story_artemis",
+    "title": "Real story: Artemis IV",
+    "body": "NASA is targeting early 2028 for Artemis IV, the first Artemis landing: two astronauts will descend to the surface and spend about a week near the lunar south pole. In this game you stayed much longer, through 11 weeks and a long night. That part is fiction, for now. The game also sets the mission in September to December 2028 for the best sunlight at the pole, while NASA's real target is early 2028.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Artemis IV",
+      "url": "https://www.nasa.gov/mission/artemis-iv/"
+    }
+  },
+  {
+    "id": "apollo11Site",
+    "title": "Tranquility Base",
+    "body": "On 20 July 1969 the Apollo 11 lunar module Eagle landed in the Sea of Tranquility, at 0.67° N, 23.47° E. Neil Armstrong and Buzz Aldrin walked there while Michael Collins circled overhead in the command module. The dark 'seas' you see from orbit are old lava plains, smoother than the bright highlands.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDC: Apollo 11 lunar landing mission",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo11info.html"
+    }
+  },
+  {
+    "id": "alarm1202",
+    "title": "Program alarm 1202",
+    "body": "During Apollo 11's descent the guidance computer flashed alarm 1202: it was overloaded with too much data and could not process it all. After a few seconds of analysis, Mission Control's Charlie Duke told the crew they were GO. The computer kept running its most important jobs and dropped the rest. Later Armstrong flew the last part by hand to avoid a boulder field.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: 50 Years Ago, One Small Step, One Giant Leap",
+      "url": "https://www.nasa.gov/history/50-years-ago-one-small-step-one-giant-leap/"
+    }
+  },
+  {
+    "id": "rocketEquation",
+    "title": "The rocket equation",
+    "body": "A rocket pushes by throwing propellant out of its nozzle, so it gets lighter every second it burns, and the same push speeds it up more and more. NASA writes the ideal rocket equation as Δv = vₑ · ln(m_full / m_empty). In this game the lander has a game-sized 120-tonne dry mass and an exhaust speed of 3.7 km/s: rounded numbers, not real Starship figures.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Glenn: Ideal Rocket Equation",
+      "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/"
+    }
+  },
+  {
+    "id": "apollo12Surveyor",
+    "title": "Apollo 12 and Surveyor 3",
+    "body": "In November 1969 Apollo 12 set down about 155 m from the robot lander Surveyor 3, which had been sitting on the Moon since 1967. Pictures from NASA's Lunar Reconnaissance Orbiter still show the ground around Apollo 12 brightened by the rocket exhaust blasting the surface. With no air to slow it, plume dust flies fast and far, so future Moon bases will need landing pads well away from camp.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: LRO looks at Apollo 12 and Surveyor 3 landing sites",
+      "url": "https://www.nasa.gov/missions/lunar-reconnaissance-orbiter-looks-at-apollo-12-surveyor-3-landing-sites/"
+    }
+  },
+  {
+    "id": "horizonGlow",
+    "title": "Twilight rays: still a mystery",
+    "body": "About 10 seconds before lunar sunrise or sunset, Apollo 8, 10, 15 and 17 crews saw pale streamers rise over the horizon, and the Apollo 17 astronauts sketched them. One idea is that sunlight charges the ground so tiny dust grains float up and scatter light. The Moon's thin gases are not enough to explain it. NASA's LADEE orbiter was sent in 2013 to test the dust idea, and scientists still argue about the answer.",
+    "tag": "debated",
+    "source": {
+      "label": "NASA Science: Mission to study mysterious lunar twilight rays",
+      "url": "https://science.nasa.gov/science-research/planetary-science/03sep_ladee/"
+    }
+  },
+  {
+    "id": "apolloLRV",
+    "title": "Apollo's Moon buggy",
+    "body": "Apollo 15, 16 and 17 each carried a Lunar Roving Vehicle. It weighed 210 kg, had a 2.3 m wheelbase and two side-by-side seats, and ran on two non-rechargeable 36-volt batteries. Its 82 cm wheels were woven from zinc-coated steel wire, with titanium chevrons for grip. Crews drove 27.8 km on Apollo 15, 26.7 km on Apollo 16 and 35.9 km on Apollo 17.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDC: Apollo Lunar Roving Vehicle",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_lrv.html"
+    }
+  },
+  {
+    "id": "artemisLTV",
+    "title": "A rover for Artemis",
+    "body": "In April 2024 NASA picked three companies (Intuitive Machines, Lunar Outpost and Venturi Astrolab) to develop a Lunar Terrain Vehicle that can handle the extreme conditions at the south pole. NASA plans crewed drives from Artemis V, and between missions the rover can drive itself to do science. The rover in this game is imagined: its look, its 18 km/h top speed and its 20° slope limit are game choices.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: NASA Selects Companies to Advance Moon Mobility for Artemis Missions",
+      "url": "https://www.nasa.gov/news-release/nasa-selects-companies-to-advance-moon-mobility-for-artemis-missions/"
+    }
+  }
+]

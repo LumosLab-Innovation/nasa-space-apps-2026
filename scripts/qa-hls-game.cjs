@@ -1,0 +1,64 @@
+const { chromium }=require(process.env.PLAYWRIGHT_PATH||'C:/Users/ADMIN/AppData/Local/npm-cache/_npx/9833c18b2d85bc59/node_modules/playwright');
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const path=require('node:path');
+const out=path.resolve('docs/screens');
+const save={v:1,modules:[],samples:[],dataLogs:[],flags:['landing:done'],cards:[],clockMs:Date.UTC(2028,8,10,8),savedAt:Date.now()};
+async function button(page,id){
+ await page.waitForFunction(id=>window.__engine?.scenes.some(s=>s.textures.some(t=>t.getControlByName?.(id)?.isVisible)),id,{timeout:60000});
+ const p=await page.evaluate(id=>{
+  for(const s of window.__engine.scenes)for(const t of s.textures){const c=t.getControlByName?.(id);if(c?.isVisible){const m=c._currentMeasure;return {x:m.left+m.width/2,y:m.top+m.height/2};}}
+ },id);
+ await page.mouse.click(p.x,p.y);await page.waitForTimeout(180);
+}
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',args:['--enable-gpu']});
+ const context=await browser.newContext({viewport:{width:1440,height:810},recordVideo:{dir:path.join(out,'hls-game-video'),size:{width:1440,height:810}}});
+ const page=await context.newPage();const errors=[],bad=[],requests=[],progress=[];
+ page.on('pageerror',e=>errors.push(String(e)));page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});
+ page.on('request',r=>{if(/models\/hls.*glb/.test(r.url()))requests.push(r.url());});
+ await page.addInitScript(s=>{localStorage.setItem('pipmica.save',JSON.stringify(s));localStorage.setItem('pipmica.lang','vi');},save);
+ let release;const gate=new Promise(r=>release=r);
+ await page.route('**/models/hlsFar.glb',async route=>{await gate;await route.continue();});
+ await page.goto('http://localhost:5173/');await page.waitForFunction(()=>window.__engine?.scenes.some(s=>s.activeCamera?.name==='mainMenuCamera'));
+ await page.waitForTimeout(1000);assert.equal(requests.length,0,'menu does not fetch HLS');
+ await button(page,'new');await button(page,'auto');await button(page,'start');
+ await page.waitForTimeout(2500);
+ const stalled=await page.evaluate(()=>({percent:document.querySelector('progress')?.value,intro:!!window.__intro}));
+ assert.ok(stalled.percent<100&&!stalled.intro,'blocked GLB prevents 100% and gameplay');
+ await page.screenshot({path:path.join(out,'hls-game-loading.png')});
+ const poll=setInterval(async()=>{try{const v=await page.locator('progress').evaluateAll(es=>es.map(e=>e.value));progress.push(...v);}catch{}},60);
+ release();await page.waitForFunction(()=>window.__intro,undefined,{timeout:120000});clearInterval(poll);
+ assert.ok(progress.every((p,i)=>i===0||p>=progress[i-1]),'monotonic real loading');
+ assert.equal(requests.length,2,'one download per HLS LOD');
+ await page.keyboard.press('Enter');await page.waitForTimeout(4500);
+ const orbit=await page.evaluate(()=>window.__intro.hlsRig.inspect());
+ assert.equal(orbit.gear,0);assert.equal(orbit.elevator,0);
+ await page.screenshot({path:path.join(out,'hls-game-docked.png')});
+ await button(page,'settingsButton');const paused=await page.evaluate(()=>window.__intro.hlsRig.inspect());await page.waitForTimeout(500);
+ assert.deepEqual(await page.evaluate(()=>window.__intro.hlsRig.inspect()),paused,'settings freezes orbit rig');await page.keyboard.press('Escape');
+ await page.evaluate(()=>window.__intro.director.stage='undock');await page.waitForTimeout(3000);
+ await page.screenshot({path:path.join(out,'hls-game-undocked.png')});
+ await page.evaluate(()=>{const d=window.__intro.director;d.stage='brake';d.brake.h=300;d.brake.v=0;});
+ await page.waitForFunction(()=>window.__world?.descent,undefined,{timeout:120000});
+ const flight=await page.evaluate(()=>window.__world.hlsRig.inspect());
+ await page.waitForTimeout(2600);await button(page,'pauseButton');
+ const frozen=await page.evaluate(()=>window.__world.hlsRig.inspect());await page.waitForTimeout(500);
+ assert.deepEqual(await page.evaluate(()=>window.__world.hlsRig.inspect()),frozen,'descent pause freezes all rig transforms');await button(page,'resume');
+ await page.screenshot({path:path.join(out,'hls-game-descent.png')});
+ await page.waitForFunction(()=>window.__world.descent?.phase==='contact',undefined,{timeout:120000});
+ await page.waitForTimeout(3500);await page.screenshot({path:path.join(out,'hls-game-elevator-opening.png')});
+ await page.waitForFunction(()=>!window.__world.descent,undefined,{timeout:45000});
+ const landed=await page.evaluate(()=>window.__world.hlsRig.inspect());assert.equal(landed.gear,1);assert.equal(landed.elevator,1);
+ for(const m of landed.models)assert.ok(m.cableError<.001,'cables stay connected');
+ assert.equal(landed.models.filter(m=>m.enabled).length,1);assert.equal(landed.models.find(m=>!m.enabled).casters,0);
+ await page.waitForTimeout(1300);await page.screenshot({path:path.join(out,'hls-game-surface.png')});
+ await button(page,'pauseButton');await button(page,'main');await button(page,'exit');
+ await button(page,'continue');await page.waitForFunction(()=>window.__world,undefined,{timeout:120000});
+ const continued=await page.evaluate(()=>({rig:window.__world.hlsRig.inspect(),descent:!!window.__world.descent,scenes:window.__engine.scenes.length}));
+ assert.equal(continued.rig.gear,1);assert.equal(continued.rig.elevator,1);assert.equal(continued.descent,false);assert.equal(continued.scenes,1);
+ await button(page,'settingsButton');await page.keyboard.press('Escape');
+ await page.screenshot({path:path.join(out,'hls-game-continue.png')});
+ const report={errors,bad,stalled,progress,requests,orbit,flight,landed,continued};
+ fs.writeFileSync(path.join(out,'hls-game-qa.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+ await context.close();await browser.close();assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
+})().catch(e=>{console.error(e);process.exit(1);});

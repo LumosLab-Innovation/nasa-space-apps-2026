@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.superpowers/
+*.tif
+.playwright-mcp/
+docs/screens/
+__pycache__/
+*.py[cod]
+output/
+qa-*.log

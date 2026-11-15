@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>THE STOWAWAY | Mô phỏng hành trình LANTERN</title>
+  <style>
+    :root {color-scheme: dark; --bg:#111518; --panel:#1b2226; --line:#3b484d; --ink:#f4efe6; --muted:#adb9b9; --accent:#ffc18a; --cyan:#a1dfdf; --radius:14px; font-family:system-ui,"Segoe UI",sans-serif}
+    *,*::before,*::after {box-sizing:border-box}
+    body {margin:0;background:radial-gradient(ellipse at 14% 1%,#283336 0,transparent 42%),var(--bg);color:var(--ink);line-height:1.55}
+    button,input,select {font:inherit}
+    button,select {color:var(--ink);background:#242e32;border:1px solid var(--line);border-radius:9px;padding:.58rem .9rem}
+    button {cursor:pointer}
+    button:hover {border-color:var(--accent);background:#2d3739}
+    button:focus-visible,summary:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible {outline:3px solid var(--cyan);outline-offset:3px}
+    button:disabled {opacity:.6;cursor:default}
+    a {color:var(--cyan)}
+    p {margin:.45rem 0 1rem}
+    h1,h2,h3 {line-height:1.12;margin:0;letter-spacing:-.035em}
+    h1 {font-size:clamp(2rem,4.4vw,4.45rem);font-weight:790}
+    h2 {font-size:clamp(1.4rem,2.55vw,2.2rem)}
+    h3 {font-size:1.18rem}
+    .wrap {width:min(1280px,100% - 48px);margin:auto}
+    .mast {padding:30px 0 22px;border-bottom:1px solid var(--line)}
+    .mission-id,.eyebrow,.metric small,.stage-number {font:650 .7rem ui-monospace,Consolas,monospace;letter-spacing:.11em;text-transform:uppercase;color:var(--accent)}
+    .mast-row {display:flex;align-items:end;justify-content:space-between;gap:20px}
+    .mast p {color:var(--muted);margin:.35rem 0 0}
+    .tabs {display:flex;gap:6px;flex-wrap:wrap;margin:16px 0}
+    .tabs button {border-color:transparent;background:transparent;color:var(--muted)}
+    .tabs button[aria-pressed="true"] {color:var(--ink);background:var(--panel);border-color:var(--line)}
+    .layout {display:grid;grid-template-columns:minmax(0,1.13fr) minmax(0,1fr);gap:20px;align-items:start}
+    .box {border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden}
+    .visual {position:relative;aspect-ratio:3/2;background-image:url(storyboard-artemis.png);background-size:300% 300%;background-color:#2f383a}
+    .visual::after {content:"";position:absolute;inset:55% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.69));pointer-events:none}
+    .caption {position:absolute;z-index:1;bottom:1rem;left:1rem;right:1rem;color:white;text-shadow:0 1px 5px black;font-weight:630}
+    .visual-title {padding:12px 16px;color:var(--muted);font-size:.82rem;border-bottom:1px solid var(--line)}
+    .panel {padding:clamp(16px,2.4vw,28px)}
+    .phase {display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:.8rem;margin-bottom:10px}
+    .phase strong {color:var(--cyan);font-weight:650}
+    .subtitle {color:var(--muted);max-width:67ch}
+    .line {background:#222d31;border-left:3px solid var(--accent);border-radius:0 7px 7px 0;padding:10px 13px;color:#e9f2ee}
+    .choices {display:grid;gap:8px;margin-top:1rem}
+    .choice {text-align:left;padding:10px 12px;display:block;width:100%}
+    .choice strong,.choice small {display:block}
+    .choice small {color:var(--muted);margin-top:2px;line-height:1.4}
+    .choice:first-child,.primary {border-color:#a47751}
+    .primary {background:#ffc18a;color:#26180d;font-weight:700}
+    .primary:hover {background:#ffcfab}
+    .metrics {display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
+    .metric {padding:12px;background:var(--panel);min-width:0}
+    .metric small {color:var(--muted);letter-spacing:.045em;display:block}
+    .metric strong {font-size:1.08rem;color:var(--ink)}
+    .timeline {display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:12px 14px;border-top:1px solid var(--line)}
+    .timeline span {border-top:3px solid var(--line);padding-top:4px;color:var(--muted);font-size:.69rem;min-width:0}
+    .timeline span.current {border-color:var(--accent);color:var(--ink)}
+    .timeline span.done {border-color:#73b7ab}
+    .message {padding:10px 12px;border:1px solid #5e7773;border-radius:9px;background:#1d3230;color:#d8f4ed;margin:.65rem 0 1rem}
+    .message:empty {display:none}
+    .note {color:var(--muted);font-size:.82rem}
+    .actions {display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+    .settings {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0;color:var(--muted);font-size:.86rem}
+    input[type="range"] {accent-color:var(--accent);max-width:150px}
+    details {margin-top:16px;padding:13px 16px}
+    summary {cursor:pointer;font-weight:650}
+    .log {padding-left:1.15rem;color:var(--muted);font-size:.88rem}
+    .log li + li {margin-top:.36rem}
+    .route {margin:12px 0;padding:12px;border:1px solid var(--line);background:#151d21;border-radius:10px}
+    .route svg {display:block;width:100%;height:auto}
+    .route small {color:var(--muted)}
+    .schedule {display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .schedule label {display:grid;gap:4px;color:var(--muted);font-size:.87rem;min-width:0}
+    .schedule select {max-width:100%;padding:.4rem .5rem}
+    table {border-collapse:collapse;width:100%;margin:10px 0;font-size:.82rem;text-align:left}
+    th,td {padding:5px 7px;border-bottom:1px solid var(--line)}
+    th {color:var(--muted);font-weight:650}
+    .report {color:var(--cyan)}
+    .story {display:grid;gap:16px}
+    .story article {display:grid;grid-template-columns:minmax(160px,.55fr) minmax(0,1fr);align-items:stretch}
+    .story .visual {height:auto;align-self:start}
+    .story .panel p:last-child {margin-bottom:0}
+    .story .panel {max-width:78ch}
+    .board {width:100%;height:auto;display:block;border-radius:var(--radius);border:1px solid var(--line)}
+    .gallery ol {columns:2;gap:30px;padding-left:1.2rem;color:var(--muted)}
+    footer {padding:18px 0 28px;color:var(--muted);font-size:.82rem}
+    [hidden] {display:none !important}
+    @media(max-width:800px) {.wrap{width:calc(100% - 24px)}.layout{grid-template-columns:1fr}.mast-row{align-items:start;flex-direction:column;gap:10px}.story article{grid-template-columns:1fr}.gallery ol{columns:1}}
+    @media(max-width:420px) {.metric{padding:7px}.metric small{font-size:.61rem}.timeline{padding:8px}.schedule{grid-template-columns:1fr}.panel{padding:14px}}
+  </style>
+</head>
+<body>
+  <header class="mast">
+    <div class="wrap mast-row">
+      <div><div class="mission-id">LANTERN / Cực Nam Mặt Trăng</div><h1>THE STOWAWAY</h1><p>Trước bước chân đầu tiên</p></div>
+      <p class="note">Bản thử tương tác theo lượt · 5 chương và kết</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <nav class="tabs" aria-label="Nội dung bản thử">
+      <button type="button" data-view="play" aria-pressed="true">Mô phỏng</button>
+      <button type="button" data-view="story" aria-pressed="false">Đọc toàn bộ câu chuyện</button>
+      <button type="button" data-view="gallery" aria-pressed="false">Storyboard 9 cảnh</button>
+    </nav>
+    <section id="play">
+      <div class="layout">
+        <div>
+          <div class="box">
+            <div id="visual-title" class="visual-title">PHÁC THẢO CẢNH</div>
+            <div id="scene-art" class="visual" role="img"><span id="caption" class="caption"></span></div>
+            <div id="metrics" class="metrics" aria-label="Trạng thái nhiệm vụ"></div>
+            <div id="timeline" class="timeline" aria-label="Tiến độ chương"></div>
+          </div>
+          <details class="box"><summary>Nhật ký quyết định</summary><ol id="log" class="log"></ol></details>
+        </div>
+        <div class="box panel">
+          <div class="phase"><strong id="chapter"></strong><span id="progress"></span></div>
+          <h2 id="title" tabindex="-1"></h2>
+          <p id="description" class="subtitle"></p>
+          <p id="dialogue" class="line"></p>
+          <div id="feedback" class="message" role="status"></div>
+          <div id="interaction"></div>
+          <div id="pip-settings" class="settings" hidden>
+            <label for="humor">Hài hước của PIP</label>
+            <input id="humor" type="range" min="0" max="100" value="65">
+            <output id="humor-value" for="humor">65</output>
+          </div>
+          <button type="button" id="restart">Chơi lại từ đầu</button>
+          <p class="note">Các chỉ số là đơn vị minh họa của bản thử. Mỗi nút thực hiện một thao tác hoặc lựa chọn trong nhiệm vụ.</p>
+        </div>
+      </div>
+    </section>
+    <section id="story" class="story" hidden aria-label="Toàn bộ câu chuyện"></section>
+    <section id="gallery" class="gallery" hidden>
+      <img class="board" src="storyboard-artemis.png" alt="Chín cảnh từ tàu đổ bộ ở quỹ đạo tới hành trình của phi hành gia, PIP và MICA tại LANTERN">
+      <ol id="gallery-labels"></ol>
+      <p class="note">Ảnh phác thảo tạo bằng ImageGen tích hợp, theo thiết kế PIP và MICA trong tài liệu dự án.</p>
+    </section>
+    <footer>LANTERN thuộc kịch bản hư cấu. Cảnh hạ cánh lấy nhịp từ <a href="https://www.nasa.gov/wp-content/uploads/static/apollo50th/pdf/A11_MissionReport.pdf">Apollo 11</a> và bối cảnh từ <a href="https://www.nasa.gov/mission/artemis-iv/">Artemis IV</a>. Bản thử dùng số liệu minh họa. Tham chiếu dự kiến gồm <a href="https://pgda.gsfc.nasa.gov/products/81">LOLA</a>, <a href="https://www.diviner.ucla.edu/data">Diviner</a> và <a href="https://www.nasa.gov/dust-mitigation/">công nghệ xử lý bụi</a>.</footer>
+  </main>
+  <script src="simulation.js"></script>
+</body>
+</html>

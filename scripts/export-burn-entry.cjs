@@ -1,0 +1,2 @@
+const {spawnSync}=require('child_process');const d=require('../docs/screens/full-transition-after-auto.json');const start=d.frames.find(f=>f.stage==='pip').t/1000-1;
+const r=spawnSync('C:/Users/ADMIN/AppData/Local/ms-playwright/ffmpeg-1013/ffmpeg-win64.exe',['-y','-ss',String(start),'-i',d.video,'-t','12','-an','-c:v','libvpx-vp9','-b:v','2000k','docs/screens/orion-to-controls-fixed.webm'],{encoding:'utf8'});console.log(r.status,r.stderr.slice(-300));

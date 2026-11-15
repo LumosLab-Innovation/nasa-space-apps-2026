@@ -1,0 +1,342 @@
+[
+  {
+    "id": "hammerFeather",
+    "title": "Cây búa và chiếc lông vũ",
+    "body": "Năm 1971, phi hành gia David Scott của Apollo 15 thả một cây búa và một chiếc lông chim ưng trên Mặt Trăng. Không có không khí làm chậm chiếc lông, cả hai chạm đất cùng một lúc, đúng như Galileo đã dự đoán. Từ độ cao 1,5 m, vật rơi mất khoảng 1,36 giây trên Mặt Trăng và 0,55 giây trên Trái Đất.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDC: The Apollo 15 Hammer-Feather Drop",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_15_feather_drop.html"
+    }
+  },
+  {
+    "id": "longShadows",
+    "title": "Bóng dài bất tận ở cực nam",
+    "body": "Gần cực nam Mặt Trăng, Mặt Trời không bao giờ lên cao quá khoảng 2 độ so với đường chân trời (2,05° vào năm 2028 tại điểm này), và mỗi tháng nó đi hết một vòng bầu trời. Một hòn đá cao 1 m có thể đổ bóng dài hàng chục mét. Vị trí Mặt Trời trong trò chơi này lấy từ dữ liệu thật của NASA/JPL Horizons cho đúng điểm này.",
+    "tag": "real",
+    "source": {
+      "label": "NASA GSFC PGDA: Lunar Polar Illumination",
+      "url": "https://pgda.gsfc.nasa.gov/products/69"
+    }
+  },
+  {
+    "id": "anorthosite",
+    "title": "Anorthosite: lớp vỏ cổ xưa của Mặt Trăng",
+    "body": "Các vùng cao nguyên sáng màu trên Mặt Trăng được tạo thành từ anorthosite, một loại đá đã nổi lên bề mặt của một đại dương magma bao phủ cả Mặt Trăng từ hơn 4 tỉ năm trước. Apollo 15 đã mang về một mẩu nổi tiếng, mẫu 15415, có biệt danh là Đá Sáng Thế (Genesis Rock).",
+    "tag": "real",
+    "source": {
+      "label": "NASA Lunar Sample Compendium: 15415",
+      "url": "https://curator.jsc.nasa.gov/lunar/lsc/15415.pdf"
+    }
+  },
+  {
+    "id": "noSound",
+    "title": "Vì sao Mặt Trăng im lặng",
+    "body": "Âm thanh là dao động truyền qua không khí, nước hoặc vật rắn. Mặt Trăng gần như không có khí quyển, nên bên ngoài mũ bảo hiểm của bạn hoàn toàn im lặng. Bạn chỉ nghe được âm thanh qua bộ đàm, hoặc dao động truyền qua chính bộ đồ của bạn khi bạn chạm vào thứ gì đó.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Moon Facts",
+      "url": "https://science.nasa.gov/moon/facts/"
+    }
+  },
+  {
+    "id": "apollo17Dust",
+    "title": "Thứ bụi đã làm khó Apollo 17",
+    "body": "Bụi Mặt Trăng sắc như thủy tinh vỡ vì không có gió hay nước mài tròn nó, và nó bám dính vì mang điện tích. Trên Apollo 17, một tấm chắn bùn bị gãy của xe tự hành làm bụi bắn tung tóe khắp nơi, nên phi hành đoàn đã làm tấm chắn mới từ bản đồ và băng dính. Bụi còn phủ lên các bộ tản nhiệt, khiến thiết bị bị quá nóng.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Lunar Dust and Duct Tape",
+      "url": "https://science.nasa.gov/image-article/apod-2004-april-17-lunar-dust-and-duct-tape/"
+    }
+  },
+  {
+    "id": "tracksLast",
+    "title": "Những dấu vết tồn tại rất lâu",
+    "body": "Không có gió và mưa, dấu chân và vết bánh xe trên Mặt Trăng chỉ bị xóa dần rất chậm bởi những thiên thạch nhỏ li ti va vào. Những dấu giày mà các phi hành gia Apollo để lại hơn 50 năm trước đến nay vẫn còn và có thể tồn tại hàng triệu năm.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Apollo 11 Bootprint",
+      "url": "https://science.nasa.gov/resource/apollo-11-bootprint/"
+    }
+  },
+  {
+    "id": "eds",
+    "title": "Tấm chắn bụi điện động",
+    "body": "Tấm chắn bụi điện động của NASA dùng điện trường để đẩy bụi khỏi các bề mặt như kính và bộ tản nhiệt. Tháng 3/2025, nó lần đầu tiên hoạt động trên Mặt Trăng, trên tàu đổ bộ Blue Ghost của hãng Firefly. Giữ cho tấm pin mặt trời sạch sẽ có thể quyết định một robot trên Mặt Trăng sống hay chết.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Dust shield successfully repels lunar regolith",
+      "url": "https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/"
+    }
+  },
+  {
+    "id": "lightDelay",
+    "title": "Nói chuyện với Trái Đất cần thời gian",
+    "body": "Mặt Trăng cách chúng ta khoảng 384.400 km. Sóng vô tuyến đi với tốc độ ánh sáng, nên một tin nhắn mất khoảng 1,28 giây để tới Trái Đất và mất chừng đó để quay lại: khoảng 2,6 giây giữa câu hỏi của bạn và câu trả lời của Houston. Từ cực nam, Trái Đất còn lặn xuống dưới đường chân trời nhiều ngày liền.",
+    "tag": "real",
+    "source": {
+      "label": "NASA/JPL Horizons System",
+      "url": "https://ssd.jpl.nasa.gov/horizons/"
+    }
+  },
+  {
+    "id": "sunFacingHeat",
+    "title": "Một bên nóng bỏng, một bên đóng băng",
+    "body": "Không có không khí để phân tán nhiệt, một bề mặt hướng về Mặt Trời có thể nóng tới khoảng 115 °C trong khi phía khuất bóng của nó xuống thấp hơn -100 °C rất nhiều. Tàu quỹ đạo Lunar Reconnaissance Orbiter (LRO) của NASA đã đo được những hố gần hai cực lạnh hơn -240 °C, thuộc hàng những nơi lạnh nhất trong hệ Mặt Trời.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Science: Lunar Reconnaissance Orbiter",
+      "url": "https://science.nasa.gov/mission/lro/"
+    }
+  },
+  {
+    "id": "micaFiction",
+    "title": "MICA là ai?",
+    "body": "MICA và Pip là nhân vật hư cấu, được tạo ra cho trò chơi này. Nhưng vấn đề MICA gặp phải là có thật: robot trên Mặt Trăng mất điện khi bụi phủ lên tấm pin mặt trời hoặc khi những cái bóng dài đổ xuống, và một số tàu đổ bộ thật đã không bao giờ thức dậy nữa. Giải quyết điều đó là một trong những thách thức còn bỏ ngỏ của chương trình Artemis của NASA.",
+    "tag": "fiction",
+    "source": {
+      "label": "NASA Artemis",
+      "url": "https://www.nasa.gov/humans-in-space/artemis/"
+    }
+  },
+  {
+    "id": "spiritStuck",
+    "title": "Mắc kẹt trong đất mềm",
+    "body": "Tháng 4/2009, rover Spirit của NASA làm vỡ một lớp vỏ cứng tại một địa điểm trên Sao Hỏa tên là Troy và lún bánh vào cát mềm. Nó không bao giờ thoát ra được. Bị kẹt, nó không thể nghiêng tấm pin mặt trời về phía Mặt Trời mùa đông, và nó im lặng vĩnh viễn vào ngày 22/3/2010. Lớp đất đá vụn (regolith) mềm và dốc vẫn là một trong những mối nguy lớn nhất với bất kỳ rover nào.",
+    "tag": "real",
+    "source": {
+      "label": "NASA JPL: NASA's Spirit Rover Completes Mission on Mars",
+      "url": "https://www.jpl.nasa.gov/news/nasas-spirit-rover-completes-mission-on-mars/"
+    }
+  },
+  {
+    "id": "boulderTracks",
+    "title": "Những vết không phải vết bánh xe",
+    "body": "Camera của tàu Lunar Reconnaissance Orbiter của NASA đã chụp được những tảng đá, có tảng rộng 7 đến 9 mét, lăn xuống thành hố và để lại những vệt cong mềm mại, “như một viên bi lăn xuống đống cát”. Không có gió hay mưa xóa đi, những vệt như vậy tồn tại rất lâu, và nhìn từ xa chúng có thể trông rất giống vết bánh xe.",
+    "tag": "real",
+    "source": {
+      "label": "LROC (LRO Camera team): Rolling Rolling Rolling",
+      "url": "https://lroc.im-ldi.com/posts/509"
+    }
+  },
+  {
+    "id": "apolloFlags",
+    "title": "Lá cờ năm 1969 giờ ra sao?",
+    "body": "Những lá cờ quá nhỏ để tàu Lunar Reconnaissance Orbiter của NASA nhìn thấy, nhưng bóng của chúng thì không: khi chụp các địa điểm Apollo vào những thời điểm khác nhau trong ngày, các nhà khoa học thấy những cái bóng nhỏ xoay quanh cột cờ. Cờ của Apollo 12, 16 và 17 vẫn đứng vững. Cờ của Apollo 11 đã bị luồng khí động cơ thổi đổ khi phi hành đoàn cất cánh, như Buzz Aldrin kể lại. Sau hàng chục năm chịu tia cực tím gay gắt và nhiệt độ khắc nghiệt, vải nylon có lẽ đã phai màu nặng.",
+    "tag": "real",
+    "source": {
+      "label": "NASA SSERVI: Apollo Moon Flags Still Standing",
+      "url": "https://sservi.nasa.gov/articles/apollo-moon-flags-still-standing/"
+    }
+  },
+  {
+    "id": "earthVisibility",
+    "title": "Khi Trái Đất lặn",
+    "body": "Nhìn từ cực nam Mặt Trăng, Trái Đất chỉ ở trên đường chân trời khoảng một nửa thời gian mỗi tháng, và ngay cả khi đó nó cũng treo thấp, ở nơi một ngọn đồi có thể che khuất. Vì vậy NASA đang lên kế hoạch đặt các vệ tinh chuyển tiếp phía trên cực nam (dự án Lunar Communications Relay and Navigation Systems), để phi hành đoàn Artemis có thể liên lạc với Trái Đất ngay cả khi không nhìn thấy nó.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Lunar Communications Relay and Navigation Systems (LCRNS)",
+      "url": "https://www.nasa.gov/goddard/esc/lcrns/"
+    }
+  },
+  {
+    "id": "lcrossIce",
+    "title": "Băng trong bóng tối",
+    "body": "Ngày 9/10/2009, sứ mệnh LCROSS của NASA cho một tầng tên lửa đã dùng hết đâm vào Cabeus, một hố luôn chìm trong bóng tối gần cực nam Mặt Trăng, rồi bay xuyên qua đám mảnh vụn bắn lên. Phân tích cho thấy khoảng 6% nước trong vùng va chạm, có cả những tinh thể băng gần như tinh khiết ở vài chỗ. Băng trong những “bẫy lạnh” này là lý do lớn khiến Artemis tới cực nam.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDCA: Water Ice on the Moon?",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/ice/ice_moon.html"
+    }
+  },
+  {
+    "id": "viperPanels",
+    "title": "Vì sao tấm pin của VIPER dựng đứng",
+    "body": "Rover VIPER của NASA gắn tấm pin mặt trời ở hai bên hông chứ không phải trên nóc, vì ở cực nam Mặt Trăng, Mặt Trời không bao giờ lên cao: tối đa 10 hoặc 11 độ ở nơi VIPER dự định chạy, và chỉ khoảng 2 độ ở đây, gần như ngay trên cực. Một tấm pin nằm phẳng hướng lên trời chỉ hứng được vài phần trăm ánh nắng xiên đó (sin 2° ≈ 3,5%), trong khi tấm pin dựng đứng quay về phía Mặt Trời hứng được gần như toàn bộ. MICA, một rover đời cũ hư cấu trong trò chơi này, có tấm pin phẳng. Pip đã rút kinh nghiệm từ đó.",
+    "tag": "real",
+    "source": {
+      "label": "NASA podcast: Houston We Have a Podcast, VIPER",
+      "url": "https://www.nasa.gov/podcasts/houston-we-have-a-podcast/viper/"
+    }
+  },
+  {
+    "id": "lunarRadiation",
+    "title": "Bức xạ trên bề mặt Mặt Trăng",
+    "body": "Năm 2019, tàu đổ bộ Hằng Nga 4 (Chang'e 4) của Trung Quốc mang một máy đo do Đức chế tạo (LND) tới mặt khuất của Mặt Trăng. Nó đo được liều trung bình khoảng 1.369 microsievert mỗi ngày trên bề mặt, và liều tia vũ trụ mỗi ngày ở đó vào khoảng 2,6 lần liều bên trong Trạm Vũ trụ Quốc tế. Các cơn bão Mặt Trời còn gây thêm những đợt tăng vọt đột ngột.",
+    "tag": "real",
+    "source": {
+      "label": "Zhang et al. 2020, Science Advances: First measurements of the radiation dose on the lunar surface",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7518862/"
+    }
+  },
+  {
+    "id": "regolithShield",
+    "title": "Tấm chăn đất Mặt Trăng",
+    "body": "Trong một cơn bão hạt Mặt Trời, proton tới Mặt Trăng từ gần như mọi hướng, nên bóng của một tảng đá không bảo vệ được bạn. Một lớp đất đá Mặt Trăng (regolith) dày phủ trên chỗ trú thì có. Từ những năm 1980, các nghiên cứu của NASA đã mô phỏng xem một căn cứ Mặt Trăng cần bao nhiêu regolith để giữ an toàn cho phi hành đoàn trong các sự kiện proton Mặt Trời.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NTRS: Solar-flare shielding with regolith at a lunar-base site (1988)",
+      "url": "https://ntrs.nasa.gov/citations/19890004839"
+    }
+  },
+  {
+    "id": "shadowClock",
+    "title": "Chiếc đồng hồ mặt trời không bao giờ ngừng quay",
+    "body": "Ở cực nam Mặt Trăng, Mặt Trời lướt trọn một vòng quanh đường chân trời khoảng mỗi tháng một lần, không bao giờ lên cao quá vài độ. Những cái bóng dài xoay trên mặt đất như kim đồng hồ, khoảng 12 độ mỗi ngày. Nhờ vậy mà những bức ảnh của MICA có thể được xếp lại đúng thứ tự.",
+    "tag": "real",
+    "source": {
+      "label": "NASA SVS: Lunar South Pole Illumination with Earth and Sun",
+      "url": "https://svs.gsfc.nasa.gov/5228"
+    }
+  },
+  {
+    "id": "peaksOfLight",
+    "title": "Đỉnh ánh sáng, hố bóng tối",
+    "body": "Vì trục Mặt Trăng chỉ nghiêng khoảng 1,5 độ, một số điểm gần hai cực nằm trong bóng tối vĩnh viễn, trong khi các sườn núi gần đó có nắng gần như quanh năm. Các nhà khoa học đã chồng khoảng 1.700 ảnh chụp từ quỹ đạo trong sáu tháng để lập bản đồ xem mỗi điểm được chiếu sáng thường xuyên đến mức nào. Mặt Trời có chiếu tới bạn hay không phụ thuộc vào những ngọn đồi quanh bạn, đó là lý do trại này chìm trong bóng tối nhiều ngày dù Mặt Trời chưa lặn đối với cả vùng.",
+    "tag": "real",
+    "source": {
+      "label": "LROC: South Pole Illumination Map",
+      "url": "https://lroc.im-ldi.com/images/271"
+    }
+  },
+  {
+    "id": "lunarNight",
+    "title": "Ngủ qua đêm Mặt Trăng",
+    "body": "Ở xa hai cực, một đêm trên Mặt Trăng kéo dài khoảng 14 ngày Trái Đất và lạnh buốt. Các tàu đổ bộ nhỏ không có máy sưởi hạt nhân thường không được kỳ vọng sẽ sống sót, vậy mà tàu SLIM của Nhật Bản đã thức dậy trở lại sau ba đêm Mặt Trăng vào năm 2024, khiến chính những người thiết kế nó bất ngờ. Ở cực nam, đồi núi có thể tạo ra một “đêm” chỉ vài ngày, giống như đêm ở trại của chúng ta.",
+    "tag": "real",
+    "source": {
+      "label": "SpacePolicyOnline: SLIM Does It Again — Survives Another Lunar Night (2024)",
+      "url": "https://spacepolicyonline.com/news/slim-does-it-again-survives-another-lunar-night/"
+    }
+  },
+  {
+    "id": "earthshine",
+    "title": "Ánh sáng Trái Đất",
+    "body": "Ánh nắng phản chiếu từ Trái Đất soi sáng phần tối của Mặt Trăng bằng một ánh xám tro mờ nhạt. Leonardo da Vinci đã giải thích hiện tượng này từ hơn 500 năm trước. Độ sáng của nó phụ thuộc vào pha của Trái Đất nhìn từ Mặt Trăng: trong đêm ở trại, Trái Đất nằm gần Mặt Trời trên bầu trời, nên nó chỉ là một vầng lưỡi liềm mảnh và ánh sáng của nó rất yếu.",
+    "tag": "real",
+    "source": {
+      "label": "NASA APOD: The Da Vinci Glow (2025)",
+      "url": "https://apod.nasa.gov/apod/ap250403.html"
+    }
+  },
+  {
+    "id": "story_pragyan",
+    "title": "Chuyện có thật: Pragyan, 2023",
+    "body": "Tháng 8/2023, sứ mệnh Chandrayaan-3 của Ấn Độ đưa tàu đổ bộ Vikram và rover nhỏ Pragyan hạ cánh gần cực nam Mặt Trăng. Thiết bị laser của Pragyan đã thực hiện những phép đo đầu tiên ngay trên bề mặt ở đó và xác nhận có lưu huỳnh trong đất, điều mà các tàu quỹ đạo không làm được.",
+    "tag": "real",
+    "source": {
+      "label": "ISRO: LIBS confirms the presence of Sulphur on the lunar surface",
+      "url": "https://www.isro.gov.in/LIBSResults.html"
+    }
+  },
+  {
+    "id": "story_slim",
+    "title": "Chuyện có thật: SLIM, 2024",
+    "body": "SLIM của Nhật Bản, “Xạ thủ Mặt Trăng” (Moon Sniper), hạ cánh ngày 20/1/2024 và chứng minh khả năng hạ cánh chính xác: JAXA ước tính độ chính xác khoảng 10 m hoặc tốt hơn, có thể là 3–4 m, so với mục tiêu 100 m. Sau đó nó còn sống sót qua nhiều đêm Mặt Trăng.",
+    "tag": "real",
+    "source": {
+      "label": "JAXA press release, 25 January 2024",
+      "url": "https://global.jaxa.jp/press/2024/01/20240125-1_e.html"
+    }
+  },
+  {
+    "id": "story_odysseus",
+    "title": "Chuyện có thật: Odysseus, 2024",
+    "body": "Ngày 22/2/2024, tàu Odysseus của hãng Intuitive Machines trở thành tàu vũ trụ thương mại đầu tiên hạ cánh mềm xuống Mặt Trăng, gần hố Malapert A ở vùng cực nam. Một chân tàu bị gãy và tàu bị lật, nhưng nó vẫn gửi về dữ liệu khoa học cho NASA.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: First surface science in decades via commercial Moon mission",
+      "url": "https://www.nasa.gov/missions/artemis/clps/nasa-collects-first-surface-science-in-decades-via-commercial-moon-mission/"
+    }
+  },
+  {
+    "id": "story_eds",
+    "title": "Chuyện có thật: tấm chắn bụi hoạt động, 2025",
+    "body": "Tháng 3/2025, tấm chắn bụi điện động của NASA bay cùng tàu đổ bộ Blue Ghost của hãng Firefly. Dùng điện trường, nó đã nhấc bụi Mặt Trăng khỏi kính và một bộ tản nhiệt trên Mặt Trăng thật, giống như cách bạn đã làm sạch tấm pin của MICA.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Dust shield successfully repels lunar regolith on the Moon",
+      "url": "https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/"
+    }
+  },
+  {
+    "id": "story_artemis",
+    "title": "Chuyện có thật: Artemis IV",
+    "body": "NASA đặt mục tiêu đầu năm 2028 cho Artemis IV, lần hạ cánh Artemis đầu tiên: hai phi hành gia sẽ xuống bề mặt và ở khoảng một tuần gần cực nam Mặt Trăng. Trong trò chơi này bạn ở lâu hơn nhiều, qua 11 tuần và một đêm dài. Phần đó là hư cấu, ít nhất là cho tới bây giờ. Trò chơi cũng đặt sứ mệnh vào khoảng tháng 9 đến tháng 12/2028 để có ánh nắng tốt nhất ở cực, trong khi mục tiêu thật của NASA là đầu năm 2028.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: Artemis IV",
+      "url": "https://www.nasa.gov/mission/artemis-iv/"
+    }
+  },
+  {
+    "id": "apollo11Site",
+    "title": "Căn cứ Tĩnh Lặng",
+    "body": "Ngày 20/7/1969, mô-đun Mặt Trăng Eagle của Apollo 11 hạ cánh xuống Biển Tĩnh Lặng, tại 0,67° Bắc, 23,47° Đông. Neil Armstrong và Buzz Aldrin đi bộ ở đó trong khi Michael Collins bay vòng phía trên trong mô-đun chỉ huy. Những “biển” tối màu bạn thấy từ quỹ đạo là các đồng bằng dung nham cổ, phẳng hơn các vùng cao nguyên sáng màu.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDC: Apollo 11 lunar landing mission",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo11info.html"
+    }
+  },
+  {
+    "id": "alarm1202",
+    "title": "Cảnh báo chương trình 1202",
+    "body": "Trong lúc Apollo 11 hạ xuống, máy tính dẫn đường nháy cảnh báo 1202: nó bị quá tải vì quá nhiều dữ liệu và không xử lý hết được. Sau vài giây phân tích, Charlie Duke ở Trung tâm Điều khiển Sứ mệnh báo phi hành đoàn rằng họ vẫn tiếp tục (GO). Máy tính vẫn chạy những việc quan trọng nhất và bỏ qua phần còn lại. Sau đó Armstrong tự lái tay đoạn cuối để tránh một bãi đá tảng.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: 50 Years Ago, One Small Step, One Giant Leap",
+      "url": "https://www.nasa.gov/history/50-years-ago-one-small-step-one-giant-leap/"
+    }
+  },
+  {
+    "id": "rocketEquation",
+    "title": "Phương trình tên lửa",
+    "body": "Tên lửa tạo lực đẩy bằng cách phụt nhiên liệu ra khỏi vòi phun, nên nó nhẹ đi sau mỗi giây đốt, và cùng một lực đẩy sẽ làm nó tăng tốc ngày càng nhiều. NASA viết phương trình tên lửa lý tưởng là Δv = vₑ · ln(m_full / m_empty). Trong trò chơi này, tàu đổ bộ có khối lượng khô 120 tấn (con số cho vừa với trò chơi) và tốc độ khí phụt 3,7 km/s: các số đã được làm tròn, không phải thông số thật của Starship.",
+    "tag": "real",
+    "source": {
+      "label": "NASA Glenn: Ideal Rocket Equation",
+      "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/"
+    }
+  },
+  {
+    "id": "apollo12Surveyor",
+    "title": "Apollo 12 và Surveyor 3",
+    "body": "Tháng 11/1969, Apollo 12 hạ cánh cách tàu đổ bộ robot Surveyor 3 khoảng 155 m, con tàu đã nằm trên Mặt Trăng từ năm 1967. Ảnh từ tàu Lunar Reconnaissance Orbiter của NASA đến nay vẫn cho thấy mặt đất quanh Apollo 12 sáng hơn do luồng khí động cơ tên lửa thổi mạnh vào bề mặt. Không có không khí làm chậm, bụi từ luồng khí bay nhanh và xa, nên các căn cứ Mặt Trăng tương lai sẽ cần bãi đáp đặt cách xa trại.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: LRO looks at Apollo 12 and Surveyor 3 landing sites",
+      "url": "https://www.nasa.gov/missions/lunar-reconnaissance-orbiter-looks-at-apollo-12-surveyor-3-landing-sites/"
+    }
+  },
+  {
+    "id": "horizonGlow",
+    "title": "Tia sáng lúc chạng vạng: vẫn còn là bí ẩn",
+    "body": "Khoảng 10 giây trước lúc Mặt Trời mọc hoặc lặn trên Mặt Trăng, phi hành đoàn Apollo 8, 10, 15 và 17 đã thấy những dải sáng nhạt vươn lên trên đường chân trời, và các phi hành gia Apollo 17 đã vẽ phác lại. Một giả thuyết là ánh nắng làm mặt đất tích điện, nên các hạt bụi nhỏ xíu bay lên và tán xạ ánh sáng. Lớp khí mỏng của Mặt Trăng không đủ để giải thích hiện tượng này. Tàu quỹ đạo LADEE của NASA được phóng năm 2013 để kiểm tra giả thuyết về bụi, và các nhà khoa học vẫn còn tranh luận về câu trả lời.",
+    "tag": "debated",
+    "source": {
+      "label": "NASA Science: Mission to study mysterious lunar twilight rays",
+      "url": "https://science.nasa.gov/science-research/planetary-science/03sep_ladee/"
+    }
+  },
+  {
+    "id": "apolloLRV",
+    "title": "Xe đi Mặt Trăng của Apollo",
+    "body": "Mỗi chuyến Apollo 15, 16 và 17 mang theo một xe tự hành Mặt Trăng (LRV). Xe nặng 210 kg, khoảng cách hai trục 2,3 m, hai ghế ngồi cạnh nhau, chạy bằng hai ắc quy 36 vôn không sạc lại được. Bánh xe đường kính 82 cm đan bằng dây thép mạ kẽm, có các vấu titan hình chữ V để bám đất. Các phi hành gia đã lái 27,8 km ở Apollo 15, 26,7 km ở Apollo 16 và 35,9 km ở Apollo 17.",
+    "tag": "real",
+    "source": {
+      "label": "NASA NSSDC: Apollo Lunar Roving Vehicle",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_lrv.html"
+    }
+  },
+  {
+    "id": "artemisLTV",
+    "title": "Xe tự hành cho Artemis",
+    "body": "Tháng 4/2024, NASA chọn ba công ty (Intuitive Machines, Lunar Outpost và Venturi Astrolab) phát triển xe địa hình Mặt Trăng (LTV) chịu được điều kiện khắc nghiệt ở cực Nam. NASA dự định cho phi hành gia lái xe từ chuyến Artemis V; giữa các chuyến, xe tự lái để làm khoa học. Chiếc xe trong game là tưởng tượng: hình dáng, tốc độ tối đa 18 km/giờ và giới hạn dốc 20° là lựa chọn của game.",
+    "tag": "real",
+    "source": {
+      "label": "NASA: NASA Selects Companies to Advance Moon Mobility for Artemis Missions",
+      "url": "https://www.nasa.gov/news-release/nasa-selects-companies-to-advance-moon-mobility-for-artemis-missions/"
+    }
+  }
+]

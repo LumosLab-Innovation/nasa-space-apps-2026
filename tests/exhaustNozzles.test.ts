@@ -1,0 +1,5 @@
+import {it,expect} from 'vitest';
+import {Vector3} from '@babylonjs/core/Maths/math.vector';
+import {rcsNozzles,selectRcsPair,orionAuxiliaries} from '../src/fx/exhaustNozzles';
+it('selects cancelling forces and the correct torque for all attitude axes',()=>{const jets=rcsNozzles();for(const axis of [Vector3.Right(),Vector3.Up(),Vector3.Forward()])for(const sign of [-1,1]){const demand=axis.scale(sign),[a,b]=selectRcsPair(jets,demand);expect(a).not.toBe(b);expect(jets[a].direction.add(jets[b].direction).length()).toBeLessThan(.001);const torque=Vector3.Cross(jets[a].position.subtract(new Vector3(0,20,0)),jets[a].direction.negate()).add(Vector3.Cross(jets[b].position.subtract(new Vector3(0,20,0)),jets[b].direction.negate()));expect(Vector3.Dot(torque,demand)).toBeGreaterThan(1);}});
+it('keeps Orion auxiliary jets away from the main bell',()=>{const n=orionAuxiliaries();expect(n).toHaveLength(8);for(const j of n){expect(Math.hypot(j.position.x,j.position.z)).toBeCloseTo(1.46);expect(j.position.y).toBeCloseTo(-2.577);expect(j.direction.y).toBe(-1);}});

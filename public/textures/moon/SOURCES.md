@@ -1,0 +1,15 @@
+# Moon textures
+
+- `lroc-color-4k.webp` (4096 × 2048) is the global LROC WAC colour map from [NASA SVS's CGI Moon Kit](https://svs.gsfc.nasa.gov/4720/), converted from [the 4K TIFF](https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_poles_4k.tif).
+- `lroc-tranquility.webp` (2816 × 2560) is a brightness-adjusted mosaic from [NASA/JPL Moon Trek](https://trek.nasa.gov/moon/). Source layer: LROC WAC Global Mosaic, `LRO_WAC_Mosaic_Global_303ppd_v02`, [WMTS EQ matrix set](https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml) `default028mm`, level 6, rows 27–36, columns 68–78. Bounds are 11.25° E to 42.1875° E and 14.0625° S to 14.0625° N.
+- Credit: NASA's Scientific Visualization Studio for the global mosaic, and NASA/JPL Moon Trek and the LRO LROC team for the regional imagery.
+
+## Orbital elevation and shadows
+
+- `lola-elevation-delta-v1.bin`: losslessly row-delta encoded then gzipped unsigned 16-bit numerical elevation, after 2×2 area averaging for the rendered mesh. First 720 × 360 samples: [NASA SVS LOLA 4 ppd](https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_4_uint.tif) reduced to 2 ppd. Remaining 768 × 768 samples: crop of [LOLA 64 ppd](https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_64_uint.tif) reduced to 32 ppd, 12–36° E and 12° S–12° N, rows north to south, pixel-centred. Credit: NASA/GSFC, LRO/LOLA team, NASA Scientific Visualization Studio.
+- Decode elevation above a 1737.4 km reference sphere as `sample / 2000 - 10` km. Vertical exaggeration: **1×**. Source spacing is approximately 474 metres at the equator. The dense rendered mesh uses approximately 948 metre spacing, with finer normal detail from the original 64 ppd grid. This is regional orbital relief, not metre-resolution Apollo landing-site reconstruction.
+- `lola-relief.webp`: lossless *linear data*, R/G = east/north tangent-normal XY encoded from −1..1 to 0..255, B = Sun visibility from ray marching the same DEM. Decode normal Z as positive sqrt(1−X²−Y²). Shadow bake uses a staged Sun at selenographic longitude 46.527° W, latitude 0°, about 20° elevation at Apollo 11. It is not a historical/2028 ephemeris. Texture has mipmaps and anisotropic filtering at runtime.
+- Terrain shadows are baked for this fixed orbital Sun; moving ships receive dynamic 1024² PCF self-shadows. The yellow Apollo 11 ring is a game annotation, not a physical lunar structure; it follows sampled terrain with 180 m display clearance and a 120 m tube radius.
+- Rebuild with `node scripts/build-orbital-terrain.mjs` (GeoTIFF package and Python Pillow required). Development downloads cache under `.superpowers/`; only the compressed derived assets ship to players.
+
+Compression v1: for each grid separately, reset predictor to zero at each row; store `(sample - previous) mod 65536` as uint16 LE before gzip. Decode by cumulative sum modulo 65536 per row. This changes no elevation values. The `.bin` extension avoids automatic HTTP gzip decoding.

@@ -1,0 +1,64 @@
+// Developer-only visual evidence. Uses installed Playwright without adding a dependency.
+const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'C:/Users/ADMIN/AppData/Local/npm-cache/_npx/9833c18b2d85bc59/node_modules/playwright');
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const assert = require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+(async()=>{
+ const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',args:['--enable-gpu']});
+ const page=await browser.newPage({viewport:{width:1600,height:1050},deviceScaleFactor:1});
+ const errors=[];const failures=[];
+ page.on('pageerror',e=>errors.push(String(e)));
+ page.on('response',r=>{if(r.status()>=400)failures.push(`${r.status()} ${r.url()}`);});
+ await page.goto('http://localhost:5173/preview/hls.html',{waitUntil:'networkidle'});
+ await page.waitForFunction(()=>window.__hlsReview?.ready,{timeout:60000});
+ const shots=[];
+ for(const view of ['three-quarter','side','surface','docking','detail']){
+  await page.evaluate(v=>window.__hlsReview.setView(v),view);
+  await page.waitForTimeout(400);
+  const file=`docs/screens/hls-v2-${view}.png`;
+  await page.screenshot({path:path.join(root,file),fullPage:true});
+  shots.push({view,file,metrics:await page.evaluate(()=>window.__hlsReview.metrics())});
+ }
+ await page.evaluate(()=>{window.__hlsReview.setView('side');window.__hlsReview.setPose('surface',true);});
+ // Detail mode pauses; resume before testing animation.
+ if(await page.evaluate(()=>window.__hlsReview.metrics().paused))await page.click('#pause');
+ const initialTransforms=await page.evaluate(()=>window.__hlsReview.transforms());
+ await page.click('#pose');await page.waitForTimeout(400);await page.click('#pause');
+ const stopped=await page.evaluate(()=>window.__hlsReview.metrics());
+ const stoppedTransforms=await page.evaluate(()=>window.__hlsReview.transforms());
+ assert.ok(stopped.deployment>0&&stopped.deployment<1,'pause during transition');
+ assert.notDeepEqual(initialTransforms.near.feet,stoppedTransforms.near.feet,'feet fold before leg retraction');
+ assert.notEqual(initialTransforms.near.carY,stoppedTransforms.near.carY,'actual elevator moved');
+ await page.waitForTimeout(300);
+ const after=await page.evaluate(()=>window.__hlsReview.metrics());
+ const afterTransforms=await page.evaluate(()=>window.__hlsReview.transforms());
+ assert.deepEqual(stoppedTransforms,afterTransforms,'all model transforms freeze on pause');
+ const pauseStable=stopped.deployment===after.deployment&&stopped.elevator===after.elevator;
+ await page.click('#pause');await page.waitForTimeout(300);
+ const resumedTransforms=await page.evaluate(()=>window.__hlsReview.transforms());
+ assert.notDeepEqual(afterTransforms.near.feet,resumedTransforms.near.feet,'feet resume');
+ assert.notEqual(afterTransforms.near.carY,resumedTransforms.near.carY,'elevator resumes');
+ await page.click('#pause');
+ await page.click('#lod');
+ const far=await page.evaluate(()=>window.__hlsReview.metrics());
+ const farTransforms=await page.evaluate(()=>window.__hlsReview.transforms());
+ assert.equal(farTransforms.near.enabled,false);assert.equal(farTransforms.far.enabled,true);
+ assert.equal(farTransforms.near.casterCount,0);assert.equal(farTransforms.far.casterCount,farTransforms.far.meshCount);
+ assert.deepEqual(farTransforms.near.legs,farTransforms.far.legs,'LOD pose equivalence');
+ assert.deepEqual(farTransforms.near.feet,farTransforms.far.feet,'LOD foot equivalence');
+ assert.deepEqual(farTransforms.near.doors,farTransforms.far.doors,'LOD door equivalence');
+ assert.equal(farTransforms.near.carY,farTransforms.far.carY);
+ await page.evaluate(()=>window.__hlsReview.setPose('flight',true));
+ await page.screenshot({path:path.join(root,'docs/screens/hls-v2-flight-far.png')});
+ await page.setViewportSize({width:600,height:900});
+ await page.screenshot({path:path.join(root,'docs/screens/hls-v2-compact.png'),fullPage:true});
+ const baseline=JSON.parse(fs.readFileSync(path.join(root,'docs/references/hls/protected-baseline.json'),'utf8').replace(/^\uFEFF/,''));
+ const unchanged=baseline.every(b=>crypto.createHash('sha256').update(fs.readFileSync(b.Path)).digest('hex').toUpperCase()===b.Hash);
+ const report={errors,failures,pauseStable,actualTransformsMovedFrozenAndResumed:true,lodVisibilityAndCastersVerified:true,far,protectedFilesUnchanged:unchanged,shots};
+ fs.writeFileSync(path.join(root,'docs/screens/hls-v2-qa.json'),JSON.stringify(report,null,2));
+ console.log(JSON.stringify(report,null,2));
+ await browser.close();
+ if(errors.length||failures.length||!pauseStable||!unchanged)process.exitCode=1;
+})().catch(e=>{console.error(e);process.exit(1);});

@@ -1,0 +1,174 @@
+{
+  "errors": [],
+  "failures": [],
+  "pauseStable": true,
+  "actualTransformsMovedFrozenAndResumed": true,
+  "lodVisibilityAndCastersVerified": true,
+  "far": {
+    "view": "side",
+    "lod": "far",
+    "paused": true,
+    "deployment": 0.824029166356724,
+    "elevator": 0.8959102539164191,
+    "elevatorVelocity": -0.08333333333333333,
+    "gearVelocity": -0.14285714285714285,
+    "gearStages": {
+      "door": 1,
+      "leg": 1,
+      "foot": 0.05802186771952445
+    },
+    "stages": {
+      "support": 1,
+      "floor": 1,
+      "guards": 1,
+      "lower": 0.9283171594686729
+    },
+    "drawCalls": 76,
+    "meshCount": 99,
+    "fps": 126.05042016806757,
+    "importMs": 2605
+  },
+  "protectedFilesUnchanged": true,
+  "shots": [
+    {
+      "view": "three-quarter",
+      "file": "docs/screens/hls-v2-three-quarter.png",
+      "metrics": {
+        "view": "three-quarter",
+        "lod": "near",
+        "paused": false,
+        "deployment": 1,
+        "elevator": 1,
+        "elevatorVelocity": 0,
+        "gearVelocity": 0,
+        "gearStages": {
+          "door": 1,
+          "leg": 1,
+          "foot": 1
+        },
+        "stages": {
+          "support": 1,
+          "floor": 1,
+          "guards": 1,
+          "lower": 1
+        },
+        "drawCalls": 77,
+        "meshCount": 99,
+        "fps": 119.85617259431605,
+        "importMs": 2605
+      }
+    },
+    {
+      "view": "side",
+      "file": "docs/screens/hls-v2-side.png",
+      "metrics": {
+        "view": "side",
+        "lod": "near",
+        "paused": false,
+        "deployment": 1,
+        "elevator": 1,
+        "elevatorVelocity": 0,
+        "gearVelocity": 0,
+        "gearStages": {
+          "door": 1,
+          "leg": 1,
+          "foot": 1
+        },
+        "stages": {
+          "support": 1,
+          "floor": 1,
+          "guards": 1,
+          "lower": 1
+        },
+        "drawCalls": 77,
+        "meshCount": 99,
+        "fps": 124.53300124224918,
+        "importMs": 2605
+      }
+    },
+    {
+      "view": "surface",
+      "file": "docs/screens/hls-v2-surface.png",
+      "metrics": {
+        "view": "surface",
+        "lod": "near",
+        "paused": false,
+        "deployment": 1,
+        "elevator": 1,
+        "elevatorVelocity": 0,
+        "gearVelocity": 0,
+        "gearStages": {
+          "door": 1,
+          "leg": 1,
+          "foot": 1
+        },
+        "stages": {
+          "support": 1,
+          "floor": 1,
+          "guards": 1,
+          "lower": 1
+        },
+        "drawCalls": 77,
+        "meshCount": 99,
+        "fps": 122.44897959183699,
+        "importMs": 2605
+      }
+    },
+    {
+      "view": "docking",
+      "file": "docs/screens/hls-v2-docking.png",
+      "metrics": {
+        "view": "docking",
+        "lod": "near",
+        "paused": false,
+        "deployment": 0,
+        "elevator": 0,
+        "elevatorVelocity": 0,
+        "gearVelocity": 0,
+        "gearStages": {
+          "door": 0,
+          "leg": 0,
+          "foot": 0
+        },
+        "stages": {
+          "support": 0,
+          "floor": 0,
+          "guards": 0,
+          "lower": 0
+        },
+        "drawCalls": 94,
+        "meshCount": 99,
+        "fps": 94.07337723248459,
+        "importMs": 2605
+      }
+    },
+    {
+      "view": "detail",
+      "file": "docs/screens/hls-v2-detail.png",
+      "metrics": {
+        "view": "detail",
+        "lod": "near",
+        "paused": false,
+        "deployment": 0,
+        "elevator": 0,
+        "elevatorVelocity": 0,
+        "gearVelocity": 0,
+        "gearStages": {
+          "door": 0,
+          "leg": 0,
+          "foot": 0
+        },
+        "stages": {
+          "support": 0,
+          "floor": 0,
+          "guards": 0,
+          "lower": 0
+        },
+        "drawCalls": 51,
+        "meshCount": 99,
+        "fps": 138.95321908866353,
+        "importMs": 2605
+      }
+    }
+  ]
+}

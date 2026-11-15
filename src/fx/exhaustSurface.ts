@@ -1,0 +1,4 @@
+export const FAN_ROWS=24,FAN_COLUMNS=64;
+export function groundPlane(x:number,z:number,sample:(x:number,z:number)=>number):[number,number,number,number]{const h=sample(x,z),nx=-(sample(x+.5,z)-sample(x-.5,z)),nz=-(sample(x,z+.5)-sample(x,z-.5)),norm=Math.hypot(nx,1,nz);return[nx/norm,1/norm,nz/norm,-(nx*x+h+nz*z)/norm];}
+/** One seamless terrain-draped sheet. Opacity/flow lives in the shader, not repeated wedge silhouettes. */
+export function fillSurfaceFan(data:Float32Array,cx:number,cz:number,angle:number,radius:number,_time:number,sample:(x:number,z:number)=>number){let k=0;for(let row=0;row<=FAN_ROWS;row++){const r=radius*row/FAN_ROWS;for(let col=0;col<=FAN_COLUMNS;col++){const a=angle+col/FAN_COLUMNS*Math.PI*2,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r;data[k++]=x;data[k++]=sample(x,z)+.12;data[k++]=z;}}}
