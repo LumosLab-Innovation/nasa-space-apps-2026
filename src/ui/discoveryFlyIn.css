@@ -1,0 +1,22 @@
+.discovery-flash { position:fixed; inset:0; z-index:60; background:#fff; opacity:0; pointer-events:none; animation:discovery-flash .35s ease-out forwards; }
+@keyframes discovery-flash { 0% { opacity:.85; } 100% { opacity:0; } }
+.discovery-pol { position:fixed; right:18px; bottom:18px; z-index:61; width:min(170px,40vw); transform:rotate(4deg); pointer-events:none; color:#222; font:700 13px/1.25 'Patrick Hand',system-ui,sans-serif; animation:discovery-in .45s cubic-bezier(.2,.9,.3,1.2) both; }
+.discovery-pol[data-leaving] { animation:discovery-out .35s ease-in forwards; }
+.discovery-pol .paper { background:#fff; padding:8px 8px 10px; box-shadow:0 4px 14px #0008; box-sizing:border-box; }
+.discovery-pol .face { position:relative; }
+.discovery-pol .back { position:absolute; inset:0; }
+.discovery-pol .b1 { background:#f6f3eb; transform:translate(-7px,3px) rotate(-7deg); }
+.discovery-pol .b2 { background:#ece7da; transform:translate(-13px,6px) rotate(-13deg); }
+.discovery-pol .badge { position:absolute; top:-10px; left:-10px; min-width:26px; padding:2px 8px; border-radius:999px; background:#c8372d; color:#fff; font:700 15px/1.2 'Patrick Hand',system-ui,sans-serif; text-align:center; box-shadow:0 2px 6px #0006; box-sizing:border-box; }
+.discovery-pol .snap { aspect-ratio:4/3; background:#8a8d91 center/cover no-repeat; transition:filter 1s ease, background-color 1s ease; filter:grayscale(1) brightness(.8); }
+.discovery-pol[data-developed] .snap { filter:none; }
+.discovery-pol .snap[data-nasa] { background-color:#efe9da; background-size:contain; filter:none; }
+.discovery-pol .credit { margin-top:2px; color:#666; font:400 10px/1.2 system-ui,sans-serif; text-align:center; overflow-wrap:anywhere; }
+.discovery-pol .cap { margin-top:7px; text-align:center; overflow-wrap:anywhere; }
+@keyframes discovery-in { from { transform:translate(40px,60px) rotate(14deg) scale(.7); opacity:0; } to { transform:rotate(4deg); opacity:1; } }
+@keyframes discovery-out { to { transform:translate(30px,40px) rotate(10deg); opacity:0; } }
+.discovery-pol[data-reduced] { transform:rotate(4deg); animation:discovery-fade-in .3s ease-out both; }
+.discovery-pol[data-reduced][data-leaving] { animation:discovery-fade-out .3s ease-in forwards; }
+@keyframes discovery-fade-in { from { opacity:0; } to { opacity:1; } }
+@keyframes discovery-fade-out { from { opacity:1; } to { opacity:0; } }
+@media (prefers-reduced-motion:reduce) { .discovery-flash { display:none; } }

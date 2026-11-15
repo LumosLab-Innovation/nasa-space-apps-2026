@@ -3,6 +3,7 @@ import HavokPhysics from '@babylonjs/havok';
 import '@babylonjs/loaders/glTF';
 import type { Music } from '../audio/musicEngine';
 import { LUNAR_G } from '../config/constants';
+import { settleWithin } from '../core/settleWithin';
 import { withPreparationTarget } from '../core/preparationRender';
 import { loadEphemeris } from '../data/ephemeris';
 import { loadHeightmap } from '../data/heightmap';
@@ -10,7 +11,9 @@ import { planMission } from '../data/mission';
 import { safeStorage, tr } from '../i18n/i18n';
 import { prepareModels } from '../models/loadModel';
 import { CONTINUE_KEY, clearSave, prepareRestore, type SaveData } from '../save/save';
+import { createPhotoStore } from '../save/photoStore';
 import { type LoadingProgress } from '../ui/loadingScreen';
+import { cardsFor, notebookThumbUrls } from '../content/content';
 import { loadEarthTexture } from '../world/earthGlobe';
 import { prepareLandingIntro } from './landingScene';
 import type { StartChoice } from './mainMenuScene';
@@ -33,7 +36,8 @@ export async function prepareMission(
   engine: Engine, music: Music, options: MissionOptions, report: LoadingProgress,
 ): Promise<() => Promise<void>> {
   const { choice, save, demo, autosave, introOnly, jump, onMainMenu } = options;
-  const work = MISSION_FILE_COUNT + 4; // Gameplay module, packaged assets, data/physics, and first scene.
+  const thumbs = notebookThumbUrls(cardsFor('en'));
+  const work = MISSION_FILE_COUNT + thumbs.length + 4; // Gameplay module, packaged assets, data/physics, and first scene.
   const progress = (completed: number) => Math.floor(completed * 100 / work);
   const downloading = (completed: number) => report(progress(completed + 1), tr('Loading assets ({done}/{total})…', {
     done: completed, total: MISSION_FILE_COUNT,
@@ -41,7 +45,17 @@ export async function prepareMission(
   downloading(0);
   const files = await loadMissionFiles(downloading);
   const fetchFile = missionFetch(files);
-  report(progress(MISSION_FILE_COUNT + 1), tr('Preparing terrain and physics…'));
+  // Album thumbnails: fetched and decoded now so the notebook grid is instant. A failed thumb never blocks loading.
+  let thumbsDone = 0;
+  const pendingThumbs: HTMLImageElement[] = [];
+  await Promise.all(thumbs.map(async (url) => {
+    // Keep the Image referenced until it settles; a hung request times out instead of blocking loading.
+    const img = new Image(); pendingThumbs.push(img); img.decoding = 'async'; img.src = url;
+    await settleWithin(img.decode(), 6000);
+    report(progress(MISSION_FILE_COUNT + 1 + ++thumbsDone), tr('Loading assets ({done}/{total})…', { done: MISSION_FILE_COUNT, total: MISSION_FILE_COUNT }));
+  }));
+  const after = MISSION_FILE_COUNT + thumbs.length;
+  report(progress(after + 1), tr('Preparing terrain and physics…'));
   const [havok, hm, eph] = await Promise.all([
     HavokPhysics({ wasmBinary: missionFile(files, HAVOK_BINARY) }),
     loadHeightmap(fetchFile),
@@ -110,11 +124,13 @@ export async function prepareMission(
     }
   };
 
-  const preparingScene = progress(MISSION_FILE_COUNT + 2);
+  const preparingScene = progress(after + 2);
   if (choice === 'auto' || choice === 'fly') {
+    // New Game: the notebook photo album starts empty (only where the surface would save photos at all).
+    if (autosave && !demo) createPhotoStore(safeStorage(), true).clear();
     report(preparingScene, tr('Preparing the lunar surface…'));
     const surface = introOnly ? null : await prepareSurface(true, text => report(preparingScene,text));
-    report(progress(MISSION_FILE_COUNT+3),tr('Preparing lunar orbit…'));
+    report(progress(after+3),tr('Preparing lunar orbit…'));
     const surfaceStart = planMission(eph).start || Date.UTC(2028, 8, 10, 8);
 
     let handoff: DescentHandoff | undefined;

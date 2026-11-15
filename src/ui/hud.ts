@@ -122,6 +122,8 @@ export function createHud(scene: Scene): Hud {
       prompt.width = Math.min(promptWidth, Math.max(1, canvasWidth - 24)) + 'px';
     },
     toast(text, seconds = 4) {
+      // Discoveries are announced by the notebook polaroid fly-in instead of a text toast.
+      if (text === tr('New discovery in your Science Notebook (Tab)') || text === tr('New discoveries in your Science Notebook (Tab)')) return;
       toastText.text = text;
       toastLeft = seconds;
       toastText.alpha = 1;

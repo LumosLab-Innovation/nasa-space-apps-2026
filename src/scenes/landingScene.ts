@@ -34,6 +34,7 @@ import { createOrbitalMoon } from '../world/orbitalMoon';
 import { createApolloHeritage } from '../world/apolloHeritage';
 import { createApolloMarker } from '../ui/apolloMarker';
 import { HERITAGE_LAYER, heritageShot } from '../landing/apolloHeritageShot';
+import { captureScene } from '../ui/discoveryCamera';
 import { ORBIT_SUN_LON, readOrbitalElevation, lunarCoordinates, renderedSurfaceRadius, renderedTerrainClearance, type Elevation } from '../world/orbitalTerrain';
 import { APOLLO_MODEL, EARTH_TEXTURE, missionFile, MOON_DETAIL_TEXTURE, MOON_TEXTURE, MOON_ELEVATION, MOON_RELIEF_TEXTURE, type MissionFiles } from './missionAssets';
 import type { ModelId } from '../models/manifest';
@@ -418,6 +419,7 @@ export async function prepareLandingIntro(
   let warnCooldown = 0;
   let holdT = 0;
   let tranquilityDialogueDone = false;
+  let eaglePhotoTaken = false; // the notebook's Tranquility Base photo, once per intro
   let heritageExitT = 0;
   let returnFadeT = 0;
   let wasLocal = false;
@@ -652,6 +654,16 @@ export async function prepareLandingIntro(
       cam.maxZ = localView ? 2000 : 100_000;
       const heritageAlpha = d.stage === 'tranquility' ? Math.max(shot.fade,Math.min(1,heritageExitT/.5)) : returnFadeT/.5;
       heritageFade.isVisible = heritageAlpha > 0;heritageFade.alpha = heritageAlpha;
+      // Notebook: photograph the Eagle once the approach has settled, before the exit fade (scene only).
+      if (!eaglePhotoTaken && opts.destination && localView && stageT >= 11 && heritageAlpha === 0) {
+        eaglePhotoTaken = true;
+        // This is the Eagle photo moment: flash, shutter and polaroid now, none after touchdown.
+        const world = opts.destination, clockMs = opts.openingUtc + t * 1000;
+        captureScene(scene, cam).then(jpeg => {
+          world.photos.put('apollo11Site', { jpeg, clockMs });
+          world.showDiscoveryMoment('apollo11Site', jpeg);
+        }, (error: unknown) => console.warn('[notebook] Eagle photo failed; Tranquility Base keeps its NASA photo', error));
+      }
       if (d.stage !== 'tranquility') returnFadeT = Math.max(0,returnFadeT-dt);
 
       // Orbit motion: real low-orbit angular speed until the burn, then the ground track of the descent.

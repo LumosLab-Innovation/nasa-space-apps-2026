@@ -7,6 +7,17 @@
     "source": {
       "label": "NASA NSSDC: The Apollo 15 Hammer-Feather Drop",
       "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_15_feather_drop.html"
+    },
+    "pipNote": "Tay muốn thi rơi với chiếc lông vũ, nhưng trên Mặt Trăng thì lúc nào cũng hòa.",
+    "photo": {
+      "file": "textures/notebook/hammerFeather.webp",
+      "thumb": "textures/notebook/hammerFeather.thumb.webp",
+      "caption": "Apollo 15, 1971: David Scott thả búa và lông chim trên Mặt Trăng.",
+      "credit": "NASA",
+      "nasaId": "S71-43788",
+      "url": "https://images.nasa.gov/details/S71-43788",
+      "width": 960,
+      "height": 830
     }
   },
   {
@@ -17,6 +28,17 @@
     "source": {
       "label": "NASA GSFC PGDA: Lunar Polar Illumination",
       "url": "https://pgda.gsfc.nasa.gov/products/69"
+    },
+    "pipNote": "Ở đây đến hòn sỏi cũng có cái bóng dài đủ để khoe với cả xóm.",
+    "photo": {
+      "file": "textures/notebook/longShadows.webp",
+      "thumb": "textures/notebook/longShadows.thumb.webp",
+      "caption": "Cực nam Mặt Trăng do tàu Clementine của NASA chụp, ghép từ khoảng 1.500 ảnh.",
+      "credit": "NASA/JPL/USGS",
+      "nasaId": "PIA00001",
+      "url": "https://images.nasa.gov/details/PIA00001",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -27,6 +49,17 @@
     "source": {
       "label": "NASA Lunar Sample Compendium: 15415",
       "url": "https://curator.jsc.nasa.gov/lunar/lsc/15415.pdf"
+    },
+    "pipNote": "Đá Sáng Thế nghe như tên một ban nhạc rock, Tay đòi xin vào nhóm liền.",
+    "photo": {
+      "file": "textures/notebook/anorthosite.webp",
+      "thumb": "textures/notebook/anorthosite.thumb.webp",
+      "caption": "Mẫu đá 15415 của Apollo 15, 'Đá Khởi Nguyên', làm từ anorthosite.",
+      "credit": "NASA",
+      "nasaId": "S71-42955",
+      "url": "https://images.nasa.gov/details/S71-42955",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -37,6 +70,17 @@
     "source": {
       "label": "NASA Science: Moon Facts",
       "url": "https://science.nasa.gov/moon/facts/"
+    },
+    "pipNote": "Ngoài này mình hát dở cỡ nào thì cũng chỉ có bộ đàm của bạn biết thôi.",
+    "photo": {
+      "file": "textures/notebook/noSound.webp",
+      "thumb": "textures/notebook/noSound.thumb.webp",
+      "caption": "Apollo 17, 1972: Harrison Schmitt bên lá cờ, giữa sự im lặng tuyệt đối.",
+      "credit": "NASA",
+      "nasaId": "AS17-134-20384",
+      "url": "https://images.nasa.gov/details/AS17-134-20384",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -47,6 +91,17 @@
     "source": {
       "label": "NASA Science: Lunar Dust and Duct Tape",
       "url": "https://science.nasa.gov/image-article/apod-2004-april-17-lunar-dust-and-duct-tape/"
+    },
+    "pipNote": "Sửa xe bằng bản đồ và băng dính, đúng kiểu kỹ sư mà mình mê!",
+    "photo": {
+      "file": "textures/notebook/apollo17Dust.webp",
+      "thumb": "textures/notebook/apollo17Dust.thumb.webp",
+      "caption": "Apollo 17, 1972: Gene Cernan trong tàu đổ bộ sau chuyến đi bộ đầy bụi.",
+      "credit": "NASA",
+      "nasaId": "AS17-145-22224",
+      "url": "https://images.nasa.gov/details/AS17-145-22224",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -57,6 +112,17 @@
     "source": {
       "label": "NASA Science: Apollo 11 Bootprint",
       "url": "https://science.nasa.gov/resource/apollo-11-bootprint/"
+    },
+    "pipNote": "Nhớ bước cho đẹp nhé, vì Mặt Trăng giữ dấu giày lâu lắm lắm.",
+    "photo": {
+      "file": "textures/notebook/tracksLast.webp",
+      "thumb": "textures/notebook/tracksLast.thumb.webp",
+      "caption": "Apollo 11, 1969: một dấu giày in trên đất Mặt Trăng.",
+      "credit": "NASA",
+      "nasaId": "as11-40-5878",
+      "url": "https://images.nasa.gov/details/as11-40-5878",
+      "width": 956,
+      "height": 960
     }
   },
   {
@@ -67,6 +133,17 @@
     "source": {
       "label": "NASA: Dust shield successfully repels lunar regolith",
       "url": "https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/"
+    },
+    "pipNote": "Cái chổi điện không cần lông chổi làm Tay lo bị mất việc ghê.",
+    "photo": {
+      "file": "textures/notebook/eds.webp",
+      "thumb": "textures/notebook/eds.thumb.webp",
+      "caption": "Tấm chắn bụi điện động trong phòng thí nghiệm của NASA Kennedy, 2023.",
+      "credit": "NASA/Cory Huston",
+      "nasaId": "KSC-20230118-PH-CSH01_0002",
+      "url": "https://images.nasa.gov/details/KSC-20230118-PH-CSH01_0002",
+      "width": 960,
+      "height": 640
     }
   },
   {
@@ -77,6 +154,17 @@
     "source": {
       "label": "NASA/JPL Horizons System",
       "url": "https://ssd.jpl.nasa.gov/horizons/"
+    },
+    "pipNote": "Khoảng lặng đó không phải Houston nghĩ lâu đâu, tin nhắn còn đang bay mà!",
+    "photo": {
+      "file": "textures/notebook/lightDelay.webp",
+      "thumb": "textures/notebook/lightDelay.thumb.webp",
+      "caption": "Ăng-ten DSS-53 của Mạng Không gian Sâu ở Madrid, dùng để liên lạc với tàu ở rất xa.",
+      "credit": "NASA/JPL-Caltech",
+      "nasaId": "PIA25136",
+      "url": "https://images.nasa.gov/details/PIA25136",
+      "width": 960,
+      "height": 720
     }
   },
   {
@@ -87,7 +175,9 @@
     "source": {
       "label": "NASA Science: Lunar Reconnaissance Orbiter",
       "url": "https://science.nasa.gov/mission/lro/"
-    }
+    },
+    "pipNote": "Nửa người mình phơi nắng thì đòi quạt, nửa trong bóng thì đòi chăn.",
+    "photo": null
   },
   {
     "id": "micaFiction",
@@ -97,7 +187,9 @@
     "source": {
       "label": "NASA Artemis",
       "url": "https://www.nasa.gov/humans-in-space/artemis/"
-    }
+    },
+    "pipNote": "Thú thật nhé: MICA và mình là nhân vật tưởng tượng, nhưng chuyện bụi phủ pin là thật.",
+    "photo": null
   },
   {
     "id": "spiritStuck",
@@ -107,6 +199,17 @@
     "source": {
       "label": "NASA JPL: NASA's Spirit Rover Completes Mission on Mars",
       "url": "https://www.jpl.nasa.gov/news/nasas-spirit-rover-completes-mission-on-mars/"
+    },
+    "pipNote": "Spirit ơi, ước gì hồi đó mình cho bạn mượn được cái tời.",
+    "photo": {
+      "file": "textures/notebook/spiritStuck.webp",
+      "thumb": "textures/notebook/spiritStuck.thumb.webp",
+      "caption": "Hình minh họa NASA: mô hình máy tính bánh xe Spirit lún trong đất mềm trên Sao Hỏa, 2009.",
+      "credit": "NASA/JPL-Caltech",
+      "nasaId": "PIA12337",
+      "url": "https://images.nasa.gov/details/PIA12337",
+      "width": 960,
+      "height": 641
     }
   },
   {
@@ -117,6 +220,17 @@
     "source": {
       "label": "LROC (LRO Camera team): Rolling Rolling Rolling",
       "url": "https://lroc.im-ldi.com/posts/509"
+    },
+    "pipNote": "Tự nhắc mình: không phải vết nào cũng có người lái, có vết chỉ do đá lăn.",
+    "photo": {
+      "file": "textures/notebook/boulderTracks.webp",
+      "thumb": "textures/notebook/boulderTracks.thumb.webp",
+      "caption": "Vệt đá lăn trên sườn dốc Mặt Trăng, do tàu LRO của NASA chụp.",
+      "credit": "NASA/GSFC/Arizona State University",
+      "nasaId": "PIA12914",
+      "url": "https://images.nasa.gov/details/PIA12914",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -127,6 +241,17 @@
     "source": {
       "label": "NASA SSERVI: Apollo Moon Flags Still Standing",
       "url": "https://sservi.nasa.gov/articles/apollo-moon-flags-still-standing/"
+    },
+    "pipNote": "Theo dõi lá cờ qua cái bóng của nó, đúng là khoa học kiểu thám tử!",
+    "photo": {
+      "file": "textures/notebook/apolloFlags.webp",
+      "thumb": "textures/notebook/apolloFlags.thumb.webp",
+      "caption": "Apollo 11, 1969: Buzz Aldrin bên lá cờ ở Căn cứ Tĩnh Lặng.",
+      "credit": "NASA",
+      "nasaId": "as11-40-5875",
+      "url": "https://images.nasa.gov/details/as11-40-5875",
+      "width": 928,
+      "height": 960
     }
   },
   {
@@ -137,6 +262,17 @@
     "source": {
       "label": "NASA: Lunar Communications Relay and Navigation Systems (LCRNS)",
       "url": "https://www.nasa.gov/goddard/esc/lcrns/"
+    },
+    "pipNote": "Lúc Trái Đất trốn sau đồi, mình tán gẫu với Tay cho đỡ buồn.",
+    "photo": {
+      "file": "textures/notebook/earthVisibility.webp",
+      "thumb": "textures/notebook/earthVisibility.thumb.webp",
+      "caption": "Trái Đất hình lưỡi liềm trên đường chân trời Mặt Trăng, Apollo 17 chụp năm 1972.",
+      "credit": "NASA",
+      "nasaId": "as17-152-23274",
+      "url": "https://images.nasa.gov/details/as17-152-23274",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -147,7 +283,9 @@
     "source": {
       "label": "NASA NSSDCA: Water Ice on the Moon?",
       "url": "https://nssdc.gsfc.nasa.gov/planetary/ice/ice_moon.html"
-    }
+    },
+    "pipNote": "Ai ngờ cố tình đâm tên lửa xuống hố lại là một thí nghiệm hay đến vậy?",
+    "photo": null
   },
   {
     "id": "viperPanels",
@@ -157,6 +295,17 @@
     "source": {
       "label": "NASA podcast: Houston We Have a Podcast, VIPER",
       "url": "https://www.nasa.gov/podcasts/houston-we-have-a-podcast/viper/"
+    },
+    "pipNote": "Nhờ tấm pin phẳng của MICA, mình học được cách đứng thẳng và nhìn về Mặt Trời.",
+    "photo": {
+      "file": "textures/notebook/viperPanels.webp",
+      "thumb": "textures/notebook/viperPanels.thumb.webp",
+      "caption": "Xe thử nghiệm VIPER với tấm pin dựng đứng tại NASA Glenn, 2022.",
+      "credit": "NASA/GRC/Bridget Caswell",
+      "nasaId": "GRC-2022-C-04467",
+      "url": "https://images.nasa.gov/details/GRC-2022-C-04467",
+      "width": 640,
+      "height": 960
     }
   },
   {
@@ -167,7 +316,9 @@
     "source": {
       "label": "Zhang et al. 2020, Science Advances: First measurements of the radiation dose on the lunar surface",
       "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7518862/"
-    }
+    },
+    "pipNote": "Thứ vô hình bay vèo vèo qua người suốt ngày, nên mình mê chỗ trú lắm.",
+    "photo": null
   },
   {
     "id": "regolithShield",
@@ -177,7 +328,9 @@
     "source": {
       "label": "NASA NTRS: Solar-flare shielding with regolith at a lunar-base site (1988)",
       "url": "https://ntrs.nasa.gov/citations/19890004839"
-    }
+    },
+    "pipNote": "Tấm chăn đất này mình tự đắp đó, đống đất đáng tự hào nhất đời mình.",
+    "photo": null
   },
   {
     "id": "shadowClock",
@@ -187,7 +340,9 @@
     "source": {
       "label": "NASA SVS: Lunar South Pole Illumination with Earth and Sun",
       "url": "https://svs.gsfc.nasa.gov/5228"
-    }
+    },
+    "pipNote": "Khỏi cần đồng hồ đeo tay, ở đây hòn đá nào cũng thành kim đồng hồ.",
+    "photo": null
   },
   {
     "id": "peaksOfLight",
@@ -197,6 +352,17 @@
     "source": {
       "label": "LROC: South Pole Illumination Map",
       "url": "https://lroc.im-ldi.com/images/271"
+    },
+    "pipNote": "Đồi ở đây chơi trốn tìm với Mặt Trời, dù Mặt Trời chưa hề lặn.",
+    "photo": {
+      "file": "textures/notebook/peaksOfLight.webp",
+      "thumb": "textures/notebook/peaksOfLight.thumb.webp",
+      "caption": "Cực nam Mặt Trăng do tàu LRO của NASA chụp, 2010.",
+      "credit": "NASA/GSFC/Arizona State University",
+      "nasaId": "PIA13523",
+      "url": "https://images.nasa.gov/details/PIA13523",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -207,7 +373,9 @@
     "source": {
       "label": "SpacePolicyOnline: SLIM Does It Again — Survives Another Lunar Night (2024)",
       "url": "https://spacepolicyonline.com/news/slim-does-it-again-survives-another-lunar-night/"
-    }
+    },
+    "pipNote": "Nghe tin SLIM tỉnh lại, mình bớt sợ giấc ngủ đông trong bóng tối hơn nhiều.",
+    "photo": null
   },
   {
     "id": "earthshine",
@@ -217,6 +385,17 @@
     "source": {
       "label": "NASA APOD: The Da Vinci Glow (2025)",
       "url": "https://apod.nasa.gov/apod/ap250403.html"
+    },
+    "pipNote": "Ánh Trái Đất giống như nhà để lại cho tụi mình một ngọn đèn ngủ bé xíu.",
+    "photo": {
+      "file": "textures/notebook/earthshine.webp",
+      "thumb": "textures/notebook/earthshine.thumb.webp",
+      "caption": "Trăng lưỡi liềm và Sao Kim nhìn từ Trạm Vũ trụ, 2003; phần tối sáng nhẹ nhờ ánh Trái Đất.",
+      "credit": "NASA",
+      "nasaId": "iss006e48523",
+      "url": "https://images.nasa.gov/details/iss006e48523",
+      "width": 960,
+      "height": 654
     }
   },
   {
@@ -227,7 +406,9 @@
     "source": {
       "label": "ISRO: LIBS confirms the presence of Sulphur on the lunar surface",
       "url": "https://www.isro.gov.in/LIBSResults.html"
-    }
+    },
+    "pipNote": "Một rover nhỏ có tia laser tìm ra lưu huỳnh, robot nhỏ muôn năm!",
+    "photo": null
   },
   {
     "id": "story_slim",
@@ -237,7 +418,9 @@
     "source": {
       "label": "JAXA press release, 25 January 2024",
       "url": "https://global.jaxa.jp/press/2024/01/20240125-1_e.html"
-    }
+    },
+    "pipNote": "Biệt danh Xạ thủ Mặt Trăng ngầu ghê, Tay bảo mình nên tên là Pip Chuẩn Xác.",
+    "photo": null
   },
   {
     "id": "story_odysseus",
@@ -247,7 +430,9 @@
     "source": {
       "label": "NASA: First surface science in decades via commercial Moon mission",
       "url": "https://www.nasa.gov/missions/artemis/clps/nasa-collects-first-surface-science-in-decades-via-commercial-moon-mission/"
-    }
+    },
+    "pipNote": "Ngã lăn ra mà vẫn làm xong việc, Odysseus đúng là người hùng của mình.",
+    "photo": null
   },
   {
     "id": "story_eds",
@@ -257,6 +442,17 @@
     "source": {
       "label": "NASA: Dust shield successfully repels lunar regolith on the Moon",
       "url": "https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/"
+    },
+    "pipNote": "Hóa ra bạn lau pin cho MICA giống hệt thí nghiệm thật trên Mặt Trăng, đập tay nào!",
+    "photo": {
+      "file": "textures/notebook/story_eds.webp",
+      "thumb": "textures/notebook/story_eds.thumb.webp",
+      "caption": "Tháng 1/2025: tên lửa chở Blue Ghost và tấm chắn bụi của NASA chờ phóng.",
+      "credit": "NASA/Kim Shiflett",
+      "nasaId": "KSC-20250114-PH-KLS01_0039",
+      "url": "https://images.nasa.gov/details/KSC-20250114-PH-KLS01_0039",
+      "width": 960,
+      "height": 640
     }
   },
   {
@@ -267,6 +463,17 @@
     "source": {
       "label": "NASA: Artemis IV",
       "url": "https://www.nasa.gov/mission/artemis-iv/"
+    },
+    "pipNote": "Chuyện ở lâu là tưởng tượng thôi, nhưng mình vẫn giữ sẵn một giường cho bạn.",
+    "photo": {
+      "file": "textures/notebook/story_artemis.webp",
+      "thumb": "textures/notebook/story_artemis.thumb.webp",
+      "caption": "Tháng 4/2026: phi hành đoàn Artemis II chụp Trái Đất lặn sau Mặt Trăng.",
+      "credit": "NASA",
+      "nasaId": "art002e021278",
+      "url": "https://images.nasa.gov/details/art002e021278",
+      "width": 960,
+      "height": 640
     }
   },
   {
@@ -277,6 +484,17 @@
     "source": {
       "label": "NASA NSSDC: Apollo 11 lunar landing mission",
       "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo11info.html"
+    },
+    "pipNote": "Mấy cái biển này không có nước, chỉ có dung nham cũ, nên Tay đừng đòi bơi nhé.",
+    "photo": {
+      "file": "textures/notebook/apollo11Site.webp",
+      "thumb": "textures/notebook/apollo11Site.thumb.webp",
+      "caption": "Apollo 11, 20/7/1969: Buzz Aldrin làm việc cạnh tàu đổ bộ Eagle.",
+      "credit": "NASA",
+      "nasaId": "as11-40-5927",
+      "url": "https://images.nasa.gov/details/as11-40-5927",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -287,7 +505,9 @@
     "source": {
       "label": "NASA: 50 Years Ago, One Small Step, One Giant Leap",
       "url": "https://www.nasa.gov/history/50-years-ago-one-small-step-one-giant-leap/"
-    }
+    },
+    "pipNote": "Hễ mọi người hỏi mình cùng lúc là mạch của mình cũng nháy 1202 liền.",
+    "photo": null
   },
   {
     "id": "rocketEquation",
@@ -297,6 +517,17 @@
     "source": {
       "label": "NASA Glenn: Ideal Rocket Equation",
       "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/ideal-rocket-equation/"
+    },
+    "pipNote": "Ném đồ ra sau để lao về trước, nghe như phép thuật mà thật ra là toán học.",
+    "photo": {
+      "file": "textures/notebook/rocketEquation.webp",
+      "thumb": "textures/notebook/rocketEquation.thumb.webp",
+      "caption": "16/7/1969: tên lửa Saturn V đưa Apollo 11 lên đường tới Mặt Trăng.",
+      "credit": "NASA",
+      "nasaId": "6900540",
+      "url": "https://images.nasa.gov/details/6900540",
+      "width": 754,
+      "height": 960
     }
   },
   {
@@ -307,6 +538,17 @@
     "source": {
       "label": "NASA: LRO looks at Apollo 12 and Surveyor 3 landing sites",
       "url": "https://www.nasa.gov/missions/lunar-reconnaissance-orbiter-looks-at-apollo-12-surveyor-3-landing-sites/"
+    },
+    "pipNote": "Luật cho căn cứ tương lai: đáp thật xa, kẻo phun bụi vào hàng xóm.",
+    "photo": {
+      "file": "textures/notebook/apollo12Surveyor.webp",
+      "thumb": "textures/notebook/apollo12Surveyor.thumb.webp",
+      "caption": "Apollo 12, 1969: Alan Bean bên tàu Surveyor 3, phía sau là tàu đổ bộ.",
+      "credit": "NASA",
+      "nasaId": "AS12-48-7134",
+      "url": "https://images.nasa.gov/details/AS12-48-7134",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -317,6 +559,17 @@
     "source": {
       "label": "NASA Science: Mission to study mysterious lunar twilight rays",
       "url": "https://science.nasa.gov/science-research/planetary-science/03sep_ladee/"
+    },
+    "pipNote": "Có thể là bụi lơ lửng, cũng có thể không, các nhà khoa học vẫn còn tranh luận.",
+    "photo": {
+      "file": "textures/notebook/horizonGlow.webp",
+      "thumb": "textures/notebook/horizonGlow.thumb.webp",
+      "caption": "Tàu Clementine của NASA, 1994: ánh sáng mờ phía trên rìa tối của Mặt Trăng.",
+      "credit": "NASA/JPL/USGS",
+      "nasaId": "PIA00434",
+      "url": "https://images.nasa.gov/details/PIA00434",
+      "width": 722,
+      "height": 960
     }
   },
   {
@@ -327,6 +580,17 @@
     "source": {
       "label": "NASA NSSDC: Apollo Lunar Roving Vehicle",
       "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_lrv.html"
+    },
+    "pipNote": "Bánh xe đan bằng dây thép, như cái giỏ đi chợ biết chạy, mình muốn một chiếc!",
+    "photo": {
+      "file": "textures/notebook/apolloLRV.webp",
+      "thumb": "textures/notebook/apolloLRV.thumb.webp",
+      "caption": "Apollo 15, 1971: James Irwin bên xe tự hành Mặt Trăng.",
+      "credit": "NASA",
+      "nasaId": "as15-86-11603",
+      "url": "https://images.nasa.gov/details/as15-86-11603",
+      "width": 960,
+      "height": 960
     }
   },
   {
@@ -337,6 +601,17 @@
     "source": {
       "label": "NASA: NASA Selects Companies to Advance Moon Mobility for Artemis Missions",
       "url": "https://www.nasa.gov/news-release/nasa-selects-companies-to-advance-moon-mobility-for-artemis-missions/"
+    },
+    "pipNote": "Xe biết tự lái giữa các chuyến, biết đâu sẽ thành bạn đua của mình!",
+    "photo": {
+      "file": "textures/notebook/artemisLTV.webp",
+      "thumb": "textures/notebook/artemisLTV.thumb.webp",
+      "caption": "2026: phi hành gia NASA thử nghiệm mẫu xe địa hình Mặt Trăng.",
+      "credit": "NASA/Bill Stafford",
+      "nasaId": "jsc2026e417568",
+      "url": "https://images.nasa.gov/details/jsc2026e417568",
+      "width": 960,
+      "height": 640
     }
   }
 ]

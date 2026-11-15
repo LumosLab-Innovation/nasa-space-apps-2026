@@ -28,6 +28,8 @@ The view shows the descent stage left on the Moon, an illustrative footprint rou
 
 ## Data
 
+Science Notebook photos: 23 of the 34 cards show a NASA image listed with NASA ids, page URLs and credits in [notebook photo credits](public/textures/notebook/SOURCES.md), used under NASA media guidelines. The 11 cards without a verified NASA image show the player's in-game photo.
+
 AxEMU character reference: public Axiom suit imagery (https://www.axiomspace.com/axiom-suit) and NASA's AxEMU testing photographs (https://www.nasa.gov/image-article/axiom-space-tests-lunar-spacesuit-at-nasas-johnson-space-center/). The game uses an original illustrative reconstruction, not a confirmed Artemis IV flight suit. Model attribution and build provenance are in `public/models/SOURCES.md`.
 
 ### Layered exhaust and attitude jets

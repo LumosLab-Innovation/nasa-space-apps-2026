@@ -1,0 +1,379 @@
+[
+ {
+  "id": "hammerFeather",
+  "photo": {
+   "nasaId": "S71-43788",
+   "pageUrl": "https://images.nasa.gov/details/S71-43788",
+   "downloadUrl": "http://images-assets.nasa.gov/image/S71-43788/S71-43788~large.jpg",
+   "width": 1920,
+   "height": 1660,
+   "captionEn": "Apollo 15, 1971: David Scott drops a hammer and a feather on the Moon.",
+   "captionVi": "Apollo 15, 1971: David Scott thả búa và lông chim trên Mặt Trăng.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "longShadows",
+  "photo": {
+   "nasaId": "PIA00001",
+   "pageUrl": "https://images.nasa.gov/details/PIA00001",
+   "downloadUrl": "http://images-assets.nasa.gov/image/PIA00001/PIA00001~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "The Moon's south pole seen by NASA's Clementine, a mosaic of about 1,500 images.",
+   "captionVi": "Cực nam Mặt Trăng do tàu Clementine của NASA chụp, ghép từ khoảng 1.500 ảnh.",
+   "credit": "NASA/JPL/USGS",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "anorthosite",
+  "photo": {
+   "nasaId": "S71-42955",
+   "pageUrl": "https://images.nasa.gov/details/S71-42955",
+   "downloadUrl": "http://images-assets.nasa.gov/image/S71-42955/S71-42955~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "Apollo 15 sample 15415, the 'Genesis Rock', made of anorthosite.",
+   "captionVi": "Mẫu đá 15415 của Apollo 15, 'Đá Khởi Nguyên', làm từ anorthosite.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "noSound",
+  "photo": {
+   "nasaId": "AS17-134-20384",
+   "pageUrl": "https://images.nasa.gov/details/AS17-134-20384",
+   "downloadUrl": "http://images-assets.nasa.gov/image/AS17-134-20384/AS17-134-20384~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "Apollo 17, 1972: Harrison Schmitt beside the flag, in total silence.",
+   "captionVi": "Apollo 17, 1972: Harrison Schmitt bên lá cờ, giữa sự im lặng tuyệt đối.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "apollo17Dust",
+  "photo": {
+   "nasaId": "AS17-145-22224",
+   "pageUrl": "https://images.nasa.gov/details/AS17-145-22224",
+   "downloadUrl": "http://images-assets.nasa.gov/image/AS17-145-22224/AS17-145-22224~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "Apollo 17, 1972: Gene Cernan inside the lunar module after a dusty moonwalk.",
+   "captionVi": "Apollo 17, 1972: Gene Cernan trong tàu đổ bộ sau chuyến đi bộ đầy bụi.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "tracksLast",
+  "photo": {
+   "nasaId": "as11-40-5878",
+   "pageUrl": "https://images.nasa.gov/details/as11-40-5878",
+   "downloadUrl": "http://images-assets.nasa.gov/image/as11-40-5878/as11-40-5878~large.jpg",
+   "width": 1912,
+   "height": 1920,
+   "captionEn": "Apollo 11, 1969: a bootprint pressed into lunar soil.",
+   "captionVi": "Apollo 11, 1969: một dấu giày in trên đất Mặt Trăng.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "eds",
+  "photo": {
+   "nasaId": "KSC-20230118-PH-CSH01_0002",
+   "pageUrl": "https://images.nasa.gov/details/KSC-20230118-PH-CSH01_0002",
+   "downloadUrl": "http://images-assets.nasa.gov/image/KSC-20230118-PH-CSH01_0002/KSC-20230118-PH-CSH01_0002~large.jpg",
+   "width": 1920,
+   "height": 1280,
+   "captionEn": "An Electrodynamic Dust Shield in a NASA Kennedy lab, 2023.",
+   "captionVi": "Tấm chắn bụi điện động trong phòng thí nghiệm của NASA Kennedy, 2023.",
+   "credit": "NASA/Cory Huston",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "lightDelay",
+  "photo": {
+   "nasaId": "PIA25136",
+   "pageUrl": "https://images.nasa.gov/details/PIA25136",
+   "downloadUrl": "http://images-assets.nasa.gov/image/PIA25136/PIA25136~large.jpg",
+   "width": 1920,
+   "height": 1440,
+   "captionEn": "Deep Space Network antenna DSS-53 in Madrid, which talks to spacecraft far away.",
+   "captionVi": "Ăng-ten DSS-53 của Mạng Không gian Sâu ở Madrid, dùng để liên lạc với tàu ở rất xa.",
+   "credit": "NASA/JPL-Caltech",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "sunFacingHeat",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "micaFiction",
+  "photo": null,
+  "why": "fiction card"
+ },
+ {
+  "id": "spiritStuck",
+  "photo": {
+   "nasaId": "PIA12337",
+   "pageUrl": "https://images.nasa.gov/details/PIA12337",
+   "downloadUrl": "http://images-assets.nasa.gov/image/PIA12337/PIA12337~orig.jpg",
+   "width": 1100,
+   "height": 734,
+   "captionEn": "NASA illustration: computer model of Spirit's wheels sunk in soft Martian soil, 2009.",
+   "captionVi": "Hình minh họa NASA: mô hình máy tính bánh xe Spirit lún trong đất mềm trên Sao Hỏa, 2009.",
+   "credit": "NASA/JPL-Caltech",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "boulderTracks",
+  "photo": {
+   "nasaId": "PIA12914",
+   "pageUrl": "https://images.nasa.gov/details/PIA12914",
+   "downloadUrl": "http://images-assets.nasa.gov/image/PIA12914/PIA12914~orig.jpg",
+   "width": 1000,
+   "height": 1000,
+   "captionEn": "Boulder trails on a lunar slope, seen by NASA's Lunar Reconnaissance Orbiter.",
+   "captionVi": "Vệt đá lăn trên sườn dốc Mặt Trăng, do tàu LRO của NASA chụp.",
+   "credit": "NASA/GSFC/Arizona State University",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "apolloFlags",
+  "photo": {
+   "nasaId": "as11-40-5875",
+   "pageUrl": "https://images.nasa.gov/details/as11-40-5875",
+   "downloadUrl": "http://images-assets.nasa.gov/image/as11-40-5875/as11-40-5875~large.jpg",
+   "width": 1856,
+   "height": 1920,
+   "captionEn": "Apollo 11, 1969: Buzz Aldrin beside the flag at Tranquility Base.",
+   "captionVi": "Apollo 11, 1969: Buzz Aldrin bên lá cờ ở Căn cứ Tĩnh Lặng.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "earthVisibility",
+  "photo": {
+   "nasaId": "as17-152-23274",
+   "pageUrl": "https://images.nasa.gov/details/as17-152-23274",
+   "downloadUrl": "http://images-assets.nasa.gov/image/as17-152-23274/as17-152-23274~large.jpg",
+   "width": 1920,
+   "height": 1919,
+   "captionEn": "A crescent Earth above the lunar horizon, photographed by Apollo 17 in 1972.",
+   "captionVi": "Trái Đất hình lưỡi liềm trên đường chân trời Mặt Trăng, Apollo 17 chụp năm 1972.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "lcrossIce",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "viperPanels",
+  "photo": {
+   "nasaId": "GRC-2022-C-04467",
+   "pageUrl": "https://images.nasa.gov/details/GRC-2022-C-04467",
+   "downloadUrl": "http://images-assets.nasa.gov/image/GRC-2022-C-04467/GRC-2022-C-04467~large.jpg",
+   "width": 1280,
+   "height": 1920,
+   "captionEn": "A VIPER test rover with its upright solar panels at NASA Glenn, 2022.",
+   "captionVi": "Xe thử nghiệm VIPER với tấm pin dựng đứng tại NASA Glenn, 2022.",
+   "credit": "NASA/GRC/Bridget Caswell",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "lunarRadiation",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "regolithShield",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "shadowClock",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "peaksOfLight",
+  "photo": {
+   "nasaId": "PIA13523",
+   "pageUrl": "https://images.nasa.gov/details/PIA13523",
+   "downloadUrl": "http://images-assets.nasa.gov/image/PIA13523/PIA13523~medium.jpg",
+   "width": 1280,
+   "height": 1280,
+   "captionEn": "The lunar south pole from NASA's Lunar Reconnaissance Orbiter, 2010.",
+   "captionVi": "Cực nam Mặt Trăng do tàu LRO của NASA chụp, 2010.",
+   "credit": "NASA/GSFC/Arizona State University",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "lunarNight",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "earthshine",
+  "photo": {
+   "nasaId": "iss006e48523",
+   "pageUrl": "https://images.nasa.gov/details/iss006e48523",
+   "downloadUrl": "http://images-assets.nasa.gov/image/iss006e48523/iss006e48523~large.jpg",
+   "width": 1920,
+   "height": 1307,
+   "captionEn": "A crescent Moon and Venus from the Space Station, 2003; the dark part glows with earthshine.",
+   "captionVi": "Trăng lưỡi liềm và Sao Kim nhìn từ Trạm Vũ trụ, 2003; phần tối sáng nhẹ nhờ ánh Trái Đất.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "story_pragyan",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "story_slim",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "story_odysseus",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "story_eds",
+  "photo": {
+   "nasaId": "KSC-20250114-PH-KLS01_0039",
+   "pageUrl": "https://images.nasa.gov/details/KSC-20250114-PH-KLS01_0039",
+   "downloadUrl": "http://images-assets.nasa.gov/image/KSC-20250114-PH-KLS01_0039/KSC-20250114-PH-KLS01_0039~large.jpg",
+   "width": 1920,
+   "height": 1280,
+   "captionEn": "Jan 2025: the rocket carrying Blue Ghost and NASA's dust shield waits to launch.",
+   "captionVi": "Tháng 1/2025: tên lửa chở Blue Ghost và tấm chắn bụi của NASA chờ phóng.",
+   "credit": "NASA/Kim Shiflett",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "story_artemis",
+  "photo": {
+   "nasaId": "art002e021278",
+   "pageUrl": "https://images.nasa.gov/details/art002e021278",
+   "downloadUrl": "http://images-assets.nasa.gov/image/art002e021278/art002e021278~large.jpg",
+   "width": 1920,
+   "height": 1280,
+   "captionEn": "April 2026: the Artemis II crew photographs Earth setting behind the Moon.",
+   "captionVi": "Tháng 4/2026: phi hành đoàn Artemis II chụp Trái Đất lặn sau Mặt Trăng.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "apollo11Site",
+  "photo": {
+   "nasaId": "as11-40-5927",
+   "pageUrl": "https://images.nasa.gov/details/as11-40-5927",
+   "downloadUrl": "http://images-assets.nasa.gov/image/as11-40-5927/as11-40-5927~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "Apollo 11, 20 July 1969: Buzz Aldrin works beside the lunar module Eagle.",
+   "captionVi": "Apollo 11, 20/7/1969: Buzz Aldrin làm việc cạnh tàu đổ bộ Eagle.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "alarm1202",
+  "photo": null,
+  "why": "no verified NASA image yet; page uses the player photo large"
+ },
+ {
+  "id": "rocketEquation",
+  "photo": {
+   "nasaId": "6900540",
+   "pageUrl": "https://images.nasa.gov/details/6900540",
+   "downloadUrl": "http://images-assets.nasa.gov/image/6900540/6900540~large.jpg",
+   "width": 1509,
+   "height": 1920,
+   "captionEn": "16 July 1969: the Saturn V lifts Apollo 11 off toward the Moon.",
+   "captionVi": "16/7/1969: tên lửa Saturn V đưa Apollo 11 lên đường tới Mặt Trăng.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "apollo12Surveyor",
+  "photo": {
+   "nasaId": "AS12-48-7134",
+   "pageUrl": "https://images.nasa.gov/details/AS12-48-7134",
+   "downloadUrl": "http://images-assets.nasa.gov/image/AS12-48-7134/AS12-48-7134~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "Apollo 12, 1969: Alan Bean at Surveyor 3, with the lunar module behind.",
+   "captionVi": "Apollo 12, 1969: Alan Bean bên tàu Surveyor 3, phía sau là tàu đổ bộ.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "horizonGlow",
+  "photo": {
+   "nasaId": "PIA00434",
+   "pageUrl": "https://images.nasa.gov/details/PIA00434",
+   "downloadUrl": "http://images-assets.nasa.gov/image/PIA00434/PIA00434~orig.jpg",
+   "width": 1168,
+   "height": 1552,
+   "captionEn": "NASA's Clementine, 1994: light glowing above the Moon's dark edge.",
+   "captionVi": "Tàu Clementine của NASA, 1994: ánh sáng mờ phía trên rìa tối của Mặt Trăng.",
+   "credit": "NASA/JPL/USGS",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "apolloLRV",
+  "photo": {
+   "nasaId": "as15-86-11603",
+   "pageUrl": "https://images.nasa.gov/details/as15-86-11603",
+   "downloadUrl": "http://images-assets.nasa.gov/image/as15-86-11603/as15-86-11603~large.jpg",
+   "width": 1920,
+   "height": 1920,
+   "captionEn": "Apollo 15, 1971: James Irwin with the Lunar Roving Vehicle.",
+   "captionVi": "Apollo 15, 1971: James Irwin bên xe tự hành Mặt Trăng.",
+   "credit": "NASA",
+   "license": "NASA media guidelines"
+  }
+ },
+ {
+  "id": "artemisLTV",
+  "photo": {
+   "nasaId": "jsc2026e417568",
+   "pageUrl": "https://images.nasa.gov/details/jsc2026e417568",
+   "downloadUrl": "http://images-assets.nasa.gov/image/jsc2026e417568/jsc2026e417568~large.jpg",
+   "width": 1920,
+   "height": 1280,
+   "captionEn": "2026: NASA astronauts test a lunar terrain vehicle prototype.",
+   "captionVi": "2026: phi hành gia NASA thử nghiệm mẫu xe địa hình Mặt Trăng.",
+   "credit": "NASA/Bill Stafford",
+   "license": "NASA media guidelines"
+  }
+ }
+]

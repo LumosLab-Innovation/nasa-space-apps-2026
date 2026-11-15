@@ -1,6 +1,7 @@
 import { catchUpGrid, countTickEvery, motifAllowed, stepBpm, targetBpm, type MusicCue, type MusicTarget } from './musicMood';
 import { CHORDS, MICA_BELLS, ORGAN_PARTIALS, PEDAL, PIP_MOTIF, THEME, TOUCHDOWN_CHORD, midiToHz } from './musicScore';
 import { touchdownSamples } from './touchdownSound';
+import { shutterSamples } from './shutterSound';
 
 /**
  * Adaptive organ score made live with the Web Audio API (no audio files, no dependencies). The mood
@@ -12,6 +13,8 @@ export interface Music {
   /** Dry contact foley, fired immediately once by the successful landing transition. */
   touchdownImpact?(): void;
   explosionImpact?(): void;
+  /** Camera-shutter click when a notebook photo is taken. */
+  shutter?(): void;
   motif(who: 'pip' | 'mica'): void;
   setOn(on: boolean): void;
   readonly on: boolean;
@@ -74,6 +77,7 @@ export function createMusic(): Music {
   let pendingStinger = false;
   let touchdownBuffer: AudioBuffer | null = null;
   let explosionBuffer: AudioBuffer | null = null;
+  let shutterBuffer: AudioBuffer | null = null;
 
   function impulse(c: AudioContext, seconds: number): AudioBuffer {
     const len = Math.floor(c.sampleRate * seconds);
@@ -94,6 +98,9 @@ export function createMusic(): Music {
     const contactSamples=touchdownSamples(c.sampleRate);
     touchdownBuffer=c.createBuffer(1,contactSamples.length,c.sampleRate);
     touchdownBuffer.getChannelData(0).set(contactSamples);
+    const clickSamples = shutterSamples(c.sampleRate);
+    shutterBuffer = c.createBuffer(1, clickSamples.length, c.sampleRate);
+    shutterBuffer.getChannelData(0).set(clickSamples);
     explosionBuffer = c.createBuffer(1, Math.floor(c.sampleRate * 1.1), c.sampleRate);
     const explosionSamples = explosionBuffer.getChannelData(0);
     let low = 0;
@@ -295,6 +302,15 @@ export function createMusic(): Music {
       source.onended=()=>source.disconnect();
       source.start(ctx.currentTime);
     },
+    shutter() {
+      // Same guard as touchdownImpact: never queue a late click while audio is locked or muted.
+      if (!ctx || !master || !shutterBuffer || ctx.state !== 'running' || !on || vol <= 0) return;
+      const source = ctx.createBufferSource();
+      source.buffer = shutterBuffer;
+      source.connect(master);
+      source.onended = () => source.disconnect();
+      source.start(ctx.currentTime);
+    },
     motif(who) {
       if (!ctx || !master || !on || !motifAllowed(target.cue)) return;
       const t0 = ctx.currentTime + 0.02;
@@ -343,6 +359,7 @@ export function createMusic(): Music {
       void ctx?.close();
       ctx = null;
       touchdownBuffer = null;
+      shutterBuffer = null;
     },
     get debug() {
       let peak = 0;
