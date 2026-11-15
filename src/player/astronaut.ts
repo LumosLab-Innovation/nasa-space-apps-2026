@@ -16,6 +16,30 @@ import { clampToWorld, computeMoveVelocity, isBelowGround, JUMP_SPEED_MS, LOPE_S
 
 import { resolveFootprint, type Footprint, type XZ } from './footprintCollision';
 
+/**
+ * How far the astronaut may start an action and how it walks into its stance. Module installs accept any start
+ * inside the 2.5 m "Hold E" prompt radius and walk there at normal speed; sample collection keeps its short reach.
+ */
+export function interactionReach(kind: 'install' | 'sample') {
+  return kind === 'install'
+    ? { stance: .40, minStart: .05, maxStart: 2.5, speed: WALK_SPEED_MS, timeout: (d: number) => 1 + d / WALK_SPEED_MS }
+    : { stance: .48, minStart: Math.max(.05, .48 - .45), maxStart: .48 + .45, speed: .45, timeout: (_d: number) => 2.5 };
+}
+
+/**
+ * The stance point to walk to, or null when the action cannot start from here. Installs compare the stance ground
+ * with the connector's ground (the player may stand on a slope); samples compare it with the player's own footing.
+ */
+export function canStartInteraction(kind: 'install' | 'sample', player: XZ, target: XZ, groundAt: (x: number, z: number) => number): XZ | null {
+  const r = interactionReach(kind);
+  const dx = player.x - target.x, dz = player.z - target.z, distance = Math.hypot(dx, dz);
+  if (distance < r.minStart || distance > r.maxStart) return null;
+  const x = target.x + dx / distance * r.stance, z = target.z + dz / distance * r.stance;
+  const reference = kind === 'install' ? groundAt(target.x, target.z) : groundAt(player.x, player.z);
+  if (Math.abs(groundAt(x, z) - reference) > .22) return null;
+  return { x, z };
+}
+
 const HEIGHT = PLAYER_HEIGHT_M;
 
 /** Capsule-centre height while riding: standing on a floor at at.y, or seated 0.82 m below the seat surface. */
@@ -76,7 +100,7 @@ export class Astronaut {
   private readonly rig: AstronautRig | null = null;
   private readonly action = new AstronautAction();
   private interaction: AstronautInteraction | null = null;
-  private approach: { x: number; z: number; remaining: number; settled: number } | null = null;
+  private approach: { x: number; z: number; remaining: number; settled: number; speed: number } | null = null;
   private actionHeld = false;
   private actionBlocked = false;
   private supported = false;
@@ -270,13 +294,12 @@ export class Astronaut {
   }
   beginInteraction(request: AstronautInteraction): boolean {
     if (this.interactionBusy || this.seat || !this.supported || !request.valid()) return false;
-    const dx = this.position.x - request.target.x, dz = this.position.z - request.target.z;
-    const distance = Math.hypot(dx, dz), stance = request.kind === 'sample' ? .48 : .40;
-    if (distance < .05 || Math.abs(distance - stance) > .45) return false;
-    const x = request.target.x + dx / distance * stance, z = request.target.z + dz / distance * stance;
-    if (Math.abs(sampleHeight(this.hm, x, z) - sampleHeight(this.hm, this.position.x, this.position.z)) > .22) return false;
+    const kind = request.kind === 'sample' ? 'sample' : 'install';
+    const stand = canStartInteraction(kind, this.position, request.target, (x, z) => sampleHeight(this.hm, x, z));
+    if (!stand) return false;
+    const reach = interactionReach(kind);
     this.interaction = { ...request, target: request.target.clone() };
-    this.approach = { x, z, remaining: 2.5, settled: 0 };
+    this.approach = { ...stand, remaining: reach.timeout(Math.hypot(this.position.x - stand.x, this.position.z - stand.z)), settled: 0, speed: reach.speed };
     return true;
   }
   updateInteraction(_dt: number, held: boolean, blocked: boolean): void {
@@ -304,7 +327,7 @@ export class Astronaut {
     if (this.approach) {
       const dx = this.approach.x - this.position.x, dz = this.approach.z - this.position.z;
       const distance = Math.hypot(dx, dz);
-      const speed = Math.min(.45, distance * 3);
+      const speed = Math.min(this.approach.speed, distance * 3);
       if (distance > .015) { h.x = dx / distance * speed; h.z = dz / distance * speed; }
       this.approach.remaining -= dt;
     }

@@ -92,3 +92,40 @@ describe('module locks use held-E animation transactions', () => {
     expect(scene.getMeshByName('iceRegolith')!.isEnabled()).toBe(true);
   });
 });
+
+describe('module install reach (hold E within the prompt radius)', async () => {
+  const { interactionReach, canStartInteraction } = await import('../src/player/astronaut');
+  const { WALK_SPEED_MS } = await import('../src/player/movement');
+  const flat = () => 0;
+  it('accepts install starts up to 2.5 m and walks at normal speed', () => {
+    const r = interactionReach('install');
+    expect(r.maxStart).toBe(2.5);
+    expect(r.stance).toBe(.4);
+    expect(r.speed).toBe(WALK_SPEED_MS);
+  });
+  it('fits an install approach from 2.5 m inside its timeout', () => {
+    const r = interactionReach('install');
+    expect((2.5 - r.stance) / r.speed).toBeLessThan(r.timeout(2.5));
+  });
+  it('keeps sample reach unchanged', () => {
+    const r = interactionReach('sample');
+    expect(r.stance).toBe(.48);
+    expect(r.maxStart).toBeCloseTo(.93, 6);
+    expect(r.speed).toBe(.45);
+    expect(r.timeout(2)).toBe(2.5);
+  });
+  it('starts an install from 2 m but not from 3 m', () => {
+    const target = { x: 0, z: 0 };
+    expect(canStartInteraction('install', { x: 2, z: 0 }, target, flat)).not.toBeNull();
+    expect(canStartInteraction('install', { x: 3, z: 0 }, target, flat)).toBeNull();
+    expect(canStartInteraction('sample', { x: 2, z: 0 }, target, flat)).toBeNull();
+  });
+  it('checks install ground against the connector height, not the player position', () => {
+    // Player stands 0.5 m uphill; stance point (0.4 m out) is level with the connector.
+    const slope = (x: number) => (x > 1 ? .5 : 0);
+    const stance = canStartInteraction('install', { x: 2, z: 0 }, { x: 0, z: 0 }, slope);
+    expect(stance).not.toBeNull();
+    expect(stance!.x).toBeCloseTo(.4, 6);
+    expect(canStartInteraction('install', { x: 2, z: 0 }, { x: 0, z: 0 }, (x) => (x < .1 ? 0 : .5))).toBeNull();
+  });
+});
