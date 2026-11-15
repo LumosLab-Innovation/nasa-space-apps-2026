@@ -26,6 +26,18 @@ export function interactionReach(kind: 'install' | 'sample') {
     : { stance: .48, minStart: Math.max(.05, .48 - .45), maxStart: .48 + .45, speed: .45, timeout: (_d: number) => 2.5 };
 }
 
+type MoveBaseline = { forward: number; right: number };
+/**
+ * Movement that cancels an interaction. Keys already held when it started (the player was walking when they held E)
+ * are ignored until released; a new direction, a re-press or a jump cancels.
+ */
+export function moveCancel(baseline: MoveBaseline | null, input: MoveInput): { cancel: boolean; baseline: MoveBaseline } {
+  if (!baseline) return { cancel: !!input.jump, baseline: { forward: input.forward, right: input.right } };
+  const next = { forward: input.forward === 0 ? 0 : baseline.forward, right: input.right === 0 ? 0 : baseline.right };
+  const fresh = (now: number, was: number) => now !== 0 && now !== was;
+  return { cancel: !!input.jump || fresh(input.forward, baseline.forward) || fresh(input.right, baseline.right), baseline: next };
+}
+
 /**
  * The stance point to walk to, or null when the action cannot start from here. Installs compare the stance ground
  * with the connector's ground (the player may stand on a slope); samples compare it with the player's own footing.
@@ -101,6 +113,7 @@ export class Astronaut {
   private readonly action = new AstronautAction();
   private interaction: AstronautInteraction | null = null;
   private approach: { x: number; z: number; remaining: number; settled: number; speed: number } | null = null;
+  private moveBaseline: { forward: number; right: number } | null = null;
   private actionHeld = false;
   private actionBlocked = false;
   private supported = false;
@@ -320,7 +333,9 @@ export class Astronaut {
       return;
     }
     const support = this.cc.checkSupport(dt, DOWN);
-    const cancel = !!(input.forward || input.right || input.jump);
+    let cancel = !!(input.forward || input.right || input.jump);
+    if (this.interaction) ({ cancel, baseline: this.moveBaseline } = moveCancel(this.moveBaseline, input));
+    else this.moveBaseline = null;
     if (this.approach && (cancel || this.actionBlocked || !this.interaction!.valid() || (this.interaction!.kind === 'install' && !this.actionHeld))) this.cancelInteraction();
     const move = this.interactionBusy ? { forward: 0, right: 0, jump: false } : input;
     const h = computeMoveVelocity(move, this.cameraYaw, input.lope ? LOPE_SPEED_MS : WALK_SPEED_MS);

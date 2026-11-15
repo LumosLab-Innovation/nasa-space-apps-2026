@@ -20,3 +20,6 @@ A (chosen) auto-walk within the prompt radius; B show "Hold E" only when already
 
 ## Verification
 Unit tests: install starts from 2 m, not from 3 m; approach from 2.5 m completes within its timeout; sample reach unchanged. Existing astronaut/action tests pass.
+
+## Follow-up (user approved 2026-11-15): holding E while walking
+Movement keys already held when the interaction starts are ignored until released; a new direction, a re-press of a released key, or a jump still cancels (approach and install phases alike). Kids can hold E while walking toward the connector.

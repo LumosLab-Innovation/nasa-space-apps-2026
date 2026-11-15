@@ -129,3 +129,30 @@ describe('module install reach (hold E within the prompt radius)', async () => {
     expect(canStartInteraction('install', { x: 2, z: 0 }, { x: 0, z: 0 }, (x) => (x < .1 ? 0 : .5))).toBeNull();
   });
 });
+
+describe('movement keys held before holding E do not cancel the install', async () => {
+  const { moveCancel } = await import('../src/player/astronaut');
+  const walk = (forward: number, right = 0, jump = false) => ({ forward, right, jump, lope: false });
+  it('ignores a movement key already held when the interaction starts', () => {
+    let s = moveCancel(null, walk(1));
+    expect(s.cancel).toBe(false);
+    s = moveCancel(s.baseline, walk(1));
+    expect(s.cancel).toBe(false);
+  });
+  it('cancels when that key is released and pressed again', () => {
+    let s = moveCancel(null, walk(1));
+    s = moveCancel(s.baseline, walk(0));
+    expect(s.cancel).toBe(false);
+    expect(moveCancel(s.baseline, walk(1)).cancel).toBe(true);
+  });
+  it('cancels on a new direction or a jump', () => {
+    const s = moveCancel(null, walk(1));
+    expect(moveCancel(s.baseline, walk(1, 1)).cancel).toBe(true);
+    expect(moveCancel(s.baseline, walk(-1)).cancel).toBe(true);
+    expect(moveCancel(s.baseline, walk(1, 0, true)).cancel).toBe(true);
+  });
+  it('cancels on any movement when nothing was held at the start', () => {
+    const s = moveCancel(null, walk(0));
+    expect(moveCancel(s.baseline, walk(0, -1)).cancel).toBe(true);
+  });
+});
